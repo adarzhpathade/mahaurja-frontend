@@ -478,24 +478,27 @@ export function GateEntry() {
           </div>
 
           {/* Security Remarks & Inspection Presets */}
-          <div className="pt-4 sm:pt-3 space-y-2.5">
+          <div className="mt-6 sm:mt-5 pt-5 sm:pt-4 border-t border-neutral-200 space-y-3">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2">
-              <label className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-neutral-700">
-                Security Inspection & Remarks
-              </label>
-              <span className="text-[10px] text-neutral-400 font-medium">
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-[#059669] shrink-0" />
+                <label className="text-xs font-bold uppercase tracking-wider text-neutral-800">
+                  Security Inspection & Remarks
+                </label>
+              </div>
+              <span className="text-[11px] text-neutral-500 font-medium">
                 Tap preset to append note:
               </span>
             </div>
 
             {/* Preset Action Chips with Generous Spacing */}
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 py-1">
               {PRESET_REMARKS.map((preset) => (
                 <button
                   key={preset}
                   type="button"
                   onClick={() => handleAddPresetRemark(preset)}
-                  className="px-2.5 py-1 text-[11px] font-medium border border-neutral-300 bg-white hover:bg-neutral-100 hover:border-neutral-400 text-neutral-700 transition-colors cursor-pointer shrink-0"
+                  className="px-3 py-1.5 text-xs font-medium border border-neutral-300 bg-white hover:bg-neutral-100 hover:border-neutral-400 text-neutral-700 transition-colors cursor-pointer shrink-0 shadow-2xs"
                   style={{ borderRadius: 0 }}
                 >
                   + {preset}
@@ -503,21 +506,21 @@ export function GateEntry() {
               ))}
             </div>
 
-            {/* Remarks Input */}
-            <div className="pt-1">
-              <input
-                type="text"
+            {/* Remarks Input with Spacious Padding */}
+            <div className="pt-1.5">
+              <textarea
+                rows={2}
                 value={remarks}
                 onChange={(e) => setRemarks(e.target.value)}
-                placeholder="Enter gate inspection remarks..."
-                className="w-full h-11 sm:h-10 px-3.5 bg-white border border-neutral-300 text-xs text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-[#059669] focus:ring-1 focus:ring-[#059669] transition-all"
+                placeholder="Enter gate inspection remarks or tap presets above..."
+                className="w-full min-h-[56px] sm:min-h-[48px] p-3 bg-white border border-neutral-300 text-xs text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-[#059669] focus:ring-1 focus:ring-[#059669] transition-all resize-none leading-relaxed"
                 style={{ borderRadius: 0 }}
               />
             </div>
           </div>
 
           {/* Form Actions Footer */}
-          <div className="pt-5 sm:pt-4 border-t border-neutral-300 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="mt-6 sm:mt-5 pt-5 sm:pt-4 border-t border-neutral-300 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="text-xs text-neutral-500 flex items-center gap-1.5">
               <Scale className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
               <span>Pass routes vehicle to <strong>Weighbridge 01 (Gross Scale)</strong>.</span>
