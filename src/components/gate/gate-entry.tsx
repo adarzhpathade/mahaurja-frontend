@@ -9,7 +9,6 @@ import {
   CheckCircle2,
   AlertCircle,
   FileText,
-  Printer,
   RotateCcw,
   ArrowRight,
   Clock,
@@ -21,7 +20,6 @@ import {
   MapPin,
   User,
   Phone,
-  Barcode,
   Check,
   ChevronRight,
   ExternalLink,
@@ -124,10 +122,13 @@ export function GateEntry() {
   const router = useRouter();
   const { addVehicle, prefillEntryData, setPrefillEntryData } = useGate();
 
-  // Generated pass serial
-  const [passSerial] = useState(
-    () => `RM-GATE-261003-${Math.floor(Math.random() * 900 + 100)}`
-  );
+  // Generated pass serial (deterministic initial value to prevent SSR hydration mismatch)
+  const [passSerial, setPassSerial] = useState("RM-GATE-261003-812");
+
+  useEffect(() => {
+    // Generate randomized sequence only on client after mount
+    setPassSerial(`RM-GATE-261003-${Math.floor(Math.random() * 900 + 100)}`);
+  }, []);
 
   // Form states
   const [direction, setDirection] = useState<VehicleDirection>("INBOUND_RM");
@@ -295,7 +296,10 @@ export function GateEntry() {
               <div className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider mb-1">
                 Generated Pass Sequence
               </div>
-              <div className="text-base font-extrabold text-neutral-900 tracking-tight font-mono">
+              <div
+                suppressHydrationWarning
+                className="text-base font-extrabold text-neutral-900 tracking-tight font-mono"
+              >
                 {passSerial}
               </div>
               <div className="text-[11px] text-[#059669] font-medium flex items-center gap-1.5 mt-0.5">
@@ -989,94 +993,8 @@ export function GateEntry() {
           </form>
         </div>
 
-        {/* RIGHT COLUMN: GATE PASS PREVIEW & PRE-ADVISED ARRIVALS QUEUE (Col span 4) */}
+        {/* RIGHT COLUMN: PRE-ADVISED ARRIVALS QUEUE & HARDWARE TELEMETRY (Col span 4) */}
         <div className="lg:col-span-4 space-y-6">
-          {/* CARD 1: LIVE THERMAL GATE PASS PREVIEW (Zero-radius Industrial Receipt) */}
-          <div className="bg-white border-2 border-neutral-900 p-5 space-y-4 shadow-sm" style={{ borderRadius: 0 }}>
-            <div className="text-center border-b border-dashed border-neutral-300 pb-3 space-y-1">
-              <span className="text-[9px] font-bold text-neutral-400 uppercase tracking-widest block">
-                THERMAL BARCODE PASS REPLICA
-              </span>
-              <h3 className="text-sm font-extrabold text-neutral-900 tracking-tight uppercase">
-                BHARAT INDUSTRIAL & RENEWABLES LLP
-              </h3>
-              <p className="text-[10px] text-neutral-500 font-mono">
-                PLANT GATE 01 · SECURITY ENTRY PASS
-              </p>
-            </div>
-
-            <div className="space-y-2 text-xs font-mono">
-              <div className="flex justify-between">
-                <span className="text-neutral-500">PASS NO:</span>
-                <span className="font-bold text-neutral-900">{passSerial}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-neutral-500">VEHICLE:</span>
-                <span className="font-bold text-neutral-900">
-                  {vehicleNo || "MH -- -- ----"}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-neutral-500">TYPE:</span>
-                <span className="text-neutral-800">{vehicleType}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-neutral-500">STREAM:</span>
-                <span className="font-semibold text-neutral-900">
-                  {direction === "INBOUND_RM" ? "INWARD RM" : "OUTWARD FG"}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-neutral-500">MATERIAL:</span>
-                <span className="text-neutral-800 truncate max-w-[170px]" title={materialName}>
-                  {materialName}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-neutral-500">SUPPLIER:</span>
-                <span className="text-neutral-800 truncate max-w-[170px]" title={supplierOrCustomer}>
-                  {supplierOrCustomer || "---"}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-neutral-500">DECLARED MT:</span>
-                <span className="font-bold text-neutral-900">{declaredWeightMT} MT</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-neutral-500">ASSIGNED:</span>
-                <span className="font-bold text-[#047857]">{assignedLocation}</span>
-              </div>
-            </div>
-
-            {/* Simulated Barcode */}
-            <div className="pt-3 border-t border-dashed border-neutral-300 text-center space-y-1">
-              <div className="h-9 bg-neutral-900 w-full flex items-center justify-around px-2 py-1 select-none">
-                {Array.from({ length: 36 }).map((_, i) => (
-                  <span
-                    key={i}
-                    className={`inline-block h-full bg-white ${
-                      i % 3 === 0 ? "w-1" : i % 5 === 0 ? "w-1.5" : "w-0.5"
-                    }`}
-                  />
-                ))}
-              </div>
-              <div className="text-[10px] text-neutral-500 font-mono tracking-widest">
-                *{passSerial}*
-              </div>
-            </div>
-
-            <div className="pt-2">
-              <button
-                type="button"
-                onClick={() => window.print()}
-                className="w-full py-2 border border-neutral-300 bg-[#F8F9FA] hover:bg-neutral-200 text-neutral-800 text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
-                style={{ borderRadius: 0 }}
-              >
-                <Printer className="w-3.5 h-3.5" />
-                <span>Test Thermal Print (80mm)</span>
-              </button>
-            </div>
-          </div>
 
           {/* CARD 2: PRE-ADVISED ARRIVALS QUICK-FILL */}
           <div className="bg-white border border-[#E2E8F0] p-4 sm:p-5 space-y-3" style={{ borderRadius: 0 }}>
