@@ -6,11 +6,18 @@ import { useGate } from "@/lib/context/gate-context";
 
 export default function GateHomePage() {
   const router = useRouter();
-  const { openEntryModal } = useGate();
+  const { setPrefillEntryData } = useGate();
+
+  const handleOpenEntryDesk = (prefillData?: Partial<GateVehicle>) => {
+    if (prefillData) {
+      setPrefillEntryData(prefillData);
+    }
+    router.push("/gate/entry");
+  };
 
   const handleNavigateTab = (tabId: string) => {
     if (tabId === "entry") {
-      openEntryModal();
+      router.push("/gate/entry");
     } else if (tabId === "live-tracker") {
       router.push("/gate/tracker");
     } else if (tabId === "exit") {
@@ -25,7 +32,7 @@ export default function GateHomePage() {
   return (
     <GateHome
       onNavigateTab={handleNavigateTab}
-      onOpenEntryModal={openEntryModal}
+      onOpenEntryModal={handleOpenEntryDesk}
     />
   );
 }

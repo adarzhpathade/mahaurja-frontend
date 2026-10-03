@@ -6,11 +6,11 @@ import { useGate } from "@/lib/context/gate-context";
 
 export default function GateTrackerPage() {
   const router = useRouter();
-  const { vehicles, updateStage, addVehicle, openEntryModal } = useGate();
+  const { vehicles, updateStage, addVehicle } = useGate();
 
   const handleNavigateTab = (tabId: string) => {
     if (tabId === "entry") {
-      openEntryModal();
+      router.push("/gate/entry");
     } else if (tabId === "exit") {
       router.push("/gate/exit");
     } else if (tabId === "docs") {

@@ -725,8 +725,8 @@ export function GateHome({ onNavigateTab, onOpenEntryModal }: GateHomeProps) {
               Register newly arrived biomass carrier, assign Gross Weighbridge, and issue barcode slip.
             </p>
             <div className="flex items-center justify-between text-[10px] text-[#059669] font-bold uppercase tracking-wider mt-3 pt-2 border-t border-neutral-100">
-              <span>Launch Entry Modal</span>
-              <Plus className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+              <span>Open Gate Entry Desk</span>
+              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
             </div>
           </button>
 

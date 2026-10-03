@@ -20,6 +20,7 @@ function GateNavShell({ children }: { children: React.ReactNode }) {
 
   // Determine active desk tab based on current route
   const getActiveTab = () => {
+    if (pathname === "/gate/entry") return "entry";
     if (pathname === "/gate/tracker") return "live-tracker";
     if (pathname === "/gate/exit") return "exit";
     if (pathname === "/gate/verification") return "docs";
@@ -28,7 +29,7 @@ function GateNavShell({ children }: { children: React.ReactNode }) {
 
   const handleTabChange = (tabId: string) => {
     if (tabId === "entry") {
-      openEntryModal();
+      router.push("/gate/entry");
     } else if (tabId === "live-tracker") {
       router.push("/gate/tracker");
     } else if (tabId === "exit") {
