@@ -266,70 +266,112 @@ export function GateEntry() {
 
   return (
     <div className="space-y-12 md:space-y-14">
-      {/* PAGE HEADER & STATION TELEMETRY */}
-      <section className="bg-white border border-[#E2E8F0] p-4 sm:p-6 lg:p-8" style={{ borderRadius: 0 }}>
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-              <span className="px-2.5 py-0.5 text-[10px] font-bold tracking-widest uppercase bg-[#18181B] text-white" style={{ borderRadius: 0 }}>
-                SECURITY ACCESS CONTROL
-              </span>
-              <span className="px-2.5 py-0.5 text-[10px] font-semibold text-[#047857] border border-emerald-300 bg-emerald-50" style={{ borderRadius: 0 }}>
-                BARRIER 01 · ACTIVE DESK
-              </span>
-              <span className="text-xs text-neutral-500 font-medium">
-                Terminal ID: <strong className="text-neutral-800">GATE-STATION-01</strong>
-              </span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-[#0F172A] uppercase">
+      {/* ========================================================================= */}
+      {/* SECTION 1: MASTER COMMAND HEADER WITH LARGE TYPOGRAPHY & HOTBAR           */}
+      {/* ========================================================================= */}
+      <section className="space-y-6">
+        {/* Section Header with Large Typography */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <span className="text-xs md:text-sm font-medium text-neutral-400 block tracking-normal">
+              Physical Access Control & Gate Pass Generation
+            </span>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-neutral-900 mt-1">
               Gate Entry Registration
             </h1>
-            <p className="text-xs sm:text-sm text-neutral-600 max-w-3xl leading-relaxed">
-              Main security checkpoint for logging incoming raw material tippers and outgoing finished goods carriers.
-              Performs preliminary consignment audit, driver safety verification, and issues automated weighbridge routing slips.
-            </p>
           </div>
 
-          {/* Telemetry Box */}
-          <div className="flex flex-col sm:flex-row lg:flex-col xl:flex-row items-stretch sm:items-center gap-3 shrink-0">
-            <div className="border border-neutral-300 bg-[#F8F9FA] px-4 py-3 min-w-[200px]" style={{ borderRadius: 0 }}>
-              <div className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider mb-1">
-                Generated Pass Sequence
+          {/* Master Telemetry & Top Action Toolbar (Clean, uniform h-10, precision aligned) */}
+          <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 sm:gap-2.5 w-full sm:w-auto">
+            {/* Generated Pass Sequence Badge */}
+            <div
+              className="col-span-2 sm:col-span-1 h-10 px-3.5 border border-neutral-300 bg-transparent flex items-center justify-between sm:justify-start gap-2.5 shrink-0 whitespace-nowrap"
+              style={{ borderRadius: 0 }}
+            >
+              <div className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 bg-[#059669] animate-pulse inline-block shrink-0" />
+                <div className="flex items-baseline gap-1.5 leading-none">
+                  <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">
+                    PASS SEQ
+                  </span>
+                  <span
+                    suppressHydrationWarning
+                    className="text-xs font-bold text-neutral-900 font-mono tracking-tight"
+                  >
+                    {passSerial}
+                  </span>
+                </div>
               </div>
-              <div
-                suppressHydrationWarning
-                className="text-base font-extrabold text-neutral-900 tracking-tight font-mono"
-              >
-                {passSerial}
-              </div>
-              <div className="text-[11px] text-[#059669] font-medium flex items-center gap-1.5 mt-0.5">
-                <span className="w-1.5 h-1.5 bg-[#059669] inline-block" />
-                <span>Interlock Sync · WB-01 Ready</span>
-              </div>
+              <span className="text-[9px] font-bold text-[#059669] px-1.5 py-0.5 border border-emerald-300 bg-emerald-50">
+                ACTIVE
+              </span>
             </div>
 
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={handleResetForm}
-                className="px-3.5 py-2.5 border border-neutral-300 bg-white text-xs font-semibold text-neutral-700 hover:bg-neutral-100 flex items-center gap-1.5 cursor-pointer transition-colors"
-                style={{ borderRadius: 0 }}
-                title="Clear current form fields"
-              >
-                <RotateCcw className="w-3.5 h-3.5" />
-                <span>Reset</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => router.push("/gate/tracker")}
-                className="px-4 py-2.5 border border-neutral-800 bg-[#18181B] text-white text-xs font-semibold hover:bg-black flex items-center gap-1.5 cursor-pointer transition-colors shadow-sm"
-                style={{ borderRadius: 0 }}
-              >
-                <Truck className="w-3.5 h-3.5" />
-                <span>Yard Queue (8)</span>
-              </button>
+            {/* Weighbridge Interlock Status Pill */}
+            <div
+              className="hidden lg:flex items-center gap-2 h-10 px-3 border border-neutral-300 bg-transparent text-xs font-medium text-neutral-700 shrink-0"
+              style={{ borderRadius: 0 }}
+            >
+              <span className="w-1.5 h-1.5 bg-[#059669] inline-block shrink-0" />
+              <span>WB-01 Sync Ready</span>
+            </div>
+
+            {/* Form Reset Button */}
+            <button
+              type="button"
+              onClick={handleResetForm}
+              className="h-10 px-3 sm:px-3.5 border border-neutral-300 bg-transparent hover:bg-neutral-200/50 text-neutral-800 text-[11px] sm:text-xs font-medium flex items-center justify-center gap-1.5 cursor-pointer transition-colors shrink-0"
+              style={{ borderRadius: 0 }}
+              title="Clear current form fields"
+            >
+              <RotateCcw className="w-3.5 h-3.5 text-neutral-600 shrink-0" />
+              <span>Reset</span>
+            </button>
+
+            {/* Yard Fleet Queue Button */}
+            <button
+              type="button"
+              onClick={() => router.push("/gate/tracker")}
+              className="col-span-2 sm:col-span-1 h-10 px-4 bg-[#18181B] hover:bg-black text-white text-xs font-medium flex items-center justify-center gap-2 cursor-pointer transition-colors shrink-0"
+              style={{ borderRadius: 0 }}
+            >
+              <Truck className="w-3.5 h-3.5 text-neutral-300 shrink-0" />
+              <span>Yard Queue (8)</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Section 1 Operational Status Card */}
+        <div
+          className="bg-transparent border border-neutral-300 p-4 sm:p-5 space-y-4"
+          style={{ borderRadius: 0 }}
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-neutral-200 pb-3">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 border border-emerald-300 bg-emerald-50/70 text-[10px] font-bold uppercase tracking-wider text-[#047857]">
+                <span className="w-1.5 h-1.5 bg-[#059669] animate-pulse inline-block shrink-0" />
+                <span>ENTRY BARRIER 01 · DESK ACTIVE</span>
+              </span>
+              <span className="text-xs text-neutral-400">·</span>
+              <span className="text-[11px] font-semibold text-neutral-600">
+                Shift 01 (08:00 – 16:00)
+              </span>
+              <span className="text-xs text-neutral-400">·</span>
+              <span className="text-[11px] text-neutral-500">
+                Officer: <strong className="text-neutral-800">Ramesh Pawar (#SEC-042)</strong>
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2 text-xs text-neutral-500 font-mono">
+              <span>Terminal ID:</span>
+              <strong className="text-neutral-800">GATE-STATION-01</strong>
             </div>
           </div>
+
+          <p className="text-xs sm:text-[13px] text-neutral-600 leading-relaxed max-w-4xl">
+            Main security access point for logging incoming raw material tippers and outgoing finished goods carriers.
+            Performs preliminary consignment audit, driver safety verification, and issues automated weighbridge routing slips.
+          </p>
         </div>
       </section>
 
