@@ -190,6 +190,326 @@ export function LiveVehicleTracker({
     }
   };
 
+  const LIFECYCLE_STAGES: { key: GateStage; label: string; icon: React.ElementType }[] = [
+    { key: "ARRIVED_AT_GATE", label: "Gate In", icon: ShieldCheck },
+    { key: "WAITING_WEIGHMENT", label: "Gross Weighment", icon: Scale },
+    { key: "UNLOADING", label: "Unload & QC", icon: FlaskConical },
+    { key: "TARE_WEIGHED", label: "Tare Weighment", icon: Scale },
+    { key: "CLEARED_EXIT", label: "Gate Out", icon: CheckCircle2 },
+  ];
+
+  const getStageIndex = (stage: GateStage) => {
+    switch (stage) {
+      case "ARRIVED_AT_GATE":
+        return 0;
+      case "WAITING_WEIGHMENT":
+      case "GROSS_WEIGHED":
+        return 1;
+      case "UNLOADING":
+      case "QC_PENDING":
+        return 2;
+      case "TARE_WEIGHED":
+        return 3;
+      case "CLEARED_EXIT":
+      case "EXIT_COMPLETED":
+        return 4;
+      default:
+        return 0;
+    }
+  };
+
+  const renderVehicleDossier = (vehicle: GateVehicle) => {
+    const stageConfig = getStageConfig(vehicle.stage);
+    const phoneStr = vehicle.driverPhone?.trim() ? vehicle.driverPhone : "+91 98224 81920";
+    const dwellStr = vehicle.dwellMinutes && vehicle.dwellMinutes > 0 ? `${vehicle.dwellMinutes}m dwell` : "42m dwell";
+    const currentStep = getStageIndex(vehicle.stage);
+
+    return (
+      <div className="p-2.5 sm:p-4 bg-neutral-200/35 border-b border-neutral-300">
+        <motion.div
+          initial={{ opacity: 0, y: -12, scale: 0.995 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: -8, scale: 0.995 }}
+          transition={{ duration: 0.28, delay: 0.03, ease: [0.16, 1, 0.3, 1] }}
+          className="bg-white border border-neutral-300 p-3.5 sm:p-5 md:p-6 space-y-4"
+        >
+          {/* Header inside expanded card */}
+          <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-neutral-200">
+            <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 border border-neutral-300 bg-neutral-100 text-[10px] font-bold uppercase tracking-wider text-neutral-800">
+                <span
+                  className="w-1.5 h-1.5 shrink-0 inline-block"
+                  style={{ backgroundColor: stageConfig.dotColor }}
+                />
+                <span>Active Dossier</span>
+              </span>
+              <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
+                <span className="text-base sm:text-lg font-bold text-neutral-900 tracking-tight">
+                  {vehicle.vehicleNo}
+                </span>
+                <span
+                  className={`text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 ${
+                    vehicle.direction === "INBOUND_RM"
+                      ? "bg-[#18181B] text-white"
+                      : "bg-[#059669] text-white"
+                  }`}
+                >
+                  {vehicle.direction === "INBOUND_RM"
+                    ? "Inbound Biomass RM"
+                    : "Outbound Dispatch FG"}
+                </span>
+                <span className="text-xs text-neutral-600">
+                  Pass: <strong className="text-neutral-800 font-semibold">{vehicle.gateEntryNo}</strong> · {vehicle.vehicleType}
+                </span>
+              </div>
+            </div>
+
+            {/* Right Metadata Pill & Close Icon */}
+            <div className="flex items-center gap-2">
+              <div className="hidden sm:flex items-center gap-2 text-[11px] text-neutral-600 bg-white/70 border border-neutral-300 px-2.5 py-1 tabular-nums">
+                <span>In: {vehicle.inTime || "14:15"}</span>
+                <span>·</span>
+                <span className="text-neutral-800 font-semibold">{dwellStr}</span>
+                <span>·</span>
+                <span className="text-[#059669] font-medium">{stageConfig.label}</span>
+              </div>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedVehicle(null);
+                }}
+                className="w-7 h-7 flex items-center justify-center border border-neutral-300 hover:bg-neutral-200/50 text-neutral-600 hover:text-neutral-900 cursor-pointer bg-white/70 transition-colors"
+                title="Close Inspection Panel"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
+          {/* 5-Stage Plant Operational Stepper (Connected Timeline Pipeline) */}
+          <div className="border border-neutral-300 p-3 sm:p-4 bg-neutral-50/80">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 text-[10px] font-bold text-neutral-500 uppercase tracking-wider mb-3">
+              <span className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 bg-[#059669] inline-block" />
+                <span>Plant Operational Lifecycle Progress</span>
+              </span>
+              <span className="font-semibold text-neutral-800 tabular-nums border border-neutral-300 px-2 py-0.5 bg-white w-fit">
+                Stage {currentStep + 1} of {LIFECYCLE_STAGES.length} · {LIFECYCLE_STAGES[currentStep]?.label}
+              </span>
+            </div>
+
+            <div className="overflow-x-auto pb-1">
+              <div className="min-w-[440px] sm:min-w-0 relative">
+                {/* Connecting Pipeline Tracks */}
+                <div className="absolute top-4 left-6 right-6 h-0.5 bg-neutral-200 z-0" />
+                <div
+                  className="absolute top-4 left-6 h-0.5 bg-[#18181B] z-0 transition-all duration-300"
+                  style={{
+                    width: `${(currentStep / (LIFECYCLE_STAGES.length - 1)) * 100}%`,
+                  }}
+                />
+
+                <div className="relative z-10 grid grid-cols-5 gap-2">
+                  {LIFECYCLE_STAGES.map((step, idx) => {
+                    const Icon = step.icon;
+                    const isPassed = idx < currentStep;
+                    const isCurrent = idx === currentStep;
+
+                    return (
+                      <div key={step.key} className="flex flex-col items-center text-center">
+                        <div
+                          className={`w-8 h-8 flex items-center justify-center text-xs mb-1.5 border transition-all relative ${
+                            isCurrent
+                              ? "bg-[#18181B] text-white border-[#18181B] ring-2 ring-[#059669]/50 shadow-sm"
+                              : isPassed
+                              ? "bg-neutral-900 text-white border-neutral-900"
+                              : "bg-white text-neutral-400 border-neutral-300"
+                          }`}
+                        >
+                          {isCurrent && (
+                            <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-[#059669] animate-ping" />
+                          )}
+                          {isPassed ? (
+                            <Check className="w-4 h-4 text-emerald-400" strokeWidth={2.5} />
+                          ) : (
+                            <Icon className="w-4 h-4" />
+                          )}
+                        </div>
+                        <span
+                          className={`text-[10px] sm:text-[11px] leading-tight block ${
+                            isCurrent
+                              ? "font-bold text-neutral-900"
+                              : isPassed
+                              ? "text-neutral-700 font-medium"
+                              : "text-neutral-400"
+                          }`}
+                        >
+                          {step.label}
+                        </span>
+                        <span className="text-[10px] text-neutral-400 block mt-0.5">
+                          {isCurrent ? "Active Now" : isPassed ? "Complete" : "Pending"}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 4-Column Structured Specification Matrix */}
+          <div className="border border-neutral-300 divide-y md:divide-y-0 md:divide-x divide-neutral-200 bg-white grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4">
+            {/* Col 1: Cargo & Commodity */}
+            <div className="p-3.5 space-y-1.5">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] uppercase font-bold tracking-wider text-neutral-400 block">
+                  Cargo / Material
+                </span>
+                <span className="text-[9px] font-semibold uppercase px-1 py-0.2 bg-neutral-100 border border-neutral-200 text-neutral-600">
+                  BIOMASS LOT
+                </span>
+              </div>
+              <div className="font-bold text-neutral-900 text-xs sm:text-sm">
+                {vehicle.materialName}
+              </div>
+              <div className="text-[11px] text-neutral-500 tabular-nums">
+                Declared: <strong className="text-neutral-900 font-semibold">{vehicle.declaredWeightMT.toFixed(2)} MT</strong>
+              </div>
+            </div>
+
+            {/* Col 2: Supplier / Origin */}
+            <div className="p-3.5 space-y-1.5">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] uppercase font-bold tracking-wider text-neutral-400 block">
+                  {vehicle.direction === "INBOUND_RM" ? "Supplier / Origin" : "Customer Unit"}
+                </span>
+                <span className="text-[9px] font-semibold uppercase px-1 py-0.2 bg-neutral-100 border border-neutral-200 text-neutral-600">
+                  VERIFIED
+                </span>
+              </div>
+              <div className="font-semibold text-neutral-900 text-xs sm:text-sm truncate">
+                {vehicle.supplierOrCustomer}
+              </div>
+              <div className="text-[11px] text-neutral-500 truncate">
+                {vehicle.transporter} · {vehicle.challanOrLrNo || "LR-78102"}
+              </div>
+            </div>
+
+            {/* Col 3: Driver & Crew */}
+            <div className="p-3.5 space-y-1.5">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] uppercase font-bold tracking-wider text-neutral-400 block">
+                  Driver & Sobriety
+                </span>
+                <span className="text-[9px] font-bold uppercase px-1 py-0.2 text-[#047857] border border-emerald-300 bg-emerald-50/50">
+                  ✓ 0.00% BAC
+                </span>
+              </div>
+              <div className="font-semibold text-neutral-900 text-xs sm:text-sm">
+                {vehicle.driverName}
+              </div>
+              <div className="text-[11px] text-neutral-600 font-medium tabular-nums">
+                {phoneStr}
+              </div>
+            </div>
+
+            {/* Col 4: Yard Location & E-Way */}
+            <div className="p-3.5 space-y-1.5">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] uppercase font-bold tracking-wider text-neutral-400 block">
+                  Assigned Bay / Yard
+                </span>
+                <span className="text-[9px] font-semibold uppercase px-1 py-0.2 bg-neutral-100 border border-neutral-200 text-neutral-600">
+                  DESTINATION
+                </span>
+              </div>
+              <div className="font-bold text-neutral-900 text-xs sm:text-sm flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 bg-[#059669] inline-block" />
+                <span>{vehicle.assignedLocation}</span>
+              </div>
+              <div className="text-[11px] text-neutral-600 font-medium truncate">
+                {vehicle.ewayBillNo || "EWB-6621-0891-7733"}
+              </div>
+            </div>
+          </div>
+
+          {/* Gate Security & Inspection Note Inset */}
+          <div className="p-3.5 bg-neutral-50 border border-neutral-300 flex items-start gap-3">
+            <ShieldCheck className="w-4 h-4 text-[#059669] shrink-0 mt-0.5" />
+            <div className="text-xs flex-1">
+              <div className="flex items-center justify-between mb-0.5">
+                <span className="font-bold uppercase tracking-wider text-[10px] text-neutral-800">
+                  Gate Security Checkpoint Record
+                </span>
+                <span className="text-[10px] text-neutral-500 font-medium">
+                  Station 01 Inspector Stamp
+                </span>
+              </div>
+              <p className="text-neutral-600 leading-relaxed text-[11px]">
+                {vehicle.remarks || "Direct tipper load from farm cluster. Moisture visually normal. Breathalyzer test passed. Gate pass authenticated."}
+              </p>
+            </div>
+          </div>
+
+          {/* Guard Fast Action Workflow Toolbar */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-500 mr-1">
+                Fast Routing Action:
+              </span>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleUpdateStage(vehicle.id, "WAITING_WEIGHMENT");
+                }}
+                className="px-3 py-1.5 bg-white hover:bg-neutral-100 border border-neutral-300 text-neutral-800 text-[11px] font-semibold cursor-pointer transition-all active:scale-95 flex items-center justify-center gap-1.5 w-full sm:w-auto"
+              >
+                <Scale className="w-3.5 h-3.5 text-amber-700" />
+                <span>Route to Weighbridge 1</span>
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleUpdateStage(vehicle.id, "UNLOADING");
+                }}
+                className="px-3 py-1.5 bg-white hover:bg-neutral-100 border border-neutral-300 text-neutral-800 text-[11px] font-semibold cursor-pointer transition-all active:scale-95 flex items-center justify-center gap-1.5 w-full sm:w-auto"
+              >
+                <Layers className="w-3.5 h-3.5 text-blue-700" />
+                <span>Direct to Yard Unloading</span>
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleUpdateStage(vehicle.id, "CLEARED_EXIT");
+                }}
+                className="px-3 py-1.5 bg-[#059669] hover:bg-[#047857] text-white text-[11px] font-bold uppercase tracking-wider cursor-pointer transition-all active:scale-95 flex items-center justify-center gap-1.5 w-full sm:w-auto"
+              >
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                <span>Clear for Boom Barrier Exit</span>
+              </button>
+            </div>
+
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                window.print();
+              }}
+              className="flex items-center justify-center gap-1.5 px-3 py-1.5 border border-neutral-300 hover:bg-neutral-100 text-neutral-700 text-[11px] font-medium cursor-pointer bg-white transition-all active:scale-95 w-full sm:w-auto"
+            >
+              <Printer className="w-3.5 h-3.5" />
+              <span>Print Gate Slip</span>
+            </button>
+          </div>
+        </motion.div>
+      </div>
+    );
+  };
+
   return (
     <div className="space-y-12 md:space-y-14 select-none">
       {/* ========================================================================= */}
@@ -695,8 +1015,8 @@ export function LiveVehicleTracker({
             </div>
           </div>
 
-          {/* Table Body (Transparent, hairline dividers) */}
-          <div className="overflow-x-auto">
+          {/* Table Body (Desktop Table View - hidden on mobile) */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse bg-transparent">
               <thead className="bg-neutral-200/60 border-b border-neutral-300">
                 <tr className="text-neutral-600 font-medium">
@@ -729,38 +1049,6 @@ export function LiveVehicleTracker({
                     const idNum = vehicle.gateEntryNo.split("-")[2] || "9836";
                     const stageConfig = getStageConfig(vehicle.stage);
                     const isExpanded = selectedVehicle?.id === vehicle.id;
-
-                    const LIFECYCLE_STAGES: { key: GateStage; label: string; icon: React.ElementType }[] = [
-                      { key: "ARRIVED_AT_GATE", label: "Gate In", icon: ShieldCheck },
-                      { key: "WAITING_WEIGHMENT", label: "Gross Weighment", icon: Scale },
-                      { key: "UNLOADING", label: "Unload & QC", icon: FlaskConical },
-                      { key: "TARE_WEIGHED", label: "Tare Weighment", icon: Scale },
-                      { key: "CLEARED_EXIT", label: "Gate Out", icon: CheckCircle2 },
-                    ];
-
-                    const getStageIndex = (stage: GateStage) => {
-                      switch (stage) {
-                        case "ARRIVED_AT_GATE":
-                          return 0;
-                        case "WAITING_WEIGHMENT":
-                        case "GROSS_WEIGHED":
-                          return 1;
-                        case "UNLOADING":
-                        case "QC_PENDING":
-                          return 2;
-                        case "TARE_WEIGHED":
-                          return 3;
-                        case "CLEARED_EXIT":
-                        case "EXIT_COMPLETED":
-                          return 4;
-                        default:
-                          return 0;
-                      }
-                    };
-
-                    const phoneStr = vehicle.driverPhone?.trim() ? vehicle.driverPhone : "+91 98224 81920";
-                    const dwellStr = vehicle.dwellMinutes && vehicle.dwellMinutes > 0 ? `${vehicle.dwellMinutes}m dwell` : "42m dwell";
-                    const currentStep = getStageIndex(vehicle.stage);
 
                     return (
                       <React.Fragment key={vehicle.id}>
@@ -799,7 +1087,7 @@ export function LiveVehicleTracker({
                             </div>
                           </td>
 
-                          {/* Status Order (Distinct Guard Colors with transparent bg) */}
+                          {/* Status Order */}
                           <td className="py-3.5 px-5 text-xs whitespace-nowrap">
                             <span
                               className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold border bg-transparent ${stageConfig.borderClass}`}
@@ -814,7 +1102,7 @@ export function LiveVehicleTracker({
                             </span>
                           </td>
 
-                          {/* Details Button / Expand Indicator */}
+                          {/* Details Button */}
                           <td className="py-3.5 px-5 text-right">
                             <button
                               type="button"
@@ -838,7 +1126,7 @@ export function LiveVehicleTracker({
                           </td>
                         </tr>
 
-                        {/* Inline Expanded Card: Framed Dossier Inset with Smooth Motion */}
+                        {/* Inline Expanded Card */}
                         <AnimatePresence initial={false}>
                           {isExpanded && (
                             <motion.tr
@@ -860,299 +1148,121 @@ export function LiveVehicleTracker({
                                   }}
                                   className="overflow-hidden"
                                 >
-                                  <div className="p-3 sm:p-4 bg-neutral-200/35 border-b border-neutral-300">
-                                    <motion.div
-                                      initial={{ opacity: 0, y: -12, scale: 0.995 }}
-                                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                                      exit={{ opacity: 0, y: -8, scale: 0.995 }}
-                                      transition={{ duration: 0.28, delay: 0.03, ease: [0.16, 1, 0.3, 1] }}
-                                      className="bg-white border border-neutral-300 p-5 md:p-6 space-y-4"
-                                    >
-                                      {/* Header inside expanded card (No duplicate collapse button) */}
-                                      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-neutral-200">
-                                  <div className="flex flex-wrap items-center gap-3">
-                                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 border border-neutral-300 bg-neutral-100 text-[10px] font-bold uppercase tracking-wider text-neutral-800">
-                                      <span
-                                        className="w-1.5 h-1.5 shrink-0 inline-block"
-                                        style={{ backgroundColor: stageConfig.dotColor }}
-                                      />
-                                      <span>Active Dossier</span>
-                                    </span>
-                                    <div className="flex flex-wrap items-center gap-2.5">
-                                      <span className="text-base sm:text-lg font-bold text-neutral-900 tracking-tight">
-                                        {vehicle.vehicleNo}
-                                      </span>
-                                      <span
-                                        className={`text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 ${
-                                          vehicle.direction === "INBOUND_RM"
-                                            ? "bg-[#18181B] text-white"
-                                            : "bg-[#059669] text-white"
-                                        }`}
-                                      >
-                                        {vehicle.direction === "INBOUND_RM"
-                                          ? "Inbound Biomass RM"
-                                          : "Outbound Dispatch FG"}
-                                      </span>
-                                      <span className="text-xs text-neutral-600">
-                                        Pass: <strong className="text-neutral-800 font-semibold">{vehicle.gateEntryNo}</strong> · {vehicle.vehicleType}
-                                      </span>
-                                    </div>
-                                  </div>
-
-                                  {/* Right Metadata Pill & Close Icon */}
-                                  <div className="flex items-center gap-2">
-                                    <div className="hidden sm:flex items-center gap-2 text-[11px] text-neutral-600 bg-white/70 border border-neutral-300 px-2.5 py-1 tabular-nums">
-                                      <span>In: {vehicle.inTime || "14:15"}</span>
-                                      <span>·</span>
-                                      <span className="text-neutral-800 font-semibold">{dwellStr}</span>
-                                      <span>·</span>
-                                      <span className="text-[#059669] font-medium">{stageConfig.label}</span>
-                                    </div>
-                                    <button
-                                      type="button"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        setSelectedVehicle(null);
-                                      }}
-                                      className="w-7 h-7 flex items-center justify-center border border-neutral-300 hover:bg-neutral-200/50 text-neutral-600 hover:text-neutral-900 cursor-pointer bg-white/70 transition-colors"
-                                      title="Close Inspection Panel"
-                                    >
-                                      <X className="w-4 h-4" />
-                                    </button>
-                                  </div>
-                                </div>
-
-                                {/* 5-Stage Plant Operational Stepper (Connected Timeline Pipeline) */}
-                                <div className="border border-neutral-300 p-4 bg-neutral-50/80">
-                                  <div className="flex items-center justify-between text-[10px] font-bold text-neutral-500 uppercase tracking-wider mb-3">
-                                    <span className="flex items-center gap-1.5">
-                                      <span className="w-1.5 h-1.5 bg-[#059669] inline-block" />
-                                      <span>Plant Operational Lifecycle Progress</span>
-                                    </span>
-                                    <span className="font-semibold text-neutral-800 tabular-nums border border-neutral-300 px-2 py-0.5 bg-white">
-                                      Stage {currentStep + 1} of {LIFECYCLE_STAGES.length} · {LIFECYCLE_STAGES[currentStep]?.label}
-                                    </span>
-                                  </div>
-
-                                  <div className="overflow-x-auto pb-1">
-                                    <div className="min-w-[440px] sm:min-w-0 relative">
-                                      {/* Connecting Pipeline Tracks */}
-                                      <div className="absolute top-4 left-6 right-6 h-0.5 bg-neutral-200 z-0" />
-                                      <div
-                                        className="absolute top-4 left-6 h-0.5 bg-[#18181B] z-0 transition-all duration-300"
-                                        style={{
-                                          width: `${(currentStep / (LIFECYCLE_STAGES.length - 1)) * 100}%`,
-                                        }}
-                                      />
-
-                                      <div className="relative z-10 grid grid-cols-5 gap-2">
-                                        {LIFECYCLE_STAGES.map((step, idx) => {
-                                          const Icon = step.icon;
-                                          const isPassed = idx < currentStep;
-                                          const isCurrent = idx === currentStep;
-
-                                          return (
-                                            <div key={step.key} className="flex flex-col items-center text-center">
-                                              <div
-                                                className={`w-8 h-8 flex items-center justify-center text-xs mb-1.5 border transition-all relative ${
-                                                  isCurrent
-                                                    ? "bg-[#18181B] text-white border-[#18181B] ring-2 ring-[#059669]/50 shadow-sm"
-                                                    : isPassed
-                                                    ? "bg-neutral-900 text-white border-neutral-900"
-                                                    : "bg-white text-neutral-400 border-neutral-300"
-                                                }`}
-                                              >
-                                                {isCurrent && (
-                                                  <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-[#059669] animate-ping" />
-                                                )}
-                                                {isPassed ? (
-                                                  <Check className="w-4 h-4 text-emerald-400" strokeWidth={2.5} />
-                                                ) : (
-                                                  <Icon className="w-4 h-4" />
-                                                )}
-                                              </div>
-                                              <span
-                                                className={`text-[10px] sm:text-[11px] leading-tight block ${
-                                                  isCurrent
-                                                    ? "font-bold text-neutral-900"
-                                                    : isPassed
-                                                    ? "text-neutral-700 font-medium"
-                                                    : "text-neutral-400"
-                                                }`}
-                                              >
-                                                {step.label}
-                                              </span>
-                                              <span className="text-[10px] text-neutral-400 block mt-0.5">
-                                                {isCurrent ? "Active Now" : isPassed ? "Complete" : "Pending"}
-                                              </span>
-                                            </div>
-                                          );
-                                        })}
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-
-                                {/* 4-Column Structured Specification Matrix */}
-                                <div className="border border-neutral-300 divide-y md:divide-y-0 md:divide-x divide-neutral-200 bg-white grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4">
-                                  {/* Col 1: Cargo & Commodity */}
-                                  <div className="p-3.5 space-y-1.5">
-                                    <div className="flex items-center justify-between">
-                                      <span className="text-[10px] uppercase font-bold tracking-wider text-neutral-400 block">
-                                        Cargo / Material
-                                      </span>
-                                      <span className="text-[9px] font-semibold uppercase px-1 py-0.2 bg-neutral-100 border border-neutral-200 text-neutral-600">
-                                        BIOMASS LOT
-                                      </span>
-                                    </div>
-                                    <div className="font-bold text-neutral-900 text-xs sm:text-sm">
-                                      {vehicle.materialName}
-                                    </div>
-                                    <div className="text-[11px] text-neutral-500 tabular-nums">
-                                      Declared: <strong className="text-neutral-900 font-semibold">{vehicle.declaredWeightMT.toFixed(2)} MT</strong>
-                                    </div>
-                                  </div>
-
-                                  {/* Col 2: Supplier / Origin */}
-                                  <div className="p-3.5 space-y-1.5">
-                                    <div className="flex items-center justify-between">
-                                      <span className="text-[10px] uppercase font-bold tracking-wider text-neutral-400 block">
-                                        {vehicle.direction === "INBOUND_RM" ? "Supplier / Origin" : "Customer Unit"}
-                                      </span>
-                                      <span className="text-[9px] font-semibold uppercase px-1 py-0.2 bg-neutral-100 border border-neutral-200 text-neutral-600">
-                                        VERIFIED
-                                      </span>
-                                    </div>
-                                    <div className="font-semibold text-neutral-900 text-xs sm:text-sm truncate">
-                                      {vehicle.supplierOrCustomer}
-                                    </div>
-                                    <div className="text-[11px] text-neutral-500 truncate">
-                                      {vehicle.transporter} · {vehicle.challanOrLrNo || "LR-78102"}
-                                    </div>
-                                  </div>
-
-                                  {/* Col 3: Driver & Crew */}
-                                  <div className="p-3.5 space-y-1.5">
-                                    <div className="flex items-center justify-between">
-                                      <span className="text-[10px] uppercase font-bold tracking-wider text-neutral-400 block">
-                                        Driver & Sobriety
-                                      </span>
-                                      <span className="text-[9px] font-bold uppercase px-1 py-0.2 text-[#047857] border border-emerald-300 bg-emerald-50/50">
-                                        ✓ 0.00% BAC
-                                      </span>
-                                    </div>
-                                    <div className="font-semibold text-neutral-900 text-xs sm:text-sm">
-                                      {vehicle.driverName}
-                                    </div>
-                                    <div className="text-[11px] text-neutral-600 font-medium tabular-nums">
-                                      {phoneStr}
-                                    </div>
-                                  </div>
-
-                                  {/* Col 4: Yard Location & E-Way */}
-                                  <div className="p-3.5 space-y-1.5">
-                                    <div className="flex items-center justify-between">
-                                      <span className="text-[10px] uppercase font-bold tracking-wider text-neutral-400 block">
-                                        Assigned Bay / Yard
-                                      </span>
-                                      <span className="text-[9px] font-semibold uppercase px-1 py-0.2 bg-neutral-100 border border-neutral-200 text-neutral-600">
-                                        DESTINATION
-                                      </span>
-                                    </div>
-                                    <div className="font-bold text-neutral-900 text-xs sm:text-sm flex items-center gap-1.5">
-                                      <span className="w-1.5 h-1.5 bg-[#059669] inline-block" />
-                                      <span>{vehicle.assignedLocation}</span>
-                                    </div>
-                                    <div className="text-[11px] text-neutral-600 font-medium truncate">
-                                      {vehicle.ewayBillNo || "EWB-6621-0891-7733"}
-                                    </div>
-                                  </div>
-                                </div>
-
-                                {/* Gate Security & Inspection Note Inset */}
-                                <div className="p-3.5 bg-neutral-50 border border-neutral-300 flex items-start gap-3">
-                                  <ShieldCheck className="w-4 h-4 text-[#059669] shrink-0 mt-0.5" />
-                                  <div className="text-xs flex-1">
-                                    <div className="flex items-center justify-between mb-0.5">
-                                      <span className="font-bold uppercase tracking-wider text-[10px] text-neutral-800">
-                                        Gate Security Checkpoint Record
-                                      </span>
-                                      <span className="text-[10px] text-neutral-500 font-medium">
-                                        Station 01 Inspector Stamp
-                                      </span>
-                                    </div>
-                                    <p className="text-neutral-600 leading-relaxed text-[11px]">
-                                      {vehicle.remarks || "Direct tipper load from farm cluster. Moisture visually normal. Breathalyzer test passed. Gate pass authenticated."}
-                                    </p>
-                                  </div>
-                                </div>
-
-                                {/* Guard Fast Action Workflow Toolbar */}
-                                <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
-                                  <div className="flex flex-wrap items-center gap-2">
-                                    <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-500 mr-1">
-                                      Fast Routing Action:
-                                    </span>
-                                    <button
-                                      type="button"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleUpdateStage(vehicle.id, "WAITING_WEIGHMENT");
-                                      }}
-                                      className="px-3 py-1.5 bg-white hover:bg-neutral-100 border border-neutral-300 text-neutral-800 text-[11px] font-semibold cursor-pointer transition-all active:scale-95 flex items-center gap-1.5"
-                                    >
-                                      <Scale className="w-3.5 h-3.5 text-amber-700" />
-                                      <span>Route to Weighbridge 1</span>
-                                    </button>
-                                    <button
-                                      type="button"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleUpdateStage(vehicle.id, "UNLOADING");
-                                      }}
-                                      className="px-3 py-1.5 bg-white hover:bg-neutral-100 border border-neutral-300 text-neutral-800 text-[11px] font-semibold cursor-pointer transition-all active:scale-95 flex items-center gap-1.5"
-                                    >
-                                      <Layers className="w-3.5 h-3.5 text-blue-700" />
-                                      <span>Direct to Yard Unloading</span>
-                                    </button>
-                                    <button
-                                      type="button"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleUpdateStage(vehicle.id, "CLEARED_EXIT");
-                                      }}
-                                      className="px-3 py-1.5 bg-[#059669] hover:bg-[#047857] text-white text-[11px] font-bold uppercase tracking-wider cursor-pointer transition-all active:scale-95 flex items-center gap-1.5"
-                                    >
-                                      <CheckCircle2 className="w-3.5 h-3.5" />
-                                      <span>Clear for Boom Barrier Exit</span>
-                                    </button>
-                                  </div>
-
-                                  <button
-                                    type="button"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      window.print();
-                                    }}
-                                    className="flex items-center gap-1.5 px-3 py-1.5 border border-neutral-300 hover:bg-neutral-100 text-neutral-700 text-[11px] font-medium cursor-pointer bg-white transition-all active:scale-95"
-                                  >
-                                    <Printer className="w-3.5 h-3.5" />
-                                    <span>Print Gate Slip</span>
-                                  </button>
-                                </div>
-                              </motion.div>
-                            </div>
-                          </motion.div>
-                        </td>
-                      </motion.tr>
-                    )}
-                  </AnimatePresence>
+                                  {renderVehicleDossier(vehicle)}
+                                </motion.div>
+                              </td>
+                            </motion.tr>
+                          )}
+                        </AnimatePresence>
                       </React.Fragment>
                     );
                   })
                 )}
               </tbody>
             </table>
+          </div>
+
+          {/* Mobile Card List View (Visible on mobile, hidden on >= md - No Horizontal Scroll!) */}
+          <div className="block md:hidden divide-y divide-neutral-200 bg-white">
+            {filteredVehicles.length === 0 ? (
+              <div className="py-8 text-center text-xs text-neutral-400">
+                No active vehicles found matching current filter.
+              </div>
+            ) : (
+              filteredVehicles.map((vehicle) => {
+                const idNum = vehicle.gateEntryNo.split("-")[2] || "9836";
+                const stageConfig = getStageConfig(vehicle.stage);
+                const isExpanded = selectedVehicle?.id === vehicle.id;
+
+                return (
+                  <div key={`mobile-card-${vehicle.id}`} className="bg-white">
+                    <div
+                      onClick={() => setSelectedVehicle(isExpanded ? null : vehicle)}
+                      className={`p-3.5 space-y-2.5 cursor-pointer transition-colors active:bg-neutral-100/70 ${
+                        isExpanded ? "bg-[#ECEFF2]/80" : "hover:bg-neutral-50"
+                      }`}
+                    >
+                      {/* Top Row: Shipping ID & Status Badge */}
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-1.5 text-xs">
+                          <span className="font-bold text-neutral-900 tabular-nums">#{idNum}</span>
+                          <span className="text-neutral-400">·</span>
+                          <span className="text-[11px] font-semibold text-neutral-600 truncate max-w-[130px]">
+                            {vehicle.gateEntryNo}
+                          </span>
+                        </div>
+                        <span
+                          className={`inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-bold border shrink-0 bg-transparent ${stageConfig.borderClass}`}
+                        >
+                          <span
+                            className="w-1.5 h-1.5 inline-block shrink-0"
+                            style={{ backgroundColor: stageConfig.dotColor }}
+                          />
+                          <span style={{ color: stageConfig.textColor }}>
+                            {stageConfig.label}
+                          </span>
+                        </span>
+                      </div>
+
+                      {/* Middle Row: Customer/Supplier & Cargo */}
+                      <div>
+                        <div className="text-xs sm:text-sm font-bold text-neutral-900 leading-tight">
+                          {vehicle.supplierOrCustomer}
+                        </div>
+                        <div className="text-[11px] text-neutral-500 font-medium mt-0.5">
+                          <span className="font-semibold text-neutral-700">{vehicle.vehicleNo}</span> · {vehicle.materialName} ({vehicle.declaredWeightMT.toFixed(1)} MT)
+                        </div>
+                      </div>
+
+                      {/* Bottom Row: Location & Inspect Action */}
+                      <div className="flex items-center justify-between gap-2 pt-2 border-t border-neutral-100 text-[11px]">
+                        <div className="text-neutral-600 truncate max-w-[200px]">
+                          <span className="font-medium text-neutral-800">{vehicle.assignedLocation}</span>
+                          <span className="text-neutral-400"> · </span>
+                          <span className="text-neutral-500 text-[10px]">{vehicle.transporter}</span>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedVehicle(isExpanded ? null : vehicle);
+                          }}
+                          className={`inline-flex items-center gap-1 px-2.5 py-1 border text-[10px] font-bold uppercase tracking-wider shrink-0 transition-colors cursor-pointer ${
+                            isExpanded
+                              ? "bg-[#18181B] text-white border-[#18181B]"
+                              : "border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-800"
+                          }`}
+                        >
+                          <span>{isExpanded ? "Close" : "Inspect"}</span>
+                          <ChevronDown
+                            className={`w-3 h-3 transition-transform ${isExpanded ? "rotate-180" : ""}`}
+                          />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Mobile Expanded Dossier */}
+                    <AnimatePresence initial={false}>
+                      {isExpanded && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
+                          transition={{
+                            height: { duration: 0.32, ease: [0.16, 1, 0.3, 1] },
+                            opacity: { duration: 0.2 },
+                          }}
+                          className="overflow-hidden border-t border-neutral-200"
+                        >
+                          {renderVehicleDossier(vehicle)}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                );
+              })
+            )}
           </div>
         </div>
       </section>
