@@ -1,0 +1,138 @@
+@import "tailwindcss";
+
+:root {
+  /* Canvas & Surfaces (80% Grays & 15% White) */
+  --background: #f4f5f7;
+  --surface: #ffffff;
+  --surface-subtle: #f8f9fa;
+  --surface-muted: #eceff2;
+  --surface-raised: #ffffff;
+  --surface-border: #e2e8f0;
+
+  /* Typography & Neutrals */
+  --foreground: #0f172a;
+  --foreground-muted: #64748b;
+  --charcoal: #18181b;
+  --charcoal-foreground: #ffffff;
+  
+  /* Brand & Surgical Accent (5% - strictly for selected items & focal actions) */
+  --primary: #059669;
+  --primary-hover: #047857;
+  --primary-glow: rgba(5, 150, 105, 0.15);
+
+  --accent: #10b981;
+  --accent-subtle: #ecfdf5;
+  --accent-glow: rgba(16, 185, 129, 0.15);
+
+  /* Status Workflows */
+  --status-expected: #64748b;
+  --status-active: #059669;
+  --status-pending: #f59e0b;
+  --status-success: #16a34a;
+  --status-hold: #f97316;
+  --status-danger: #dc2626;
+}
+
+.dark {
+  --background: #0d1117;
+  --surface: #161b22;
+  --surface-subtle: #1c2128;
+  --surface-muted: #21262d;
+  --surface-raised: #21262d;
+  --surface-border: rgba(255, 255, 255, 0.08);
+
+  --foreground: #f0f6fc;
+  --foreground-muted: #8b949e;
+  --charcoal: #090d12;
+  --charcoal-foreground: #f0f6fc;
+
+  --primary: #10b981;
+  --primary-hover: #059669;
+  --primary-glow: rgba(16, 185, 129, 0.2);
+
+  --accent: #34d399;
+  --accent-subtle: rgba(16, 185, 129, 0.1);
+  --accent-glow: rgba(52, 211, 153, 0.2);
+
+  --status-expected: #8b949e;
+  --status-active: #10b981;
+  --status-pending: #f59e0b;
+  --status-success: #22c55e;
+  --status-hold: #f97316;
+  --status-danger: #ef4444;
+}
+
+@theme {
+  --font-sans: var(--font-switzer), system-ui, -apple-system, sans-serif;
+  --color-background: var(--background);
+  --color-canvas: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-subtle: var(--surface-subtle);
+  --color-surface-muted: var(--surface-muted);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-border: var(--surface-border);
+  --color-border: var(--surface-border);
+  --color-foreground: var(--foreground);
+  --color-foreground-muted: var(--foreground-muted);
+  --color-charcoal: var(--charcoal);
+  --color-charcoal-foreground: var(--charcoal-foreground);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-accent: var(--accent);
+  --color-accent-subtle: var(--accent-subtle);
+
+  --color-status-expected: var(--status-expected);
+  --color-status-active: var(--status-active);
+  --color-status-pending: var(--status-pending);
+  --color-status-success: var(--status-success);
+  --color-status-hold: var(--status-hold);
+  --color-status-danger: var(--status-danger);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Card & Panel utilities */
+.glass-panel {
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
+}
+
+.glass-panel-elevated {
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.06), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+}
+
+/* Custom sleek scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.2);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.35);
+}
