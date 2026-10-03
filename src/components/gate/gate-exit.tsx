@@ -251,285 +251,188 @@ export function GateExit({ vehicles, onUpdateStage, onNavigateTab }: GateExitPro
   };
 
   return (
-    <div className="space-y-12 md:space-y-14 select-none">
-      {/* 
-        ============================================================
-        1. COMMAND HEADER & LIVE EXIT TELEMETRY BAR
-        ============================================================
-      */}
-      <section className="space-y-6">
-        {/* Section Header with Large Typography */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-          <div>
-            <span className="text-xs md:text-sm font-medium text-neutral-400 block tracking-normal">
-              Physical Dispatch Inspection & Outward Despatch
-            </span>
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-neutral-900 mt-1">
-              Vehicle Exit Station
-            </h1>
-          </div>
+    <div className="w-full space-y-8 sm:space-y-10 select-none">
+      {/* ========================================================================= */}
+      {/* 1. COMPACT COMMAND HEADER                                                 */}
+      {/* ========================================================================= */}
+      <div className="border-b border-neutral-300 pb-4 sm:pb-5">
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-neutral-900">
+          Vehicle Exit Station
+        </h1>
+      </div>
 
-          {/* Quick Actions & Live Clock (Responsive Grid on Mobile) */}
-          <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 sm:gap-2.5 w-full sm:w-auto">
-            {/* Clock Box */}
-            <div
-              className="col-span-2 sm:col-span-1 px-3.5 h-10 border border-neutral-300 bg-transparent flex items-center justify-between sm:justify-start gap-2 shrink-0"
-              style={{ borderRadius: 0 }}
-            >
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-[#059669] animate-pulse" />
-                <div className="flex items-baseline gap-1.5 whitespace-nowrap">
-                  <span className="text-[11px] font-semibold text-neutral-500 uppercase">IST</span>
-                  <span className="text-xs font-bold text-neutral-900 tabular-nums">
-                    {currentTime || "14:52:00"}
-                  </span>
-                </div>
-              </div>
-              <span className="sm:hidden text-[9px] font-bold text-[#059669] px-1.5 py-0.5 border border-emerald-300 bg-emerald-50">
-                ACTIVE
-              </span>
-            </div>
-
-            {/* Manual Barrier Override Button */}
-            <button
-              type="button"
-              onClick={() => setIsBarrierOverrideModalOpen(true)}
-              className="h-10 px-2 sm:px-3.5 border border-neutral-300 bg-transparent hover:bg-neutral-200/50 text-neutral-800 text-[11px] sm:text-xs font-medium flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer transition-colors shrink-0"
-              style={{ borderRadius: 0 }}
-            >
-              <Radio className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-              <span>Override</span>
-            </button>
-
-            {/* Back to Tracker */}
-            <button
-              type="button"
-              onClick={() => onNavigateTab("live-tracker")}
-              className="h-10 px-2 sm:px-3.5 border border-neutral-300 bg-transparent hover:bg-neutral-200/50 text-neutral-800 text-[11px] sm:text-xs font-medium flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer transition-colors shrink-0"
-              style={{ borderRadius: 0 }}
-            >
-              <Truck className="w-3.5 h-3.5 text-neutral-600 shrink-0" />
-              <span>Fleet Tracker</span>
-            </button>
-
-            {/* Back to Hub */}
-            <button
-              type="button"
-              onClick={() => onNavigateTab("home")}
-              className="col-span-2 sm:col-span-1 h-10 px-3.5 bg-[#18181B] hover:bg-black text-white text-xs font-medium flex items-center justify-center gap-2 cursor-pointer transition-colors shrink-0"
-              style={{ borderRadius: 0 }}
-            >
-              <span>Operations Hub</span>
-              <ArrowRight className="w-3.5 h-3.5 text-neutral-300 shrink-0" />
-            </button>
-          </div>
-        </div>
-
-        {/* Section 1 Card */}
+      {/* ========================================================================= */}
+      {/* 2. REAL-TIME OPERATIONAL METRICS (4 CLICKABLE CARDS)                      */}
+      {/* ========================================================================= */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-5">
+        {/* KPI 1: Ready for Exit */}
         <div
-          className="bg-transparent border border-neutral-300 p-4 sm:p-5 space-y-4"
-          style={{ borderRadius: 0 }}
+          onClick={() => setActiveTab("QUEUE")}
+          className="border border-neutral-300 p-4 sm:p-5 hover:border-neutral-900 transition-colors cursor-pointer group bg-white"
         >
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-neutral-200 pb-3">
-            <div className="flex items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 border border-emerald-300 bg-emerald-50/70 text-[10px] font-bold uppercase tracking-wider text-[#047857]">
-                <span className="w-1.5 h-1.5 bg-[#059669] animate-pulse inline-block shrink-0" />
-                <span>EXIT BARRIER 02 · DESK ACTIVE</span>
-              </span>
-              <span className="text-xs text-neutral-400">·</span>
-              <span className="text-[11px] font-semibold text-neutral-600">Shift 01 (08:00 – 16:00)</span>
-            </div>
-            <p className="text-xs text-neutral-500">
-              Physical security inspection, tare weight slip audit, driver sign-off, and barrier dispatch.
-            </p>
-          </div>
-
-          {/* Live Boom Barrier Status Alert Banner */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 border border-neutral-200 bg-neutral-50">
-            <div className="flex items-center gap-3">
-              <div
-                className={`w-3 h-3 ${
-                  barrierState === "RAISED"
-                    ? "bg-[#10B981] animate-ping"
-                    : "bg-neutral-900"
-                }`}
-              />
-              <div className="flex items-center gap-2 text-xs">
-                <span className="font-bold text-neutral-900 uppercase tracking-wide">
-                  Boom Barrier 02:
-                </span>
-                <span
-                  className={`font-semibold px-2 py-0.5 border ${
-                    barrierState === "RAISED"
-                      ? "bg-[#ECFDF5] text-[#059669] border-[#A7F3D0]"
-                      : "bg-white text-neutral-800 border-neutral-300"
-                  }`}
-                >
-                  {barrierState === "RAISED"
-                    ? "RAISED · VEHICLE PASSING"
-                    : "LOWERED · PHYSICAL LOCK ACTIVE"}
-                </span>
-                {barrierMessage && (
-                  <span className="text-xs font-bold text-[#059669] animate-pulse">
-                    ● {barrierMessage}
-                  </span>
-                )}
-              </div>
-            </div>
-
-            <div className="flex items-center gap-4 text-xs text-neutral-500">
-              <span className="flex items-center gap-1.5">
-                <Camera className="w-3.5 h-3.5 text-neutral-600" />
-                <span>ANPR CAM-04 (Exit Plate Reader): <strong className="text-neutral-800">ONLINE (99.4%)</strong></span>
-              </span>
-              <span className="hidden md:inline">|</span>
-              <span className="flex items-center gap-1.5">
-                <User className="w-3.5 h-3.5 text-neutral-600" />
-                <span>Officer on Post: <strong className="text-neutral-800">Ramesh Pawar (#SEC-014)</strong></span>
-              </span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 
-        ============================================================
-        2. SHIFT 01 EXIT TELEMETRY KPIS
-        ============================================================
-      */}
-      <section className="space-y-6">
-        {/* Section Header with Large Typography */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-          <div>
-            <span className="text-xs md:text-sm font-medium text-neutral-400 block tracking-normal">
-              Today&apos;s Departure Telemetry
+          <div className="flex items-center justify-between gap-1">
+            <span className="text-[11px] sm:text-xs font-bold text-neutral-600 uppercase tracking-wider group-hover:text-neutral-900 transition-colors">
+              Ready for Exit
             </span>
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900 mt-1">
-              Exit Queue & Dispatch Throughput
-            </h2>
+            <span className="w-2.5 h-2.5 rounded-full bg-[#059669] animate-pulse shrink-0" />
           </div>
-
-          <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 border border-neutral-300 text-xs font-medium text-neutral-700">
-              <span className="w-2 h-2 bg-[#059669] inline-block" />
-              <span>Shift 01 Dispatch Flow</span>
-            </span>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        {/* KPI 1: Ready in Queue */}
-        <div
-          className="bg-white border border-neutral-300 p-4 flex flex-col justify-between"
-          style={{ borderRadius: 0 }}
-        >
-          <div className="flex items-center justify-between text-neutral-500 mb-2">
-            <span className="text-[11px] font-bold uppercase tracking-wider">Ready for Exit Queue</span>
-            <span className="w-2 h-2 rounded-full bg-[#059669]" />
-          </div>
-          <div className="flex items-baseline gap-2">
-            <span className="text-2xl sm:text-3xl font-extrabold text-neutral-900 tabular-nums">
+          <div className="mt-3 flex items-baseline gap-2">
+            <span className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900 tabular-nums">
               {exitQueueVehicles.length}
             </span>
-            <span className="text-xs text-neutral-500">vehicles</span>
-          </div>
-          <div className="text-[11px] text-neutral-500 border-t border-neutral-200 pt-2 mt-2 flex items-center justify-between">
-            <span>Tare weighed & cleared</span>
-            <span className="font-semibold text-[#059669]">Immediate action</span>
+            <span className="text-xs sm:text-sm text-neutral-500 font-medium">Vehicles</span>
           </div>
         </div>
 
         {/* KPI 2: Departed Today */}
         <div
-          className="bg-white border border-neutral-300 p-4 flex flex-col justify-between"
-          style={{ borderRadius: 0 }}
+          onClick={() => setActiveTab("DEPARTED")}
+          className="border border-neutral-300 p-4 sm:p-5 hover:border-neutral-900 transition-colors cursor-pointer group bg-white"
         >
-          <div className="flex items-center justify-between text-neutral-500 mb-2">
-            <span className="text-[11px] font-bold uppercase tracking-wider">Departed Today</span>
-            <CheckCircle2 className="w-4 h-4 text-[#059669]" />
+          <div className="flex items-center justify-between gap-1">
+            <span className="text-[11px] sm:text-xs font-bold text-neutral-600 uppercase tracking-wider group-hover:text-neutral-900 transition-colors">
+              Departed Today
+            </span>
+            <CheckCircle2 className="w-4 h-4 text-[#059669] shrink-0" />
           </div>
-          <div className="flex items-baseline gap-2">
-            <span className="text-2xl sm:text-3xl font-extrabold text-neutral-900 tabular-nums">
+          <div className="mt-3 flex items-baseline gap-2">
+            <span className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900 tabular-nums">
               {departedLog.length}
             </span>
-            <span className="text-xs text-neutral-500">completed</span>
-          </div>
-          <div className="text-[11px] text-neutral-500 border-t border-neutral-200 pt-2 mt-2 flex items-center justify-between">
-            <span>Total pass slips issued</span>
-            <span className="font-semibold text-neutral-800">Shift 01</span>
+            <span className="text-xs sm:text-sm text-neutral-500 font-medium">Completed</span>
           </div>
         </div>
 
-        {/* KPI 3: Avg Plant Dwell Time */}
-        <div
-          className="bg-white border border-neutral-300 p-4 flex flex-col justify-between"
-          style={{ borderRadius: 0 }}
-        >
-          <div className="flex items-center justify-between text-neutral-500 mb-2">
-            <span className="text-[11px] font-bold uppercase tracking-wider">Avg Plant Turnaround</span>
-            <Clock className="w-4 h-4 text-neutral-500" />
+        {/* KPI 3: Avg Turnaround */}
+        <div className="border border-neutral-300 p-4 sm:p-5 hover:border-neutral-900 transition-colors cursor-pointer group bg-white">
+          <div className="flex items-center justify-between gap-1">
+            <span className="text-[11px] sm:text-xs font-bold text-neutral-600 uppercase tracking-wider group-hover:text-neutral-900 transition-colors">
+              Avg Turnaround
+            </span>
+            <Clock className="w-4 h-4 text-neutral-500 shrink-0" />
           </div>
-          <div className="flex items-baseline gap-2">
-            <span className="text-2xl sm:text-3xl font-extrabold text-neutral-900 tabular-nums">
+          <div className="mt-3 flex items-baseline gap-2">
+            <span className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900 tabular-nums">
               36
             </span>
-            <span className="text-xs text-neutral-500">mins / vehicle</span>
-          </div>
-          <div className="text-[11px] text-neutral-500 border-t border-neutral-200 pt-2 mt-2 flex items-center justify-between">
-            <span>Benchmark: &lt; 45 mins</span>
-            <span className="font-semibold text-[#059669]">Optimal (92%)</span>
+            <span className="text-xs sm:text-sm text-neutral-500 font-medium">Mins</span>
           </div>
         </div>
 
-        {/* KPI 4: Security Inspection Compliance */}
-        <div
-          className="bg-white border border-neutral-300 p-4 flex flex-col justify-between"
-          style={{ borderRadius: 0 }}
-        >
-          <div className="flex items-center justify-between text-neutral-500 mb-2">
-            <span className="text-[11px] font-bold uppercase tracking-wider">Security Compliance</span>
-            <ShieldCheck className="w-4 h-4 text-[#059669]" />
+        {/* KPI 4: Security Compliance */}
+        <div className="border border-neutral-300 p-4 sm:p-5 hover:border-neutral-900 transition-colors cursor-pointer group bg-white">
+          <div className="flex items-center justify-between gap-1">
+            <span className="text-[11px] sm:text-xs font-bold text-neutral-600 uppercase tracking-wider group-hover:text-neutral-900 transition-colors">
+              Compliance
+            </span>
+            <ShieldCheck className="w-4 h-4 text-[#059669] shrink-0" />
           </div>
-          <div className="flex items-baseline gap-2">
-            <span className="text-2xl sm:text-3xl font-extrabold text-neutral-900 tabular-nums">
+          <div className="mt-3 flex items-baseline gap-2">
+            <span className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900 tabular-nums">
               100%
             </span>
-            <span className="text-xs text-[#059669] font-semibold">Zero breach</span>
-          </div>
-          <div className="text-[11px] text-neutral-500 border-t border-neutral-200 pt-2 mt-2 flex items-center justify-between">
-            <span>Breathalyzer & Tare audit</span>
-            <span className="font-semibold text-neutral-800">100% Stamped</span>
+            <span className="text-xs sm:text-sm text-[#059669] font-medium">Zero breach</span>
           </div>
         </div>
       </div>
-    </section>
 
-      {/* 
-        ============================================================
-        3. QUEUE NAVIGATION, SEARCH & FILTER CONTROLS
-        ============================================================
-      */}
-      <section className="space-y-6">
-        {/* Section Header with Large Typography */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-          <div>
-            <span className="text-xs md:text-sm font-medium text-neutral-400 block tracking-normal">
-              Inspection & Barrier Release Registry
+      {/* ========================================================================= */}
+      {/* 3. QUICK ACTION BUTTONS                                                   */}
+      {/* ========================================================================= */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 w-full">
+        <button
+          type="button"
+          onClick={() => setIsBarrierOverrideModalOpen(true)}
+          className="h-11 sm:h-10 px-4 border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-800 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors cursor-pointer w-full sm:w-auto"
+        >
+          <Radio className="w-4 h-4 text-amber-600 shrink-0" />
+          <span>Override Barrier</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => onNavigateTab("live-tracker")}
+          className="h-11 sm:h-10 px-4 border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-800 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors cursor-pointer w-full sm:w-auto"
+        >
+          <Truck className="w-4 h-4 text-neutral-600 shrink-0" />
+          <span>Fleet Tracker</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => onNavigateTab("home")}
+          className="h-11 sm:h-10 px-5 bg-[#18181B] hover:bg-black text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs w-full sm:w-auto"
+        >
+          <span>Operations Hub</span>
+        </button>
+      </div>
+
+      {/* ========================================================================= */}
+      {/* 4. LIVE BOOM BARRIER STATUS                                               */}
+      {/* ========================================================================= */}
+      <div className="border border-neutral-300 bg-white p-3.5 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div
+            className={`w-2.5 h-2.5 shrink-0 ${
+              barrierState === "RAISED"
+                ? "bg-[#10B981] animate-ping"
+                : "bg-neutral-900"
+            }`}
+          />
+          <div className="flex flex-wrap items-center gap-2 text-xs">
+            <span className="font-bold text-neutral-900 uppercase tracking-wide">
+              Boom Barrier 02:
             </span>
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900 mt-1">
-              Vehicle Exit Queue & Departure Registry
-            </h2>
+            <span
+              className={`font-semibold px-2 py-0.5 border text-xs ${
+                barrierState === "RAISED"
+                  ? "bg-[#ECFDF5] text-[#059669] border-[#A7F3D0]"
+                  : "bg-neutral-100 text-neutral-800 border-neutral-300"
+              }`}
+            >
+              {barrierState === "RAISED"
+                ? "RAISED · PASSING"
+                : "LOWERED · LOCKED"}
+            </span>
+            {barrierMessage && (
+              <span className="text-xs font-bold text-[#059669] animate-pulse">
+                ● {barrierMessage}
+              </span>
+            )}
           </div>
+        </div>
 
-          <div className="text-xs text-neutral-500">
+        <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs text-neutral-500">
+          <span className="flex items-center gap-1.5">
+            <Camera className="w-3.5 h-3.5 text-neutral-600 shrink-0" />
+            <span>ANPR CAM-04: <strong className="text-neutral-800 font-semibold">ONLINE (99.4%)</strong></span>
+          </span>
+          <span className="hidden sm:inline text-neutral-300">|</span>
+          <span className="flex items-center gap-1.5">
+            <User className="w-3.5 h-3.5 text-neutral-600 shrink-0" />
+            <span>Officer: <strong className="text-neutral-800 font-semibold">Ramesh Pawar (#SEC-014)</strong></span>
+          </span>
+        </div>
+      </div>
+
+      {/* ========================================================================= */}
+      {/* 5. EXIT QUEUE & REGISTRY                                                  */}
+      {/* ========================================================================= */}
+      <div className="space-y-4 pt-3 sm:pt-6">
+        {/* Section Heading */}
+        <div className="flex items-center justify-between border-b border-neutral-300 pb-3">
+          <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-neutral-900">
+            Exit Queue & Registry
+          </h2>
+          <div className="text-xs font-semibold text-neutral-500">
             {activeTab === "DEPARTED"
-              ? `Showing ${filteredDepartedLog.length} departures logged today`
-              : `Showing ${displayedVehicles.length} vehicles in view`}
+              ? `${filteredDepartedLog.length} departures logged`
+              : `${displayedVehicles.length} in view`}
           </div>
         </div>
 
         <div
-          className="bg-white border border-neutral-300 p-4 space-y-4"
+          className="border-0 p-0 bg-transparent space-y-3 sm:bg-white sm:border sm:border-neutral-300 sm:p-4 sm:space-y-4"
           style={{ borderRadius: 0 }}
         >
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-neutral-200 pb-3">
@@ -602,8 +505,8 @@ export function GateExit({ vehicles, onUpdateStage, onNavigateTab }: GateExitPro
             </button>
           </div>
 
-          {/* Direction Filter Pills */}
-          <div className="flex items-center gap-1 border border-neutral-300 p-0.5 bg-neutral-50 overflow-x-auto shrink-0 self-start md:self-auto">
+          {/* Direction Filter Pills (PC Only) */}
+          <div className="hidden sm:flex items-center gap-1 border border-neutral-300 p-0.5 bg-neutral-50 overflow-x-auto shrink-0 self-start md:self-auto">
             {(["ALL", "INBOUND_RM", "OUTBOUND_DISPATCH"] as const).map((dir) => (
               <button
                 key={dir}
@@ -626,20 +529,20 @@ export function GateExit({ vehicles, onUpdateStage, onNavigateTab }: GateExitPro
           </div>
         </div>
 
-        {/* Search Bar */}
-        <div className="relative">
+        {/* Search Bar - Full Width on Mobile */}
+        <div className="relative w-full">
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search by Vehicle Plate (e.g. MH 20), Gate Pass #, Driver Name, Transporter, or Material..."
-            className="w-full pl-9 pr-4 py-2 border border-neutral-300 bg-neutral-50 text-xs text-neutral-900 placeholder-neutral-400 focus:outline-none focus:border-neutral-700 focus:bg-white transition-colors"
+            className="w-full h-11 sm:h-10 pl-9.5 pr-4 border border-neutral-300 bg-white text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-[#059669] transition-colors"
             style={{ borderRadius: 0 }}
           />
         </div>
       </div>
-    </section>
+    </div>
 
       {/* 
         ============================================================
@@ -649,7 +552,7 @@ export function GateExit({ vehicles, onUpdateStage, onNavigateTab }: GateExitPro
       {activeTab === "DEPARTED" ? (
         /* Departed Vehicles Audit History */
         <section
-          className="bg-white border border-neutral-300 overflow-hidden"
+          className="bg-white border-0 sm:border border-neutral-300 overflow-hidden"
           style={{ borderRadius: 0 }}
         >
           <div className="p-4 border-b border-neutral-200 flex items-center justify-between bg-neutral-50">
@@ -657,9 +560,6 @@ export function GateExit({ vehicles, onUpdateStage, onNavigateTab }: GateExitPro
               <h2 className="text-xs font-bold uppercase tracking-wider text-neutral-900">
                 Departed Vehicles Audit Trail (Shift 01)
               </h2>
-              <p className="text-[11px] text-neutral-500">
-                Official outward records stamped with barrier cycle times and security authorizations.
-              </p>
             </div>
             <div className="text-xs font-semibold text-neutral-600">
               Showing {filteredDepartedLog.length} of {departedLog.length} records

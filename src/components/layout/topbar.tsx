@@ -22,11 +22,11 @@ export function Topbar() {
 
         {/* Search Bar */}
         <div className="relative w-48 sm:w-64 md:w-80">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-500" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
           <input
             type="text"
             placeholder="Search Vehicle, Lot, SO, Batch ID..."
-            className="h-9 w-full rounded-xl bg-slate-900/90 pl-9 pr-3 text-xs text-white placeholder-slate-500 border border-slate-800/80 focus:border-emerald-500/50 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 transition-all"
+            className="h-10 w-full rounded-xl bg-slate-900/90 pl-9.5 pr-3 text-sm text-white placeholder-slate-500 border border-slate-800/80 focus:border-emerald-500/50 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 transition-all"
           />
         </div>
       </div>

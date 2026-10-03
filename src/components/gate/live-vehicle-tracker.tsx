@@ -4,34 +4,30 @@ import React, { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   Truck,
-  Plus,
   Search,
   Scale,
   Clock,
   CheckCircle2,
   AlertTriangle,
-  ArrowDownRight,
-  ArrowUpRight,
-  FileText,
-  SlidersHorizontal,
-  MoreVertical,
-  Calendar,
-  ChevronDown,
-  Layers,
-  Activity,
-  Zap,
   ShieldCheck,
   FlaskConical,
-  Printer,
-  ChevronUp,
   Check,
   X,
+  MapPin,
+  Eye,
+  SlidersHorizontal,
+  ChevronDown,
 } from "lucide-react";
 import { GateVehicle, VehicleDirection, GateStage } from "@/lib/types/gate";
 import { INITIAL_GATE_VEHICLES } from "@/lib/data/mock-gate-vehicles";
-import { GateEntryModal } from "@/components/gate/gate-entry-modal";
 
-type FilterTab = "ALL" | "INBOUND_RM" | "OUTBOUND_DISPATCH" | "WAITING_WEIGHMENT" | "CLEARED_EXIT";
+type FilterTab =
+  | "ALL"
+  | "INBOUND_RM"
+  | "OUTBOUND_DISPATCH"
+  | "WAITING_WEIGHMENT"
+  | "UNLOADING"
+  | "CLEARED_EXIT";
 
 export interface LiveVehicleTrackerProps {
   vehicles?: GateVehicle[];
@@ -42,25 +38,27 @@ export interface LiveVehicleTrackerProps {
 
 export function LiveVehicleTracker({
   vehicles: externalVehicles,
-  onUpdateStage: externalUpdateStage,
-  onAddVehicle: externalAddVehicle,
-  onNavigateTab,
 }: LiveVehicleTrackerProps = {}) {
-  const [internalVehicles, setInternalVehicles] = useState<GateVehicle[]>(INITIAL_GATE_VEHICLES);
+  const [internalVehicles] = useState<GateVehicle[]>(INITIAL_GATE_VEHICLES);
   const vehicles = externalVehicles || internalVehicles;
-  const [activeTab, setActiveTab] = useState<FilterTab>("ALL");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedVehicle, setSelectedVehicle] = useState<GateVehicle | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [exitBarrierMessage, setExitBarrierMessage] = useState<string | null>(null);
 
-  // Dynamic KPI Stats
+  const [activeTab, setActiveTab] = useState<FilterTab>("ALL");
+  const [showFilters, setShowFilters] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [inspectVehicle, setInspectVehicle] = useState<GateVehicle | null>(null);
+  const [viewMode, setViewMode] = useState<"CARDS" | "TABLE">("CARDS");
+
+  // Dynamic Fleet Counts & Dwell Metrics
   const stats = useMemo(() => {
     const totalInside = vehicles.length;
     const inboundRM = vehicles.filter((v) => v.direction === "INBOUND_RM").length;
     const outboundFG = vehicles.filter((v) => v.direction === "OUTBOUND_DISPATCH").length;
+
     const awaitingWeighbridge = vehicles.filter(
-      (v) => v.stage === "WAITING_WEIGHMENT" || v.stage === "ARRIVED_AT_GATE"
+      (v) =>
+        v.stage === "WAITING_WEIGHMENT" ||
+        v.stage === "ARRIVED_AT_GATE" ||
+        v.stage === "GROSS_WEIGHED"
     ).length;
     const activeUnloading = vehicles.filter(
       (v) => v.stage === "UNLOADING" || v.stage === "QC_PENDING"
@@ -69,19 +67,36 @@ export function LiveVehicleTracker({
       (v) => v.stage === "CLEARED_EXIT" || v.stage === "TARE_WEIGHED"
     ).length;
 
-    return { totalInside, inboundRM, outboundFG, awaitingWeighbridge, activeUnloading, clearedForExit };
+    // Dwell Time Alerts (>90m)
+    const overdueDwell = vehicles.filter((v) => (v.elapsedMinutes || 0) > 90).length;
+
+    return {
+      totalInside,
+      inboundRM,
+      outboundFG,
+      awaitingWeighbridge,
+      activeUnloading,
+      clearedForExit,
+      overdueDwell,
+    };
   }, [vehicles]);
 
   // Filtered vehicles
   const filteredVehicles = useMemo(() => {
     return vehicles.filter((v) => {
-      // Tab filter
       if (activeTab === "INBOUND_RM" && v.direction !== "INBOUND_RM") return false;
       if (activeTab === "OUTBOUND_DISPATCH" && v.direction !== "OUTBOUND_DISPATCH") return false;
       if (
         activeTab === "WAITING_WEIGHMENT" &&
         v.stage !== "WAITING_WEIGHMENT" &&
-        v.stage !== "ARRIVED_AT_GATE"
+        v.stage !== "ARRIVED_AT_GATE" &&
+        v.stage !== "GROSS_WEIGHED"
+      )
+        return false;
+      if (
+        activeTab === "UNLOADING" &&
+        v.stage !== "UNLOADING" &&
+        v.stage !== "QC_PENDING"
       )
         return false;
       if (
@@ -91,7 +106,6 @@ export function LiveVehicleTracker({
       )
         return false;
 
-      // Search query
       if (searchQuery.trim()) {
         const query = searchQuery.toLowerCase();
         const matchesNo = v.vehicleNo.toLowerCase().includes(query);
@@ -99,83 +113,68 @@ export function LiveVehicleTracker({
         const matchesMaterial = v.materialName.toLowerCase().includes(query);
         const matchesSupplier = v.supplierOrCustomer.toLowerCase().includes(query);
         const matchesDriver = v.driverName.toLowerCase().includes(query);
-        return matchesNo || matchesPass || matchesMaterial || matchesSupplier || matchesDriver;
+        const matchesLocation = (v.assignedLocation || "").toLowerCase().includes(query);
+        return matchesNo || matchesPass || matchesMaterial || matchesSupplier || matchesDriver || matchesLocation;
       }
 
       return true;
     });
   }, [vehicles, activeTab, searchQuery]);
 
-  const handleAddVehicle = (newVehicle: GateVehicle) => {
-    if (externalAddVehicle) {
-      externalAddVehicle(newVehicle);
-    } else {
-      setInternalVehicles((prev) => [newVehicle, ...prev]);
-    }
-  };
-
-  const handleUpdateStage = (vehicleId: string, newStage: GateStage) => {
-    if (externalUpdateStage) {
-      externalUpdateStage(vehicleId, newStage);
-    } else {
-      setInternalVehicles((prev) =>
-        prev.map((v) => (v.id === vehicleId ? { ...v, stage: newStage } : v))
-      );
-    }
-    if (selectedVehicle && selectedVehicle.id === vehicleId) {
-      setSelectedVehicle((prev) => (prev ? { ...prev, stage: newStage } : null));
-    }
-  };
-
-
-  // Distinct stage colors adhering strictly to 80% Grays, 15% Studio White, 5% Bio-Emerald Green
   const getStageConfig = (stage: GateStage) => {
     switch (stage) {
       case "ARRIVED_AT_GATE":
         return {
-          label: "At Gate Barrier",
+          label: "At Gate In",
           dotColor: "#18181B",
           textColor: "#18181B",
-          borderClass: "border-neutral-400 bg-neutral-100/60",
+          borderClass: "border-neutral-300 bg-neutral-100",
         };
       case "WAITING_WEIGHMENT":
         return {
-          label: "Weighbridge Queue",
+          label: "Gross Weighbridge Queue",
           dotColor: "#D97706",
           textColor: "#92400E",
-          borderClass: "border-amber-300 bg-amber-50/60",
+          borderClass: "border-amber-300 bg-amber-50",
+        };
+      case "GROSS_WEIGHED":
+        return {
+          label: "Gross Weighed",
+          dotColor: "#059669",
+          textColor: "#047857",
+          borderClass: "border-emerald-300 bg-emerald-50",
         };
       case "UNLOADING":
         return {
-          label: "Unloading / Yard",
+          label: "Unloading in Yard",
           dotColor: "#059669",
           textColor: "#047857",
-          borderClass: "border-emerald-300 bg-emerald-50/60",
+          borderClass: "border-emerald-300 bg-emerald-50",
         };
       case "QC_PENDING":
         return {
           label: "QC Sampling Active",
           dotColor: "#D97706",
           textColor: "#92400E",
-          borderClass: "border-amber-300 bg-amber-50/60",
+          borderClass: "border-amber-300 bg-amber-50",
         };
       case "TARE_WEIGHED":
         return {
-          label: "Tare Weighed",
+          label: "Tare Weighed (Net Done)",
           dotColor: "#059669",
           textColor: "#047857",
-          borderClass: "border-emerald-300 bg-emerald-50/60",
+          borderClass: "border-emerald-300 bg-emerald-50",
         };
       case "CLEARED_EXIT":
         return {
           label: "Cleared for Exit",
           dotColor: "#059669",
           textColor: "#047857",
-          borderClass: "border-emerald-300 bg-emerald-50/60",
+          borderClass: "border-emerald-300 bg-emerald-50",
         };
       case "EXIT_COMPLETED":
         return {
-          label: "Exit Completed",
+          label: "Gate Out / Departed",
           dotColor: "#64748B",
           textColor: "#475569",
           borderClass: "border-neutral-300 bg-neutral-100",
@@ -195,7 +194,7 @@ export function LiveVehicleTracker({
     { key: "WAITING_WEIGHMENT", label: "Gross Weighment", shortLabel: "Gross", icon: Scale },
     { key: "UNLOADING", label: "Unload & QC", shortLabel: "Unload", icon: FlaskConical },
     { key: "TARE_WEIGHED", label: "Tare Weighment", shortLabel: "Tare", icon: Scale },
-    { key: "CLEARED_EXIT", label: "Gate Out", shortLabel: "Gate Out", icon: CheckCircle2 },
+    { key: "CLEARED_EXIT", label: "Gate Out", shortLabel: "Exit", icon: CheckCircle2 },
   ];
 
   const getStageIndex = (stage: GateStage) => {
@@ -218,1064 +217,603 @@ export function LiveVehicleTracker({
     }
   };
 
-  const renderVehicleDossier = (vehicle: GateVehicle, isMobile: boolean = false) => {
-    const stageConfig = getStageConfig(vehicle.stage);
-    const phoneStr = vehicle.driverPhone?.trim() ? vehicle.driverPhone : "+91 98224 81920";
-    const dwellStr = vehicle.dwellMinutes && vehicle.dwellMinutes > 0 ? `${vehicle.dwellMinutes}m dwell` : "42m dwell";
-    const currentStep = getStageIndex(vehicle.stage);
-
-    const dossierContent = (
-      <div className={isMobile ? "p-3.5 space-y-3.5 bg-white" : "p-4 sm:p-5 md:p-6 space-y-4 bg-white"}>
-        {/* Header inside expanded card */}
-        <div className="flex items-start justify-between gap-2 pb-2.5 border-b border-neutral-200">
-          <div className="space-y-1 min-w-0">
-            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 border border-emerald-300 bg-emerald-50 text-[10px] font-bold uppercase tracking-wider text-[#047857]">
-                <span className="w-1.5 h-1.5 shrink-0 bg-[#059669] inline-block" />
-                <span>Active Dossier</span>
-              </span>
-              <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 bg-[#18181B] text-white">
-                {vehicle.direction === "INBOUND_RM" ? "Inbound Biomass RM" : "Outbound Dispatch FG"}
-              </span>
-            </div>
-            <div className="text-base sm:text-lg font-bold text-neutral-900 tracking-tight">
-              {vehicle.vehicleNo}
-            </div>
-            <div className="text-[11px] text-neutral-500">
-              Pass: <strong className="text-neutral-800 font-semibold">{vehicle.gateEntryNo}</strong> · {vehicle.vehicleType}
-            </div>
-          </div>
-
-          {/* Right Metadata & Close Button */}
-          <div className="flex flex-col items-end gap-1 shrink-0">
-            <div className="flex items-center gap-2">
-              <div className="hidden sm:flex items-center gap-2 text-[11px] text-neutral-600 bg-white border border-neutral-300 px-2.5 py-1 tabular-nums">
-                <span>In: {vehicle.inTime || "14:15"}</span>
-                <span>·</span>
-                <span className="text-neutral-800 font-semibold">{dwellStr}</span>
-                <span>·</span>
-                <span className="text-[#059669] font-medium">{stageConfig.label}</span>
-              </div>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setSelectedVehicle(null);
-                }}
-                className="w-7 h-7 flex items-center justify-center border border-neutral-300 hover:bg-neutral-100 text-neutral-600 hover:text-neutral-900 cursor-pointer bg-white transition-colors"
-                title="Close Dossier"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            </div>
-            <span className="sm:hidden text-[10px] font-semibold text-neutral-500 tabular-nums">
-              {dwellStr}
-            </span>
-          </div>
+  return (
+    <div className="space-y-8 sm:space-y-10 select-none">
+      {/* ========================================================================= */}
+      {/* HEADER & OPERATIONAL COUNTERS                                             */}
+      {/* ========================================================================= */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-300 pb-5 sm:pb-6">
+        <div className="py-1 sm:py-1.5">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-neutral-900">
+            Vehicle Tracker
+          </h1>
         </div>
 
-        {/* 5-Stage Plant Operational Stepper (Connected Timeline Pipeline - 100% width on all screens) */}
-        <div className="border border-neutral-200 p-2.5 sm:p-4 bg-[#F8F9FA]">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-[10px] font-bold text-neutral-600 uppercase tracking-wider mb-2.5">
-            <span className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 bg-[#059669] inline-block shrink-0" />
-              <span>Plant Operational Lifecycle Progress</span>
-            </span>
-            <span className="font-semibold text-neutral-800 tabular-nums border border-neutral-300 px-2 py-0.5 bg-white w-fit text-[9px] sm:text-[10px]">
-              Stage {currentStep + 1} of {LIFECYCLE_STAGES.length} · {LIFECYCLE_STAGES[currentStep]?.label}
-            </span>
+        {/* Live Operational Counters */}
+        <div className="flex flex-wrap items-center gap-2.5 mt-2 sm:mt-0">
+          <div className="h-10 flex items-center gap-2 px-3.5 bg-neutral-200/50 border border-neutral-300 text-xs font-bold text-neutral-900">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#059669] animate-pulse shrink-0" />
+            <span className="font-mono">{stats.totalInside}</span>
+            <span>Inside Plant</span>
           </div>
 
-          <div className="relative">
-            {/* Connecting Pipeline Tracks */}
-            <div className="absolute top-3.5 sm:top-4 left-4 right-4 h-0.5 bg-neutral-200 z-0" />
-            <div
-              className="absolute top-3.5 sm:top-4 left-4 h-0.5 bg-[#059669] z-0 transition-all duration-300"
-              style={{
-                width: `calc(${(currentStep / (LIFECYCLE_STAGES.length - 1)) * 100}% - 8px)`,
-              }}
-            />
+          {stats.overdueDwell > 0 && (
+            <div className="h-10 flex items-center gap-2 px-3 bg-amber-50 border border-amber-300 text-xs font-bold text-amber-800">
+              <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+              <span><strong className="font-mono">{stats.overdueDwell}</strong> Overdue (&gt;90m)</span>
+            </div>
+          )}
+        </div>
+      </div>
 
-            <div className="relative z-10 grid grid-cols-5 gap-1 sm:gap-2">
-              {LIFECYCLE_STAGES.map((step, idx) => {
-                const Icon = step.icon;
-                const isPassed = idx < currentStep;
-                const isCurrent = idx === currentStep;
+      {/* ========================================================================= */}
+      {/* MAIN VEHICLE FLEET TABLE                                                  */}
+      {/* ========================================================================= */}
+      <div className="border-0 sm:border sm:border-neutral-300">
+        {/* Filter Tabs & Search Controls */}
+        <div className="p-0 sm:p-4 pb-3 sm:pb-4 border-b border-neutral-300 space-y-2.5">
+          {/* Top Row: Search Input (Full Width on mobile) + Filters Toggle (PC) + View Mode Switcher (PC) */}
+          <div className="flex items-center gap-2">
+            <div className="relative w-full flex-1">
+              <Search className="w-4 h-4 text-neutral-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search plate, pass ID, material, driver..."
+                className="w-full h-11 sm:h-10 pl-9.5 pr-8 bg-white border border-neutral-300 text-sm text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:border-[#059669] transition-colors"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-700 cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+
+            {/* Filters Toggle Button (PC Only) */}
+            <button
+              type="button"
+              onClick={() => setShowFilters(!showFilters)}
+              className={`hidden sm:flex h-10 px-3.5 border text-xs font-bold uppercase tracking-wider items-center gap-2 transition-colors cursor-pointer shrink-0 ${
+                showFilters || activeTab !== "ALL"
+                  ? "bg-[#18181B] text-white border-[#18181B]"
+                  : "bg-white text-neutral-700 border-neutral-300 hover:bg-neutral-100"
+              }`}
+            >
+              <SlidersHorizontal className="w-4 h-4" />
+              <span>Filters</span>
+              {activeTab !== "ALL" && (
+                <span className="text-[10px] bg-[#059669] text-white px-1.5 py-0.2 rounded font-mono font-bold">
+                  1
+                </span>
+              )}
+              <ChevronDown
+                className={`w-3.5 h-3.5 transition-transform ${
+                  showFilters ? "rotate-180" : ""
+                }`}
+              />
+            </button>
+
+            {/* View Mode Switcher (PC Only) */}
+            <div className="hidden sm:inline-flex border border-neutral-300 divide-x divide-neutral-300 text-xs shrink-0 h-10">
+              <button
+                type="button"
+                onClick={() => setViewMode("CARDS")}
+                className={`px-3 py-1.5 transition-colors cursor-pointer flex items-center ${
+                  viewMode === "CARDS"
+                    ? "bg-[#18181B] text-white font-semibold"
+                    : "bg-neutral-200/50 text-neutral-700 hover:bg-neutral-200"
+                }`}
+              >
+                Cards
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode("TABLE")}
+                className={`px-3 py-1.5 transition-colors cursor-pointer flex items-center ${
+                  viewMode === "TABLE"
+                    ? "bg-[#18181B] text-white font-semibold"
+                    : "bg-neutral-200/50 text-neutral-700 hover:bg-neutral-200"
+                }`}
+              >
+                Table
+              </button>
+            </div>
+          </div>
+
+          {/* Active Filter summary chip (PC Only) */}
+          {!showFilters && activeTab !== "ALL" && (
+            <div className="hidden sm:flex items-center gap-2 pt-0.5 text-xs">
+              <span className="text-neutral-500 font-medium">Filter:</span>
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-neutral-900 text-white font-bold text-[11px] uppercase tracking-wide">
+                <span>
+                  {
+                    [
+                      { key: "INBOUND_RM", label: "Inbound Biomass" },
+                      { key: "OUTBOUND_DISPATCH", label: "Outbound Dispatch" },
+                      { key: "WAITING_WEIGHMENT", label: "Awaiting Weighment" },
+                      { key: "UNLOADING", label: "Yard Unload & QC" },
+                      { key: "CLEARED_EXIT", label: "Cleared for Exit" },
+                    ].find((f) => f.key === activeTab)?.label
+                  }
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("ALL")}
+                  className="hover:text-red-400 cursor-pointer ml-1"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </span>
+            </div>
+          )}
+
+          {/* Expandable Filter Tabs Grid/Pills (PC Only) */}
+          {showFilters && (
+            <div className="hidden sm:block pt-2 border-t border-neutral-200 space-y-2">
+              <div className="flex flex-wrap items-center gap-1.5">
+                {[
+                  { key: "ALL", label: "All Inside", count: stats.totalInside },
+                  { key: "INBOUND_RM", label: "Inbound Biomass", count: stats.inboundRM },
+                  { key: "OUTBOUND_DISPATCH", label: "Outbound Dispatch", count: stats.outboundFG },
+                  { key: "WAITING_WEIGHMENT", label: "Awaiting Weighment", count: stats.awaitingWeighbridge },
+                  { key: "UNLOADING", label: "Yard Unload & QC", count: stats.activeUnloading },
+                  { key: "CLEARED_EXIT", label: "Cleared for Exit", count: stats.clearedForExit },
+                ].map((tab) => (
+                  <button
+                    key={tab.key}
+                    type="button"
+                    onClick={() => setActiveTab(tab.key as FilterTab)}
+                    className={`px-3 py-1.5 text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer border whitespace-nowrap flex items-center gap-1.5 ${
+                      activeTab === tab.key
+                        ? "bg-[#18181B] text-white border-[#18181B]"
+                        : "bg-white text-neutral-700 border-neutral-300 hover:bg-neutral-100"
+                    }`}
+                  >
+                    <span>{tab.label}</span>
+                    <span className="opacity-75 font-mono text-[11px]">({tab.count})</span>
+                  </button>
+                ))}
+                {activeTab !== "ALL" && (
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab("ALL")}
+                    className="text-xs text-neutral-500 hover:text-neutral-900 underline underline-offset-2 ml-2 cursor-pointer font-medium"
+                  >
+                    Reset
+                  </button>
+                )}
+              </div>
+              <div className="text-[11px] text-neutral-500">
+                Showing <strong className="text-neutral-900">{filteredVehicles.length}</strong> vehicles matching criteria
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Vehicles Data: Cards View or Table View */}
+        {filteredVehicles.length === 0 ? (
+          <div className="py-12 text-center text-neutral-500">
+            <Truck className="w-8 h-8 text-neutral-300 mx-auto mb-2" />
+            <p className="font-semibold text-neutral-700">No vehicles match the selected filter</p>
+            <p className="text-[11px] text-neutral-400 mt-0.5">Try clearing the search query or switching tabs</p>
+          </div>
+        ) : (
+          <>
+            {/* Cards View: Always on Mobile, respects viewMode on Desktop */}
+            <div className={viewMode === "CARDS" ? "px-0 py-3 sm:p-4" : "px-0 py-3 sm:hidden"}>
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+              {filteredVehicles.map((vehicle) => {
+                const stageConfig = getStageConfig(vehicle.stage);
+                const dwell = vehicle.elapsedMinutes || vehicle.dwellMinutes || 35;
+                const isOverdue = dwell > 90;
+                const isWarning = dwell >= 60 && dwell <= 90;
 
                 return (
-                  <div key={step.key} className="flex flex-col items-center text-center">
-                    <div
-                      className={`w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-xs mb-1 border transition-all relative ${
-                        isCurrent
-                          ? "bg-[#18181B] text-white border-[#059669] ring-2 ring-[#059669]/60 shadow-sm"
-                          : isPassed
-                          ? "bg-[#059669] text-white border-[#059669]"
-                          : "bg-white text-neutral-400 border-neutral-300"
-                      }`}
-                    >
-                      {isCurrent && (
-                        <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-[#059669] animate-ping" />
-                      )}
-                      {isPassed ? (
-                        <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" strokeWidth={2.5} />
-                      ) : (
-                        <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                      )}
+                  <div
+                    key={vehicle.id}
+                    onClick={() => setInspectVehicle(vehicle)}
+                    className="border border-neutral-300 p-3.5 hover:border-neutral-900 transition-all cursor-pointer group bg-transparent flex flex-col justify-between space-y-3"
+                  >
+                    {/* Card Top: Plate + Pass ID + Direction Badge */}
+                    <div className="flex items-start justify-between gap-2 border-b border-neutral-200 pb-2">
+                      <div>
+                        <div className="font-mono font-bold text-neutral-900 text-sm group-hover:text-[#059669] transition-colors">
+                          {vehicle.vehicleNo}
+                        </div>
+                        <div className="text-[10px] text-neutral-500 font-mono mt-0.5">
+                          {vehicle.gateEntryNo}
+                        </div>
+                      </div>
+
+                      <span
+                        className={`text-[10px] font-bold uppercase px-2 py-0.5 border shrink-0 ${
+                          vehicle.direction === "INBOUND_RM"
+                            ? "border-emerald-300 bg-emerald-50 text-[#047857]"
+                            : "border-neutral-300 bg-[#18181B] text-white"
+                        }`}
+                      >
+                        {vehicle.direction === "INBOUND_RM" ? "Inbound RM" : "Outbound FG"}
+                      </span>
                     </div>
-                    <span
-                      className={`text-[9px] sm:text-[11px] leading-tight block truncate max-w-full ${
-                        isCurrent
-                          ? "font-bold text-neutral-900"
-                          : isPassed
-                          ? "text-neutral-700 font-medium"
-                          : "text-neutral-400"
-                      }`}
-                    >
-                      <span className="sm:hidden">{step.shortLabel}</span>
-                      <span className="hidden sm:inline">{step.label}</span>
-                    </span>
-                    <span className="text-[8px] sm:text-[10px] text-neutral-400 block mt-0.5">
-                      {isCurrent ? "Active" : isPassed ? "Complete" : "Pending"}
-                    </span>
+
+                    {/* Card Middle: Cargo & Party details */}
+                    <div className="space-y-1 text-xs">
+                      <div className="flex items-baseline justify-between gap-2">
+                        <span className="font-semibold text-neutral-900 truncate">
+                          {vehicle.materialName}
+                        </span>
+                        <span className="text-[11px] font-bold text-neutral-700 tabular-nums shrink-0">
+                          {vehicle.declaredWeightMT.toFixed(1)} MT
+                        </span>
+                      </div>
+
+                      <div className="text-[11px] text-neutral-600 truncate">
+                        {vehicle.supplierOrCustomer}
+                      </div>
+
+                      <div className="text-[10px] text-neutral-400 truncate">
+                        {vehicle.transporter} · {vehicle.driverName}
+                      </div>
+                    </div>
+
+                    {/* Card Footer: Operational Stage + Dwell Timer */}
+                    <div className="pt-2 border-t border-neutral-200 flex items-center justify-between gap-2">
+                      <span
+                        className={`inline-flex items-center gap-1.5 px-2 py-0.5 border text-[10px] font-bold uppercase tracking-wider ${stageConfig.borderClass}`}
+                        style={{ color: stageConfig.textColor }}
+                      >
+                        <span
+                          className="w-1.5 h-1.5 inline-block shrink-0"
+                          style={{ backgroundColor: stageConfig.dotColor }}
+                        />
+                        <span>{stageConfig.label}</span>
+                      </span>
+
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-mono font-bold tabular-nums border ${
+                            isOverdue
+                              ? "bg-red-50 text-red-700 border-red-200"
+                              : isWarning
+                              ? "bg-amber-50 text-amber-700 border-amber-200"
+                              : "bg-neutral-200/60 text-neutral-700 border-neutral-300"
+                          }`}
+                        >
+                          <Clock className="w-3 h-3" />
+                          <span>{dwell}m</span>
+                        </span>
+
+                        <span className="text-[10px] text-neutral-400 group-hover:text-neutral-900 transition-colors inline-flex items-center gap-1">
+                          <Eye className="w-3.5 h-3.5" />
+                          <span className="hidden sm:inline">Details</span>
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 );
               })}
             </div>
           </div>
-        </div>
 
-        {/* Structured Specification Matrix */}
-        <div className="border border-neutral-200 divide-x divide-y md:divide-y-0 bg-white grid grid-cols-2 md:grid-cols-4">
-          {/* Col 1: Cargo & Commodity */}
-          <div className="p-2.5 sm:p-3.5 space-y-1">
-            <div className="flex items-center justify-between">
-              <span className="text-[9px] sm:text-[10px] uppercase font-bold tracking-wider text-neutral-400 block">
-                Cargo
-              </span>
-              <span className="text-[8px] sm:text-[9px] font-semibold uppercase px-1 py-0.2 bg-neutral-100 border border-neutral-200 text-neutral-600">
-                LOT
-              </span>
-            </div>
-            <div className="font-bold text-neutral-900 text-xs sm:text-sm truncate">
-              {vehicle.materialName}
-            </div>
-            <div className="text-[10px] sm:text-[11px] text-neutral-500 tabular-nums">
-              Declared: <strong className="text-neutral-900 font-semibold">{vehicle.declaredWeightMT.toFixed(1)} MT</strong>
-            </div>
-          </div>
-
-          {/* Col 2: Supplier / Origin */}
-          <div className="p-2.5 sm:p-3.5 space-y-1">
-            <div className="flex items-center justify-between">
-              <span className="text-[9px] sm:text-[10px] uppercase font-bold tracking-wider text-neutral-400 block">
-                {vehicle.direction === "INBOUND_RM" ? "Supplier" : "Customer"}
-              </span>
-              <span className="text-[8px] sm:text-[9px] font-semibold uppercase px-1 py-0.2 bg-neutral-100 border border-neutral-200 text-neutral-600">
-                VERIFIED
-              </span>
-            </div>
-            <div className="font-semibold text-neutral-900 text-xs sm:text-sm truncate">
-              {vehicle.supplierOrCustomer}
-            </div>
-            <div className="text-[10px] sm:text-[11px] text-neutral-500 truncate">
-              {vehicle.transporter}
-            </div>
-          </div>
-
-          {/* Col 3: Driver & Crew */}
-          <div className="p-2.5 sm:p-3.5 space-y-1">
-            <div className="flex items-center justify-between">
-              <span className="text-[9px] sm:text-[10px] uppercase font-bold tracking-wider text-neutral-400 block">
-                Driver & KYC
-              </span>
-              <span className="text-[8px] sm:text-[9px] font-bold uppercase px-1 py-0.2 text-[#047857] border border-emerald-300 bg-emerald-50">
-                ✓ 0.00% BAC
-              </span>
-            </div>
-            <div className="font-semibold text-neutral-900 text-xs sm:text-sm truncate">
-              {vehicle.driverName}
-            </div>
-            <div className="text-[10px] sm:text-[11px] text-neutral-600 font-medium tabular-nums">
-              {phoneStr}
-            </div>
-          </div>
-
-          {/* Col 4: Yard Location & E-Way */}
-          <div className="p-2.5 sm:p-3.5 space-y-1">
-            <div className="flex items-center justify-between">
-              <span className="text-[9px] sm:text-[10px] uppercase font-bold tracking-wider text-neutral-400 block">
-                Assigned Bay
-              </span>
-              <span className="text-[8px] sm:text-[9px] font-semibold uppercase px-1 py-0.2 bg-neutral-100 border border-neutral-200 text-neutral-600">
-                YARD
-              </span>
-            </div>
-            <div className="font-bold text-neutral-900 text-xs sm:text-sm flex items-center gap-1.5 truncate">
-              <span className="w-1.5 h-1.5 bg-[#059669] inline-block shrink-0" />
-              <span>{vehicle.assignedLocation}</span>
-            </div>
-            <div className="text-[10px] sm:text-[11px] text-neutral-600 font-medium truncate">
-              {vehicle.ewayBillNo || "EWB Verified"}
-            </div>
-          </div>
-        </div>
-
-        {/* Gate Security & Inspection Note Inset */}
-        <div className="p-2.5 sm:p-3.5 bg-[#F8F9FA] border border-neutral-200 flex items-start gap-2.5">
-          <ShieldCheck className="w-4 h-4 text-[#059669] shrink-0 mt-0.5" />
-          <div className="text-xs flex-1 min-w-0">
-            <div className="flex items-center justify-between mb-0.5">
-              <span className="font-bold uppercase tracking-wider text-[9px] sm:text-[10px] text-neutral-800">
-                Gate Security Checkpoint Record
-              </span>
-              <span className="text-[9px] sm:text-[10px] text-neutral-500 font-medium">
-                Station 01 Passed
-              </span>
-            </div>
-            <p className="text-neutral-600 leading-relaxed text-[11px]">
-              {vehicle.remarks || "Direct tipper load from farm cluster. Moisture visually normal. Breathalyzer test passed. Gate pass authenticated."}
-            </p>
-          </div>
-        </div>
-
-        {/* Guard Fast Action Workflow Toolbar */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-1">
-          <div className="grid grid-cols-1 sm:flex sm:items-center gap-1.5 sm:gap-2 w-full sm:w-auto">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-500 mr-1 hidden sm:inline">
-              Fast Routing Action:
-            </span>
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleUpdateStage(vehicle.id, "WAITING_WEIGHMENT");
-              }}
-              className="px-3 py-2 bg-white hover:bg-neutral-50 border border-neutral-300 text-neutral-800 text-[11px] font-semibold cursor-pointer transition-all active:scale-95 flex items-center justify-center gap-1.5"
-            >
-              <Scale className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-              <span>Route to Weighbridge 1</span>
-            </button>
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleUpdateStage(vehicle.id, "UNLOADING");
-              }}
-              className="px-3 py-2 bg-white hover:bg-neutral-50 border border-neutral-300 text-neutral-800 text-[11px] font-semibold cursor-pointer transition-all active:scale-95 flex items-center justify-center gap-1.5"
-            >
-              <Layers className="w-3.5 h-3.5 text-neutral-700 shrink-0" />
-              <span>Direct to Yard Unloading</span>
-            </button>
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleUpdateStage(vehicle.id, "CLEARED_EXIT");
-              }}
-              className="px-3 py-2 bg-[#059669] hover:bg-[#047857] text-white text-[11px] font-bold uppercase tracking-wider cursor-pointer transition-all active:scale-95 flex items-center justify-center gap-1.5"
-            >
-              <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
-              <span>Clear for Boom Barrier Exit</span>
-            </button>
-          </div>
-
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              window.print();
-            }}
-            className="flex items-center justify-center gap-1.5 px-3 py-2 border border-neutral-300 hover:bg-neutral-50 text-neutral-700 text-[11px] font-medium cursor-pointer bg-white transition-all active:scale-95 w-full sm:w-auto"
-          >
-            <Printer className="w-3.5 h-3.5 shrink-0" />
-            <span>Print Gate Slip</span>
-          </button>
-        </div>
-      </div>
-    );
-
-    if (isMobile) {
-      return dossierContent;
-    }
-
-    return (
-      <div className="p-3 sm:p-4 bg-[#F8F9FA] border-b border-neutral-300">
-        <motion.div
-          initial={{ opacity: 0, y: -8 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -6 }}
-          transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-          className="border border-neutral-300"
-        >
-          {dossierContent}
-        </motion.div>
-      </div>
-    );
-  };
-
-  return (
-    <div className="space-y-12 md:space-y-14 select-none">
-      {/* ========================================================================= */}
-      {/* SECTION 1: OVERVIEW PANEL WITH LARGE TYPOGRAPHY & BIG CARDS (NO BG COLOR) */}
-      {/* ========================================================================= */}
-      <section className="space-y-6">
-        {/* Section Header with Large Typography */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-          <div>
-            <span className="text-xs md:text-sm font-medium text-neutral-400 block tracking-normal">
-              Data Based on Today&apos;s Logistics
-            </span>
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-neutral-900 mt-1">
-              Overview Panel
-            </h1>
-          </div>
-
-          {/* Quick Header Utility Badges (Transparent, neutral borders, no bg color) */}
-          <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 sm:gap-2.5 w-full sm:w-auto">
-            {/* Date Pill */}
-            <div className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-transparent border border-neutral-300 text-xs font-medium text-neutral-700">
-              <Calendar className="w-3.5 h-3.5 text-neutral-500" />
-              <span>Today · 03 Oct</span>
-            </div>
-
-            {/* Station Dropdown Pill */}
-            <div className="flex items-center justify-center gap-2 px-3 py-1.5 bg-transparent border border-neutral-300 text-xs font-medium text-neutral-800 cursor-pointer hover:bg-neutral-200/40">
-              <span className="w-1.5 h-1.5 bg-[#059669] inline-block" />
-              <span>Gate Station 01</span>
-              <ChevronDown className="w-3.5 h-3.5 text-neutral-400" />
-            </div>
-
-            {/* Primary Action Button (Surgical Bio-Emerald Accent) */}
-            <button
-              type="button"
-              onClick={() => setIsModalOpen(true)}
-              className="col-span-2 sm:col-span-1 flex items-center justify-center gap-1.5 px-4 py-2 sm:py-1.5 bg-[#059669] hover:bg-[#047857] text-white text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer"
-            >
-              <Plus className="w-4 h-4" strokeWidth={2.5} />
-              <span>New Gate Pass</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Big Cards Row: Transparent surfaces, crisp hairline borders, no bg color */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-          {/* Big Hero Card: Live Barrier Control & Vehicle Gate Desk */}
-          <div className="lg:col-span-6 bg-transparent border border-neutral-300 p-5 md:p-6 flex flex-col justify-between">
-            {/* Header: Title + Barrier System Status */}
-            <div>
-              <div className="flex items-center justify-between border-b border-neutral-200 pb-3">
-                <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 border border-neutral-300 bg-transparent flex items-center justify-center text-neutral-800">
-                    <ShieldCheck className="w-3.5 h-3.5 text-[#059669]" />
-                  </div>
-                  <div>
-                    <span className="text-xs font-bold uppercase tracking-wider text-neutral-900 block">
-                      Live Barrier Control & Gate Desk
-                    </span>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <span className="inline-flex items-center gap-1.5 px-2 py-0.5 border border-emerald-300 text-[10px] uppercase font-bold tracking-wider text-[#047857]">
-                    <span className="w-1.5 h-1.5 bg-[#059669] animate-pulse inline-block" />
-                    <span>BOOM BARRIERS ACTIVE</span>
-                  </span>
-                </div>
-              </div>
-
-              {/* Two Active Physical Gate Stations: Entry vs Exit */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                {/* Station 01: Inbound Entry Boom */}
-                <div className="border border-neutral-300 p-3.5 flex flex-col justify-between bg-transparent">
-                  <div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-[11px] font-bold text-neutral-800 uppercase tracking-wider flex items-center gap-1.5">
-                        <ArrowDownRight className="w-3.5 h-3.5 text-sky-600" />
-                        <span>Entry Gate 01</span>
-                      </span>
-                      <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 border border-sky-300 text-sky-700">
-                        AT BARRIER
-                      </span>
-                    </div>
-
-                    <div className="mt-2.5">
-                      <div className="text-sm font-bold text-neutral-900 tracking-tight">
-                        MH-12-Q-4491
-                      </div>
-                      <div className="text-[11px] text-neutral-600 mt-0.5 font-medium">
-                        Kisan Bio-Agri · Groundnut Shell
-                      </div>
-                      <div className="text-[11px] text-neutral-500 mt-1 flex items-center gap-2">
-                        <span className="font-semibold text-neutral-700">PO-2026-0881</span>
-                        <span>·</span>
-                        <span className="tabular-nums">28.5 MT Declared</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 pt-3 border-t border-neutral-200">
-                    <button
-                      type="button"
-                      onClick={() => setIsModalOpen(true)}
-                      className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 bg-[#059669] hover:bg-[#047857] text-white text-[11px] font-bold uppercase tracking-wider transition-colors cursor-pointer"
-                    >
-                      <Plus className="w-3.5 h-3.5" strokeWidth={2.5} />
-                      <span>Issue Pass & Open Entry</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Station 02: Outbound Exit Boom */}
-                <div className="border border-neutral-300 p-3.5 flex flex-col justify-between bg-transparent">
-                  <div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-[11px] font-bold text-neutral-800 uppercase tracking-wider flex items-center gap-1.5">
-                        <ArrowUpRight className="w-3.5 h-3.5 text-[#059669]" />
-                        <span>Exit Gate 02</span>
-                      </span>
-                      <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 border border-emerald-300 text-[#047857] tabular-nums">
-                        {stats.clearedForExit} CLEARED
-                      </span>
-                    </div>
-
-                    <div className="mt-2.5">
-                      <div className="text-sm font-bold text-neutral-900 tracking-tight">
-                        MH-40-BL-1102
-                      </div>
-                      <div className="text-[11px] text-neutral-600 mt-0.5 font-medium">
-                        MahaGenco · FG Pellets (32 MT)
-                      </div>
-                      <div className="text-[11px] text-neutral-500 mt-1 flex items-center gap-2">
-                        <span className="text-[#059669] font-medium">✓ Tare Done</span>
-                        <span>·</span>
-                        <span className="text-[#059669] font-medium">✓ EWB Verified</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 pt-3 border-t border-neutral-200">
-                    <div className="flex gap-2">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const exitVehicle = vehicles.find((v) => v.stage === "CLEARED_EXIT" || v.stage === "TARE_WEIGHED");
-                          if (exitVehicle) {
-                            handleUpdateStage(exitVehicle.id, "EXIT_COMPLETED");
-                            setExitBarrierMessage(`Exit Barrier Raised · Vehicle ${exitVehicle.vehicleNo} Exited Plant`);
-                            setTimeout(() => setExitBarrierMessage(null), 4000);
-                          } else {
-                            setExitBarrierMessage("All cleared vehicles have departed.");
-                            setTimeout(() => setExitBarrierMessage(null), 3000);
-                          }
-                        }}
-                        className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 bg-[#18181B] hover:bg-neutral-800 text-white text-[11px] font-bold uppercase tracking-wider transition-colors cursor-pointer"
-                        style={{ borderRadius: 0 }}
-                      >
-                        <CheckCircle2 className="w-3.5 h-3.5 text-[#059669]" strokeWidth={2} />
-                        <span>Quick Raise Barrier</span>
-                      </button>
-                      {onNavigateTab && (
-                        <button
-                          type="button"
-                          onClick={() => onNavigateTab("exit")}
-                          className="px-2.5 py-1.5 border border-neutral-300 hover:bg-neutral-100 text-neutral-800 text-[11px] font-bold transition-colors cursor-pointer"
-                          style={{ borderRadius: 0 }}
-                          title="Open Outward Exit Station"
-                        >
-                          Exit Desk →
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Bottom Status Ticker: Direct Guard Safety Telemetry */}
-            <div className="mt-4 pt-3 border-t border-neutral-200 flex flex-wrap items-center justify-between text-[11px] text-neutral-600 gap-2">
-              <div className="flex items-center gap-3">
-                {exitBarrierMessage ? (
-                  <span className="text-[#059669] font-bold animate-pulse">
-                    ● {exitBarrierMessage}
-                  </span>
-                ) : (
-                  <>
-                    <span className="flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 bg-[#059669] inline-block" />
-                      <span>Entry Barrier: READY</span>
-                    </span>
-                    <span>·</span>
-                    <span className="flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 bg-amber-500 inline-block" />
-                      <span className="tabular-nums">Exit Barrier: {stats.clearedForExit} IN QUEUE</span>
-                    </span>
-                  </>
-                )}
-              </div>
-
-              <div className="text-[11px] text-neutral-500">
-                RFID Sensor: <strong className="text-neutral-800 font-semibold">Online</strong> (Antenna 01/02)
-              </div>
-            </div>
-          </div>
-
-          {/* Big Metric Card 1: Physical Plant Bay Matrix */}
-          <div className="lg:col-span-3 bg-transparent border border-neutral-300 p-5 flex flex-col justify-between">
-            <div>
-              {/* Header: Icon + Title */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 border border-neutral-300 bg-transparent flex items-center justify-center text-neutral-800">
-                    <Layers className="w-3 h-3" />
-                  </div>
-                  <span className="text-xs font-bold uppercase tracking-wider text-neutral-800">
-                    Plant Bay Matrix
-                  </span>
-                </div>
-                <span className="text-[10px] text-[#059669] font-bold uppercase tracking-wider border border-emerald-300 px-1.5 py-0.5">
-                  4 BAYS FREE
-                </span>
-              </div>
-
-              {/* Sub-header info */}
-              <div className="flex items-baseline justify-between mt-2.5">
-                <div className="text-2xl font-bold text-neutral-900 tracking-tight tabular-nums">
-                  8 <span className="text-sm font-normal text-neutral-400">/ 12 Active Bays</span>
-                </div>
-                <span className="text-[11px] text-neutral-500 tabular-nums">67% Yard Load</span>
-              </div>
-            </div>
-
-            {/* Visual 12-Bay Matrix: 3 rows of 4 bays */}
-            <div className="my-3 py-3 border-y border-neutral-200">
-              <div className="grid grid-cols-4 gap-1.5">
-                {[
-                  { id: "B01", name: "WB-01", occupied: true },
-                  { id: "B02", name: "Yard A", occupied: true },
-                  { id: "B03", name: "Yard A", occupied: true },
-                  { id: "B04", name: "Yard B", occupied: true },
-                  { id: "B05", name: "Yard B", occupied: true },
-                  { id: "B06", name: "FG-01", occupied: true },
-                  { id: "B07", name: "FG-02", occupied: true },
-                  { id: "B08", name: "WB-02", occupied: true },
-                  { id: "B09", name: "Yard A", occupied: false },
-                  { id: "B10", name: "Yard B", occupied: false },
-                  { id: "B11", name: "FG-03", occupied: false },
-                  { id: "B12", name: "Hold", occupied: false },
-                ].map((bay) => (
-                  <div
-                    key={bay.id}
-                    className={`p-1.5 border text-center transition-colors ${
-                      bay.occupied
-                        ? "border-neutral-300 bg-neutral-200/40"
-                        : "border-emerald-400 bg-emerald-50/30"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between text-[10px] font-bold leading-none">
-                      <span className={bay.occupied ? "text-neutral-500" : "text-[#059669] font-bold"}>
-                        {bay.id}
-                      </span>
-                      <span
-                        className={`w-1.5 h-1.5 inline-block ${
-                          bay.occupied ? "bg-[#18181B]" : "bg-[#059669]"
-                        }`}
-                      />
-                    </div>
-                    <div
-                      className={`text-[10px] font-semibold mt-1 truncate ${
-                        bay.occupied ? "text-neutral-800" : "text-[#047857]"
-                      }`}
-                    >
-                      {bay.occupied ? bay.name : "FREE"}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Bottom Guard Guidance */}
-            <div className="flex items-center justify-between text-[11px] pt-1 text-neutral-500">
-              <span className="text-neutral-700 font-medium">Bays 01–08: Occupied</span>
-              <span className="text-[#059669] font-bold">Bays 09–12: Open for Entry</span>
-            </div>
-          </div>
-
-          {/* Big Metric Card 2: Dual Live Weighbridge Decks */}
-          <div className="lg:col-span-3 bg-transparent border border-neutral-300 p-5 flex flex-col justify-between">
-            <div>
-              {/* Header: Icon + Title */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 border border-neutral-300 bg-transparent flex items-center justify-center text-neutral-800">
-                    <Scale className="w-3 h-3" />
-                  </div>
-                  <span className="text-xs font-bold uppercase tracking-wider text-neutral-800">
-                    Dual Weighbridge Decks
-                  </span>
-                </div>
-                <span className="text-[10px] text-[#059669] font-bold uppercase tracking-wider flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 bg-[#059669] inline-block animate-pulse" />
-                  <span>LIVE LOAD</span>
-                </span>
-              </div>
-
-              {/* Sub-header info */}
-              <div className="flex items-baseline justify-between mt-2.5">
-                <div className="text-2xl font-bold text-neutral-900 tracking-tight tabular-nums">
-                  2 <span className="text-sm font-normal text-neutral-400">Scales Active</span>
-                </div>
-                <span className="text-[11px] text-amber-800 font-semibold tabular-nums">2 In Queue</span>
-              </div>
-            </div>
-
-            {/* Dual Platform Scale Decks Side-by-Side */}
-            <div className="my-3 py-2 border-y border-neutral-200 space-y-2.5">
-              {/* Deck 1: WB-01 Gross Inbound Scale */}
-              <div className="border border-neutral-300 p-2.5 bg-neutral-200/30">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-bold text-neutral-800 uppercase tracking-wider flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 bg-amber-500 inline-block" />
-                    <span>WB-01 Gross Scale</span>
-                  </span>
-                  <span className="text-[10px] font-bold uppercase tracking-wider border border-amber-300 px-1.5 py-0.5 text-amber-800 bg-transparent">
-                    WEIGHING
-                  </span>
-                </div>
-                <div className="flex items-baseline justify-between mt-1.5">
-                  <div className="text-lg font-bold text-neutral-900 tabular-nums">
-                    42.85 <span className="text-[10px] font-normal text-neutral-500">MT</span>
-                  </div>
-                  <div className="text-[11px] font-semibold text-neutral-700 truncate max-w-[120px]">
-                    MH-12-Q-4491
-                  </div>
-                </div>
-                <div className="w-full bg-neutral-200 h-1.5 mt-1.5 flex">
-                  <div className="bg-[#18181B] h-full w-[71%]" title="42.85 MT of 60 MT capacity" />
-                </div>
-              </div>
-
-              {/* Deck 2: WB-02 Tare Outbound Scale */}
-              <div className="border border-neutral-300 p-2.5 bg-transparent">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-bold text-neutral-800 uppercase tracking-wider flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 bg-[#059669] inline-block" />
-                    <span>WB-02 Tare Scale</span>
-                  </span>
-                  <span className="text-[10px] font-bold uppercase tracking-wider border border-emerald-300 px-1.5 py-0.5 text-[#047857] bg-transparent">
-                    CLEAR
-                  </span>
-                </div>
-                <div className="flex items-baseline justify-between mt-1.5">
-                  <div className="text-lg font-bold text-neutral-900 tabular-nums">
-                    0.00 <span className="text-[10px] font-normal text-neutral-500">MT</span>
-                  </div>
-                  <div className="text-[11px] text-[#059669] font-semibold">
-                    Platform Ready
-                  </div>
-                </div>
-                <div className="w-full bg-neutral-200 h-1.5 mt-1.5 flex">
-                  <div className="bg-[#059669] h-full w-0" />
-                </div>
-              </div>
-            </div>
-
-            {/* Bottom Guard Guidance */}
-            <div className="flex items-center justify-between text-[11px] pt-1 text-neutral-500">
-              <span className="text-amber-800 font-semibold tabular-nums">Gross: ~2m remaining</span>
-              <span className="text-[#059669] font-bold">Tare: Instant Access</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ========================================================================= */}
-      {/* SECTION 2: LIVE VEHICLE FLEET & ORDER LIST (NO BG COLOR)                  */}
-      {/* ========================================================================= */}
-      <section className="space-y-6">
-        {/* Section Header with Large Typography */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-          <div>
-            <span className="text-xs md:text-sm font-medium text-neutral-400 block tracking-normal">
-              Active Gate Movement Queue
-            </span>
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900 mt-1">
-              Vehicle Fleet & Order List
-            </h2>
-          </div>
-
-          <div className="text-xs text-neutral-500">
-            Showing <strong className="text-neutral-900">{filteredVehicles.length}</strong> of{" "}
-            <strong>{vehicles.length}</strong> active vehicles
-          </div>
-        </div>
-
-        {/* Filter Tabs & Search Bar (Transparent, neutral borders, no bg color) */}
-        <div className="bg-transparent border border-neutral-300 p-3 flex flex-col md:flex-row md:items-center justify-between gap-3">
-          {/* Spaced Rectangular Tab Filters (Scrollable on mobile) */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 max-w-full md:flex-wrap">
-            <button
-              type="button"
-              onClick={() => setActiveTab("ALL")}
-              className={`px-3 py-1.5 text-xs font-medium border cursor-pointer transition-colors shrink-0 ${
-                activeTab === "ALL"
-                  ? "bg-[#18181B] text-white border-[#18181B]"
-                  : "bg-transparent text-neutral-700 border-neutral-300 hover:bg-neutral-200/50"
-              }`}
-            >
-              All ({stats.totalInside})
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveTab("INBOUND_RM")}
-              className={`px-3 py-1.5 text-xs font-medium border cursor-pointer transition-colors shrink-0 whitespace-nowrap ${
-                activeTab === "INBOUND_RM"
-                  ? "bg-[#18181B] text-white border-[#18181B]"
-                  : "bg-transparent text-neutral-700 border-neutral-300 hover:bg-neutral-200/50"
-              }`}
-            >
-              Inbound RM ({stats.inboundRM})
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveTab("OUTBOUND_DISPATCH")}
-              className={`px-3 py-1.5 text-xs font-medium border cursor-pointer transition-colors shrink-0 whitespace-nowrap ${
-                activeTab === "OUTBOUND_DISPATCH"
-                  ? "bg-[#18181B] text-white border-[#18181B]"
-                  : "bg-transparent text-neutral-700 border-neutral-300 hover:bg-neutral-200/50"
-              }`}
-            >
-              Outbound ({stats.outboundFG})
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveTab("WAITING_WEIGHMENT")}
-              className={`px-3 py-1.5 text-xs font-medium border cursor-pointer transition-colors shrink-0 whitespace-nowrap ${
-                activeTab === "WAITING_WEIGHMENT"
-                  ? "bg-[#18181B] text-white border-[#18181B]"
-                  : "bg-transparent text-neutral-700 border-neutral-300 hover:bg-neutral-200/50"
-              }`}
-            >
-              Awaiting Scale ({stats.awaitingWeighbridge})
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveTab("CLEARED_EXIT")}
-              className={`px-3 py-1.5 text-xs font-medium border cursor-pointer transition-colors shrink-0 whitespace-nowrap ${
-                activeTab === "CLEARED_EXIT"
-                  ? "bg-[#18181B] text-white border-[#18181B]"
-                  : "bg-transparent text-neutral-700 border-neutral-300 hover:bg-neutral-200/50"
-              }`}
-            >
-              Exit Queue ({stats.clearedForExit})
-            </button>
-          </div>
-
-          {/* Search Input (Transparent, dark icon) */}
-          <div className="flex items-center gap-2 border border-neutral-300 px-3 py-1.5 bg-transparent w-full md:w-72">
-            <Search className="w-4 h-4 text-neutral-800 shrink-0" strokeWidth={2} />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search vehicle, driver, supplier..."
-              className="w-full bg-transparent text-xs text-neutral-900 placeholder:text-neutral-500 focus:outline-none"
-            />
-          </div>
-        </div>
-
-        {/* The Exact Order list Table (Transparent background, no bg color) */}
-        <div className="bg-transparent border border-neutral-300 overflow-hidden">
-          {/* Table Card Header */}
-          <div className="flex items-center justify-between px-5 py-3.5 border-b border-neutral-300 bg-transparent">
-            <div className="flex items-center gap-2.5">
-              <div className="w-5 h-5 border border-neutral-300 flex items-center justify-center text-neutral-700 bg-transparent">
-                <FileText className="w-3 h-3" strokeWidth={1.75} />
-              </div>
-              <h3 className="text-xs md:text-[13px] font-semibold text-neutral-900 tracking-tight">
-                Order list
-              </h3>
-            </div>
-
-            <div className="flex items-center gap-1.5">
-              <button
-                type="button"
-                className="w-6 h-6 border border-neutral-300 hover:bg-neutral-200/50 flex items-center justify-center text-neutral-600 transition-colors cursor-pointer bg-transparent"
-                title="Table Filters"
-              >
-                <SlidersHorizontal className="w-3 h-3" strokeWidth={1.75} />
-              </button>
-              <button
-                type="button"
-                className="w-6 h-6 border border-neutral-300 hover:bg-neutral-200/50 flex items-center justify-center text-neutral-600 transition-colors cursor-pointer bg-transparent"
-                title="Table Options"
-              >
-                <MoreVertical className="w-3 h-3" strokeWidth={1.75} />
-              </button>
-            </div>
-          </div>
-
-          {/* Table Body (Desktop Table View - hidden on mobile) */}
-          <div className="hidden md:block overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse bg-transparent">
-              <thead className="bg-neutral-200/60 border-b border-neutral-300">
-                <tr className="text-neutral-600 font-medium">
-                  <th className="py-2.5 px-5 font-medium text-xs text-neutral-600">
-                    Customer name
-                  </th>
-                  <th className="py-2.5 px-4 font-medium text-xs text-neutral-600">
-                    Shipping ID
-                  </th>
-                  <th className="py-2.5 px-4 font-medium text-xs text-neutral-600">
-                    Location
-                  </th>
-                  <th className="py-2.5 px-5 font-medium text-xs text-neutral-600">
-                    Status Order
-                  </th>
-                  <th className="py-2.5 px-5 font-medium text-xs text-neutral-600 text-right">
-                    Details
-                  </th>
+          {/* Table View (PC Only) */}
+          <div className={viewMode === "TABLE" ? "hidden sm:block overflow-x-auto" : "hidden"}>
+            <table className="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr className="bg-neutral-200/50 border-b border-neutral-300 text-[10px] uppercase font-bold text-neutral-600 tracking-wider">
+                  <th className="py-3 px-4">Vehicle & Pass No</th>
+                  <th className="py-3 px-3">Direction</th>
+                  <th className="py-3 px-3">Material & Declared</th>
+                  <th className="py-3 px-3">Supplier / Customer</th>
+                  <th className="py-3 px-3">Operational Stage</th>
+                  <th className="py-3 px-3">Dwell Time</th>
+                  <th className="py-3 px-4 text-right">Details</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-neutral-200/70 bg-transparent">
-                {filteredVehicles.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} className="py-8 text-center text-neutral-400 bg-transparent">
-                      No active vehicles found matching current filter.
-                    </td>
-                  </tr>
-                ) : (
-                  filteredVehicles.map((vehicle) => {
-                    const idNum = vehicle.gateEntryNo.split("-")[2] || "9836";
-                    const stageConfig = getStageConfig(vehicle.stage);
-                    const isExpanded = selectedVehicle?.id === vehicle.id;
+              <tbody className="divide-y divide-neutral-300">
+                {filteredVehicles.map((vehicle) => {
+                  const stageConfig = getStageConfig(vehicle.stage);
+                  const dwell = vehicle.elapsedMinutes || vehicle.dwellMinutes || 35;
+                  const isOverdue = dwell > 90;
+                  const isWarning = dwell >= 60 && dwell <= 90;
 
-                    return (
-                      <React.Fragment key={vehicle.id}>
-                        <tr
-                          onClick={() => setSelectedVehicle(isExpanded ? null : vehicle)}
-                          className={`cursor-pointer transition-colors ${
-                            isExpanded ? "bg-[#ECEFF2]" : "hover:bg-neutral-200/40"
+                  return (
+                    <tr
+                      key={vehicle.id}
+                      onClick={() => setInspectVehicle(vehicle)}
+                      className="hover:bg-neutral-200/40 cursor-pointer transition-colors"
+                    >
+                      {/* Vehicle & Pass */}
+                      <td className="py-3.5 px-4">
+                        <div className="font-mono font-bold text-neutral-900 text-sm">
+                          {vehicle.vehicleNo}
+                        </div>
+                        <div className="text-[11px] text-neutral-500 mt-0.5">
+                          {vehicle.gateEntryNo}
+                        </div>
+                      </td>
+
+                      {/* Direction */}
+                      <td className="py-3.5 px-3">
+                        <span
+                          className={`inline-block text-[10px] font-bold uppercase px-2 py-0.5 border ${
+                            vehicle.direction === "INBOUND_RM"
+                              ? "border-emerald-300 bg-emerald-50 text-[#047857]"
+                              : "border-neutral-300 bg-[#18181B] text-white"
                           }`}
                         >
-                          {/* Customer / Supplier Name */}
-                          <td className="py-3.5 px-5 font-medium text-neutral-900 text-xs md:text-[13px]">
-                            <div className="flex items-center gap-2">
-                              {isExpanded && (
-                                <span className="w-1.5 h-1.5 bg-[#059669] inline-block shrink-0" title="Active Inspection" />
-                              )}
-                              <span>{vehicle.supplierOrCustomer}</span>
-                            </div>
-                            <div className="text-[11px] font-normal text-neutral-500 mt-0.5">
-                              {vehicle.vehicleNo} · {vehicle.materialName} ({vehicle.declaredWeightMT.toFixed(1)} MT)
-                            </div>
-                          </td>
+                          {vehicle.direction === "INBOUND_RM" ? "Inbound RM" : "Outbound FG"}
+                        </span>
+                      </td>
 
-                          {/* Shipping ID (#9836 style) */}
-                          <td className="py-3.5 px-4 text-xs text-neutral-700">
-                            <span className="font-semibold tabular-nums text-neutral-900">#{idNum}</span>
-                            <div className="text-[10px] text-neutral-500 font-medium">
-                              {vehicle.gateEntryNo}
-                            </div>
-                          </td>
-
-                          {/* Location */}
-                          <td className="py-3.5 px-4 text-xs text-neutral-700">
-                            <div>{vehicle.assignedLocation}</div>
-                            <div className="text-[10px] text-neutral-400">
-                              {vehicle.transporter}
-                            </div>
-                          </td>
-
-                          {/* Status Order */}
-                          <td className="py-3.5 px-5 text-xs whitespace-nowrap">
-                            <span
-                              className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold border bg-transparent ${stageConfig.borderClass}`}
-                            >
-                              <span
-                                className="w-1.5 h-1.5 inline-block shrink-0"
-                                style={{ backgroundColor: stageConfig.dotColor }}
-                              />
-                              <span style={{ color: stageConfig.textColor }}>
-                                {stageConfig.label}
-                              </span>
-                            </span>
-                          </td>
-
-                          {/* Details Button */}
-                          <td className="py-3.5 px-5 text-right">
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setSelectedVehicle(isExpanded ? null : vehicle);
-                              }}
-                              className={`inline-flex items-center gap-1.5 px-3 py-1 border text-[11px] font-medium cursor-pointer transition-all duration-200 active:scale-95 ${
-                                isExpanded
-                                  ? "bg-[#18181B] text-white border-[#18181B]"
-                                  : "border-neutral-300 hover:bg-neutral-200/50 text-neutral-700 bg-transparent"
-                              }`}
-                            >
-                              <span>{isExpanded ? "Collapse" : "Inspect"}</span>
-                              <ChevronDown
-                                className={`w-3.5 h-3.5 transition-transform duration-300 ease-in-out ${
-                                  isExpanded ? "rotate-180" : ""
-                                }`}
-                              />
-                            </button>
-                          </td>
-                        </tr>
-
-                        {/* Inline Expanded Card */}
-                        <AnimatePresence initial={false}>
-                          {isExpanded && (
-                            <motion.tr
-                              key={`expanded-${vehicle.id}`}
-                              initial={{ opacity: 0 }}
-                              animate={{ opacity: 1 }}
-                              exit={{ opacity: 0 }}
-                              transition={{ duration: 0.15 }}
-                              className="border-b border-neutral-300"
-                            >
-                              <td colSpan={5} className="p-0">
-                                <motion.div
-                                  initial={{ opacity: 0, height: 0 }}
-                                  animate={{ opacity: 1, height: "auto" }}
-                                  exit={{ opacity: 0, height: 0 }}
-                                  transition={{
-                                    height: { duration: 0.35, ease: [0.16, 1, 0.3, 1] },
-                                    opacity: { duration: 0.25 },
-                                  }}
-                                  className="overflow-hidden"
-                                >
-                                  {renderVehicleDossier(vehicle)}
-                                </motion.div>
-                              </td>
-                            </motion.tr>
-                          )}
-                        </AnimatePresence>
-                      </React.Fragment>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Mobile Card List View (Visible on mobile, hidden on >= md - No Horizontal Scroll!) */}
-          <div className="block md:hidden divide-y divide-neutral-200 bg-white">
-            {filteredVehicles.length === 0 ? (
-              <div className="py-8 text-center text-xs text-neutral-400">
-                No active vehicles found matching current filter.
-              </div>
-            ) : (
-              filteredVehicles.map((vehicle) => {
-                const idNum = vehicle.gateEntryNo.split("-")[2] || "9836";
-                const stageConfig = getStageConfig(vehicle.stage);
-                const isExpanded = selectedVehicle?.id === vehicle.id;
-
-                return (
-                  <div key={`mobile-card-${vehicle.id}`} className="bg-white">
-                    <div
-                      onClick={() => setSelectedVehicle(isExpanded ? null : vehicle)}
-                      className={`p-3.5 space-y-2.5 cursor-pointer transition-colors active:bg-neutral-100/70 ${
-                        isExpanded ? "bg-[#ECEFF2]/80" : "hover:bg-neutral-50"
-                      }`}
-                    >
-                      {/* Top Row: Shipping ID & Status Badge */}
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-1.5 text-xs">
-                          <span className="font-bold text-neutral-900 tabular-nums">#{idNum}</span>
-                          <span className="text-neutral-400">·</span>
-                          <span className="text-[11px] font-semibold text-neutral-600 truncate max-w-[130px]">
-                            {vehicle.gateEntryNo}
-                          </span>
+                      {/* Material & Declared Qty */}
+                      <td className="py-3.5 px-3">
+                        <div className="font-semibold text-neutral-800 truncate max-w-[170px]">
+                          {vehicle.materialName}
                         </div>
+                        <div className="text-[11px] text-neutral-500 tabular-nums">
+                          {vehicle.declaredWeightMT.toFixed(1)} MT declared
+                        </div>
+                      </td>
+
+                      {/* Supplier / Customer */}
+                      <td className="py-3.5 px-3">
+                        <div className="font-medium text-neutral-800 truncate max-w-[180px]">
+                          {vehicle.supplierOrCustomer}
+                        </div>
+                        <div className="text-[11px] text-neutral-500 truncate max-w-[180px]">
+                          {vehicle.transporter}
+                        </div>
+                      </td>
+
+                      {/* Operational Stage */}
+                      <td className="py-3.5 px-3">
                         <span
-                          className={`inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-bold border shrink-0 bg-transparent ${stageConfig.borderClass}`}
+                          className={`inline-flex items-center gap-1.5 px-2 py-0.5 border text-[10px] font-bold uppercase tracking-wider ${stageConfig.borderClass}`}
+                          style={{ color: stageConfig.textColor }}
                         >
                           <span
                             className="w-1.5 h-1.5 inline-block shrink-0"
                             style={{ backgroundColor: stageConfig.dotColor }}
                           />
-                          <span style={{ color: stageConfig.textColor }}>
-                            {stageConfig.label}
-                          </span>
+                          <span>{stageConfig.label}</span>
                         </span>
-                      </div>
-
-                      {/* Middle Row: Customer/Supplier & Cargo */}
-                      <div>
-                        <div className="text-xs sm:text-sm font-bold text-neutral-900 leading-tight">
-                          {vehicle.supplierOrCustomer}
+                        <div className="text-[10px] text-neutral-400 mt-0.5">
+                          {vehicle.assignedLocation || "Yard Area"}
                         </div>
-                        <div className="text-[11px] text-neutral-500 font-medium mt-0.5">
-                          <span className="font-semibold text-neutral-700">{vehicle.vehicleNo}</span> · {vehicle.materialName} ({vehicle.declaredWeightMT.toFixed(1)} MT)
-                        </div>
-                      </div>
+                      </td>
 
-                      {/* Bottom Row: Location & Inspect Action */}
-                      <div className="flex items-center justify-between gap-2 pt-2 border-t border-neutral-100 text-[11px]">
-                        <div className="text-neutral-600 truncate max-w-[200px]">
-                          <span className="font-medium text-neutral-800">{vehicle.assignedLocation}</span>
-                          <span className="text-neutral-400"> · </span>
-                          <span className="text-neutral-500 text-[10px]">{vehicle.transporter}</span>
-                        </div>
+                      {/* Dwell Time */}
+                      <td className="py-3.5 px-3">
+                        <span
+                          className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-mono font-bold tabular-nums ${
+                            isOverdue
+                              ? "bg-red-50 text-red-700 border border-red-200"
+                              : isWarning
+                              ? "bg-amber-50 text-amber-700 border border-amber-200"
+                              : "bg-neutral-200/60 text-neutral-700 border border-neutral-300"
+                          }`}
+                        >
+                          <Clock className="w-3 h-3" />
+                          <span>{dwell}m</span>
+                        </span>
+                      </td>
 
+                      {/* Details Trigger Button */}
+                      <td className="py-3.5 px-4 text-right">
                         <button
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
-                            setSelectedVehicle(isExpanded ? null : vehicle);
+                            setInspectVehicle(vehicle);
                           }}
-                          className={`inline-flex items-center gap-1 px-2.5 py-1 border text-[10px] font-bold uppercase tracking-wider shrink-0 transition-colors cursor-pointer ${
-                            isExpanded
-                              ? "bg-[#18181B] text-white border-[#18181B]"
-                              : "border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-800"
-                          }`}
+                          className="px-2.5 py-1 text-xs font-semibold border border-neutral-300 hover:bg-neutral-200/60 text-neutral-700 transition-colors inline-flex items-center gap-1 cursor-pointer bg-transparent"
                         >
-                          <span>{isExpanded ? "Close" : "Inspect"}</span>
-                          <ChevronDown
-                            className={`w-3 h-3 transition-transform ${isExpanded ? "rotate-180" : ""}`}
-                          />
+                          <Eye className="w-3.5 h-3.5 text-neutral-500" />
+                          <span>View Details</span>
                         </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
+
+        {/* Footer info bar */}
+        <div className="p-3 border-t border-neutral-300 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-neutral-500">
+          <div className="flex items-center gap-2">
+            <span>Plant Gate Operations</span>
+            <span>·</span>
+            <span className="text-[#059669] font-medium">Automatic Dwell Time Tracking Active</span>
+          </div>
+          <div>
+            Click any row or &quot;View Details&quot; to inspect vehicle lifecycle and specifications.
+          </div>
+        </div>
+      </div>
+
+      {/* ========================================================================= */}
+      {/* POPUP MODAL: CLEAN VEHICLE DETAILS CARD (ZERO TRUNCATION)                 */}
+      {/* ========================================================================= */}
+      <AnimatePresence>
+        {inspectVehicle && (() => {
+          const v = inspectVehicle;
+          const stageConfig = getStageConfig(v.stage);
+          const currentStep = getStageIndex(v.stage);
+          const dwell = v.elapsedMinutes || v.dwellMinutes || 45;
+          const phoneStr = v.driverPhone || v.driverMobile || "+91 98224 81920";
+
+          return (
+            <div
+              className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs"
+              onClick={() => setInspectVehicle(null)}
+            >
+              <motion.div
+                initial={{ opacity: 0, scale: 0.96, y: 8 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.96, y: 8 }}
+                transition={{ duration: 0.18, ease: "easeOut" }}
+                onClick={(e) => e.stopPropagation()}
+                className="w-full max-w-xl bg-white border border-neutral-300 shadow-2xl p-5 sm:p-6 space-y-4"
+              >
+                {/* Modal Header */}
+                <div className="flex items-start justify-between gap-3 pb-3 border-b border-neutral-200">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono font-bold text-xl sm:text-2xl text-neutral-900 tracking-tight">
+                        {v.vehicleNo}
+                      </span>
+                      <span
+                        className={`text-[10px] font-bold uppercase px-2 py-0.5 border ${
+                          v.direction === "INBOUND_RM"
+                            ? "border-emerald-300 bg-emerald-50 text-[#047857]"
+                            : "border-neutral-300 bg-[#18181B] text-white"
+                        }`}
+                      >
+                        {v.direction === "INBOUND_RM" ? "Inbound RM" : "Outbound FG"}
+                      </span>
+                    </div>
+                    <div className="text-xs text-neutral-500">
+                      Pass: <strong className="text-neutral-800 font-semibold">{v.gateEntryNo}</strong> · In: {v.arrivalTime || v.inTime || "14:15"}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-semibold text-neutral-700 bg-neutral-100 border border-neutral-200 px-2.5 py-1 tabular-nums">
+                      ⏱️ {dwell}m inside
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setInspectVehicle(null)}
+                      className="w-7 h-7 flex items-center justify-center border border-neutral-300 hover:bg-neutral-100 text-neutral-500 hover:text-neutral-900 cursor-pointer bg-white transition-colors"
+                      title="Close"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Sleek Segmented Stage Indicator */}
+                <div className="space-y-1.5 pt-1">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-bold text-neutral-900 flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-[#059669] animate-pulse" />
+                      <span>{stageConfig.label}</span>
+                    </span>
+                    <span className="text-neutral-500 text-[11px] font-medium">
+                      Stage {currentStep + 1} of 5
+                    </span>
+                  </div>
+
+                  {/* 5-Segment Track */}
+                  <div className="grid grid-cols-5 gap-1.5 h-1.5">
+                    {[0, 1, 2, 3, 4].map((stepIdx) => (
+                      <div
+                        key={stepIdx}
+                        className={`h-full transition-colors ${
+                          stepIdx <= currentStep ? "bg-[#059669]" : "bg-neutral-200"
+                        }`}
+                      />
+                    ))}
+                  </div>
+
+                  <div className="flex justify-between text-[10px] text-neutral-400 font-medium px-0.5">
+                    <span>Gate In</span>
+                    <span>Gross</span>
+                    <span>Unload/QC</span>
+                    <span>Tare</span>
+                    <span>Exit</span>
+                  </div>
+                </div>
+
+                {/* 2-Column Clean Details (Zero Truncation) */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 py-3 border-y border-neutral-200 text-xs">
+                  {/* Left Column: Cargo & Source */}
+                  <div className="space-y-3">
+                    <div>
+                      <span className="text-[10px] uppercase font-bold tracking-wider text-neutral-400 block mb-0.5">
+                        Material & Quantity
+                      </span>
+                      <div className="font-semibold text-neutral-900 text-sm">
+                        {v.materialName}
+                      </div>
+                      <div className="text-neutral-600 font-medium mt-0.5">
+                        Declared: <strong className="text-neutral-900">{v.declaredWeightMT.toFixed(1)} MT</strong>
                       </div>
                     </div>
 
-                    {/* Mobile Expanded Dossier */}
-                    <AnimatePresence initial={false}>
-                      {isExpanded && (
-                        <motion.div
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: "auto" }}
-                          exit={{ opacity: 0, height: 0 }}
-                          transition={{
-                            height: { duration: 0.32, ease: [0.16, 1, 0.3, 1] },
-                            opacity: { duration: 0.2 },
-                          }}
-                          className="overflow-hidden border-t border-neutral-200"
-                        >
-                          {renderVehicleDossier(vehicle, true)}
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
+                    <div>
+                      <span className="text-[10px] uppercase font-bold tracking-wider text-neutral-400 block mb-0.5">
+                        {v.direction === "INBOUND_RM" ? "Supplier / Source" : "Customer / Destination"}
+                      </span>
+                      <div className="font-semibold text-neutral-900">
+                        {v.supplierOrCustomer}
+                      </div>
+                      <div className="text-neutral-500 text-[11px] mt-0.5">
+                        Transporter: {v.transporter}
+                      </div>
+                    </div>
                   </div>
-                );
-              })
-            )}
-          </div>
-        </div>
-      </section>
 
-      {/* Gate Entry Modal */}
-      <GateEntryModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onAddVehicle={handleAddVehicle}
-      />
+                  {/* Right Column: Driver & Area */}
+                  <div className="space-y-3 sm:border-l sm:border-neutral-200 sm:pl-4">
+                    <div>
+                      <span className="text-[10px] uppercase font-bold tracking-wider text-neutral-400 block mb-0.5">
+                        Driver Details
+                      </span>
+                      <div className="font-semibold text-neutral-900 text-sm">
+                        {v.driverName}
+                      </div>
+                      <div className="text-neutral-600 font-mono text-[11px] mt-0.5">
+                        {phoneStr}
+                      </div>
+                    </div>
+
+                    <div>
+                      <span className="text-[10px] uppercase font-bold tracking-wider text-neutral-400 block mb-0.5">
+                        Assigned Plant Area
+                      </span>
+                      <div className="font-semibold text-neutral-900 flex items-center gap-1.5">
+                        <MapPin className="w-3.5 h-3.5 text-[#059669] shrink-0" />
+                        <span>{v.assignedLocation || "Yard Area"}</span>
+                      </div>
+                      <div className="text-neutral-500 text-[11px] mt-0.5 truncate">
+                        {v.ewayBillNo ? `EWB: ${v.ewayBillNo}` : (v.challanOrLrNo ? `Challan: ${v.challanOrLrNo}` : "Pass Authenticated")}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Subtle Remarks (No Giant Box) */}
+                {(v.notes || v.remarks) && (
+                  <div className="text-xs text-neutral-600 flex items-start gap-2 bg-[#F8F9FA] p-2.5 border border-neutral-200">
+                    <span className="font-bold text-neutral-800 shrink-0">Note:</span>
+                    <span className="leading-relaxed">{v.notes || v.remarks}</span>
+                  </div>
+                )}
+
+                {/* Modal Footer */}
+                <div className="flex items-center justify-end pt-1">
+                  <button
+                    type="button"
+                    onClick={() => setInspectVehicle(null)}
+                    className="px-5 py-2 bg-[#18181B] hover:bg-neutral-800 text-white text-xs font-semibold cursor-pointer transition-colors"
+                  >
+                    Close
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+          );
+        })()}
+      </AnimatePresence>
     </div>
   );
 }

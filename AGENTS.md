@@ -64,14 +64,16 @@ The color system is inspired by high-end minimalist industrial design: **80% Gra
 
 ## Design Philosophy
 
-- **Awwwards-level UI** — Every screen must feel premium, polished, and visually stunning. No generic or basic-looking interfaces.
-- **Mobile-first** — Every page must be fully responsive and optimized for mobile devices.
-- **Micro-animations everywhere** — Use Motion for page transitions, staggered reveals, layout animations. Use Tailwind transitions for hover states, focus rings, and subtle interactive feedback.
+- **Awwwards-level UI** — Every screen must feel premium, polished, state-of-the-art, and visually stunning. No generic, basic, or stripped-down interfaces.
+- **Rich Industrial Operations & Control Workbenches** — Retain the rich, immersive industrial operational design currently in place: live vehicle flow tracking, interactive weighbridge console with scale stabilization telemetry, QC testing workbenches, production line flow monitors, location-wise warehouse maps, and executive management KPIs.
+- **No Kiosk / No Tile Grid** — Do NOT reduce screens to 4–6 button kiosk tile grids or push all operations exclusively into popup modals. Preserve the multi-panel, high-productivity industrial layout matching the current codebase (e.g., `gate-home.tsx`, `weighbridge-home.tsx`).
+- **Mobile-first & Responsive** — Every page must be fully responsive and adapt smoothly across mobile devices (375px+), tablets, and wide industrial desktop consoles.
+- **Micro-animations everywhere** — Use Motion for page transitions, staggered reveals, layout animations, and tab transitions. Use Tailwind transitions for hover states, focus rings, and subtle interactive feedback.
 - **Smooth scrolling** — Lenis for buttery scroll experience across all pages.
-- **Status-driven design** — Use color-coded badges, progress indicators, and status pills throughout. Every entity moves through a status workflow, not just static forms.
+- **Status-driven design** — Use color-coded badges, progress indicators, and status pills throughout. Every entity moves through a defined status workflow, not just static forms.
 - **Glassmorphism, gradients, and depth** — Use modern design patterns: subtle glass effects, layered cards with shadows, vibrant gradients, and visual depth.
 - **Dark mode ready** — Design with dark mode as a first-class citizen.
-- **Typography matters** — Use premium Google Fonts, proper hierarchy (size, weight, spacing), and never rely on browser defaults.
+- **Typography matters** — Use premium typography (Switzer), proper hierarchy (size, weight, spacing), and never rely on browser defaults.
 
 ---
 
@@ -101,11 +103,12 @@ If something is ambiguous in the design image, ask for clarification rather than
 - Implement proper loading states (skeleton loaders with `animate-pulse`)
 - Add proper `aria-` attributes and keyboard navigation for accessibility
 - Keep bundle size minimal — lazy load heavy components with `next/dynamic`
+- Maintain rich, highly functional industrial consoles that empower operators with immediate context, quick actions, and clear status visibility
 
 ### DON'T:
 - ❌ Do NOT run lint checks, build checks, or type checks after every step. Only run checks when explicitly asked or at the end of a complete feature.
 - ❌ Do NOT use placeholder images — generate real assets using the image generation tool when needed
-- ❌ Do NOT create basic/minimal UIs — every component must look premium
+- ❌ Do NOT create basic/minimal UIs or dumbed-down kiosk tile grids — every screen and component must look premium and operational
 - ❌ Do NOT hardcode data — use proper TypeScript types/interfaces even for mock data
 - ❌ Do NOT skip animations — every page transition, list render, and interactive element should have motion
 - ❌ Do NOT ignore mobile — test every layout mentally for 375px (mobile), 768px (tablet), and 1440px (desktop)
@@ -114,52 +117,112 @@ If something is ambiguous in the design image, ask for clarification rather than
 
 ## User Roles (8 Total)
 
-Each role has its own dashboard and set of screens. Role-based access control restricts visibility.
+Each role has its own comprehensive operational workbench and dedicated screens. Role-based access control restricts visibility.
 
 ### 1. Admin / Super Admin
 - **Purpose:** System configuration, user management, master data setup
+- **PDF Sections:** 2 (Supplier/Farmer Master), 11 (Storage Locations), 12 (Formulas/Blends), 25 (Customer Master)
 - **Screens:** User management, role/permission settings, system config, material masters, storage location masters, formula/blend masters, supplier/farmer master
 - **Priority:** 🥇 Build first — establishes design system and core UI patterns
 
 ### 2. Gate / Security Operator
 - **Purpose:** Records vehicle arrivals and exits for both RM and dispatch
-- **Screens:** Gate Entry form, Gate Dashboard (live vehicle tracker), Vehicle Exit verification, Document verification
+- **PDF Sections:** 3 (Vehicle Arrival & Gate Entry), 27 (Dispatch Vehicle Arrival), 31 (Vehicle Exit)
+- **Screens:**
+  - **Gate Entry Console:** Date, Time, Vehicle No, Driver Name & Mobile, Supplier (dropdown), Material (dropdown), Purpose, PO Reference, Expected Quantity, Security Remarks, Direction (Inbound RM / Outbound FG). Auto-generates ID: `RM-GATE-YYMMDD-seq`
+  - **Live Gate Dashboard & Vehicle Tracker:** Visual plant tracking, arrival monitoring, dwell time counters, approaching/delayed alerts
+  - **Vehicle Exit Verification:** Exit clearance checklist (verify weighbridge slip for RM exit; verify Vehicle, Quantity, Invoice, Dispatch docs, Customer, and Authorization for FG exit)
+  - **Gate Operations Ledger:** Real-time log of today's gate entries and exits with status badges
 - **Status Flow:** ARRIVED → GATE ENTRY CREATED → WAITING FOR WEIGHMENT → ... → VEHICLE EXIT COMPLETED
 
 ### 3. Weighbridge Operator
 - **Purpose:** Records gross/tare/net weighments for incoming RM and outgoing dispatch
-- **Screens:** Weighment entry form, auto net-weight calculation, weighbridge slip generation, photo/document upload
+- **PDF Sections:** 4 (Gross Weighment), 7 (Tare Weighment), 29 (Dispatch Weighment), 30 (Weighbridge Slip)
+- **Screens:**
+  - **Weighment Capture Workbench:** Dual platform support, digital scale indicator with live stability & motion status, axle load distribution, gross & tare capture
+  - **Auto Net-Weight Calculation:** Net = Gross − Tare auto-calculated by system (strictly non-editable by operator)
+  - **Weighbridge Slip Generation:** Printable official WB slips with company header, vehicle details, gross/tare/net timestamps, and operator signature fields
+  - **Weighment Records & History:** Searchable, filterable archive of all completed weighments
 - **Key Rule:** System auto-calculates Net = Gross − Tare. Never manual.
 
 ### 4. QC / Lab Technician
 - **Purpose:** Sampling, testing, and approval of both raw materials and finished goods
-- **Screens:** QC sample entry, test parameter forms (Moisture%, Ash%, GCV, Bulk Density, Foreign Matter%), approval/hold/reject workflow, QC reports, COA generation
+- **PDF Sections:** 6 (Sampling & QC), 22 (Final QC for FG), 30 (COA Generation)
+- **Screens:**
+  - **RM Testing Workbench:** Moisture%, Ash%, GCV, Foreign Matter%, Bulk Density, Material Grade testing form with instant tolerance validation; Approve / Hold / Reject decisions. ID: `QC-YYMMDD-seq`
+  - **FG Testing Workbench:** GCV, Moisture%, Ash%, Bulk Density, Pellet Diameter, Fines%, customer-specific specs. ID: `FG-QC-YYMMDD-seq`
+  - **QC Reports & COA Console:** Searchable test repository and Certificate of Analysis (COA) generator for approved FG batches
+  - **Sample Audit History:** Historical logs with lab technician signatures and status tracking
 - **Status Flow:** PENDING → TESTING → APPROVED / HOLD / REJECTED
-- **Key Rule:** Rejected/Hold material must NOT become available inventory.
+- **Key Rules:**
+  - Rejected material must NOT become available inventory
+  - HOLD material must remain blocked until authorised release
+  - Only approved FG should become dispatchable inventory
 
 ### 5. Production Supervisor / Operator
-- **Purpose:** Manages entire production lifecycle
-- **Screens:** Production Plan creation, Material Issue requests, stage-wise logging (Cleaning → Grinding → Drying → Blending → Pelletisation → Cooling → Screening), Production Batch creation, machine/shift/operator tracking, downtime logging
+- **Purpose:** Manages entire production lifecycle across all 7 processing stages
+- **PDF Sections:** 12 (Production Planning), 13 (Material Issue), 14–20 (7 Processing Stages), 21 (FG Batch)
+- **Screens:**
+  - **Production Planning:** Shift, target quantity (MT), product specification (e.g., 8mm pellet), formula/blend selection. ID: `PRD-YYMMDD-seq`
+  - **Material Issue Request & Lot Allocation:** Allocation of RM lots to active plan, deducting inventory with full lot-level traceability. ID: `ISS-YYMMDD-seq`
+  - **Stage-Wise Production Console (7 Sequential Stages):**
+    - Stage 1 — Cleaning *(Sec 14)*: Input qty, Output qty, Rejected qty, Loss
+    - Stage 2 — Grinding *(Sec 15)*: Machine, Start/End time, Input, Output, Operator, Shift, Downtime
+    - Stage 3 — Drying *(Sec 16)*: Input, Output, Moisture before/after, Dryer used, Loss
+    - Stage 4 — Blending *(Sec 17)*: Formula ID, RM lots, Actual quantities, Target quantities, Operator
+    - Stage 5 — Pelletisation *(Sec 18)*: Batch, Machine, Shift, Start/End, Input, Output, Pellet diameter, Operator, Downtime
+    - Stage 6 — Cooling *(Sec 19)*: Batch, Input, Output, Start/End, Machine, Operator, Loss
+    - Stage 7 — Screening *(Sec 20)*: Good production qty, Fines qty, Rejected/Recycle qty
+    Creates Production Batch `PB-YYMMDD-seq` and FG Batch `FG-BATCH-YYMMDD-seq`
+  - **Active Batch Monitor & Shift Downtime Tracker:** Live batch progress, machine uptime, operator assignment
+  - **Production Batch History & Lot Traceability:** Historical batch performance, yield analysis, formula compliance
 - **Status Flow:** PLANNED → MATERIAL ISSUED → PROCESSING → PELLETISATION → COOLING → SCREENING → PRODUCED → QC PENDING → APPROVED/HOLD/REJECTED → STORED
 
 ### 6. Warehouse / Inventory Manager
 - **Purpose:** Manages RM inventory, FG inventory, storage locations, packaging, stock tracking
-- **Screens:** RM Inventory dashboard (location-wise), FG Inventory dashboard, RM Lot management, Packaging/bagging entry, stock movements, lot traceability view
-- **Key Feature:** Location-wise inventory (Yard A, Warehouse 1, Shed 2, etc.)
+- **PDF Sections:** 9 (RM Lot Creation), 10 (RM Inventory), 11 (RM Storage), 23 (Packaging), 24 (FG Storage)
+- **Screens:**
+  - **Location-Wise RM Inventory Dashboard:** Visual layout of Yard A, Warehouse 1, Sheds, with capacity & occupancy metrics (Sec 11)
+  - **RM Lot Traceability Ledger:** Material, Supplier, Vehicle, Date, Quantity, Rate, QC Report, QC parameters, Storage location, Status (Sec 9)
+  - **FG Inventory Console:** Grouped by FG Batch, product diameter, QC status (Produced → QC Pending → QC Approved → Dispatchable) (Sec 24)
+  - **Packaging & Bagging Workbench:** Bagged (25/40/50 kg), Bulk, or custom packaging entry, bag counting, date tagging (Sec 23)
+  - **Stock Movement Ledger:** Complete real-time audit trail of Receipts, Issues, and Dispatches
 
 ### 7. Sales / Dispatch Manager
 - **Purpose:** Manages customer orders, dispatch planning, loading, invoicing, delivery, payments
-- **Screens:** Customer Master, Sales Order CRUD, Dispatch planning, Loading transaction, Invoice & document generation (e-way bill, delivery challan, LR), Delivery tracking, Payment/receivable tracking
+- **PDF Sections:** 25 (Sales Order), 26 (Dispatch Planning), 27 (Dispatch Vehicle), 28 (Loading), 29 (Dispatch Weighment), 30 (Invoice & Docs), 32 (Customer Delivery), 33 (Payment)
+- **Screens:**
+  - **Sales Order Workbench:** Customer selection, order status, required date, rate (₹/MT), quantity, specs. ID: `SO-YYMMDD-seq`
+  - **Dispatch Planning & Allocation:** Check approved FG stock against orders, allocate FG batches to transport vehicles with full customer-to-batch linkage (Sec 28). ID: `DIS-YYMMDD-seq`
+  - **Loading & Inspection Console:** Vehicle loading verification, tare/gross dispatch weighment coordination
+  - **Invoice & Dispatch Document Suite:** Automated generation and archival of Sales Invoice, Delivery Challan, e-Way Bill, Weighbridge Slip, LR/Transport document, COA (Sec 30)
+  - **Customer Delivery & POD Tracking:** In-transit tracking, delivery confirmation, Proof of Delivery (POD) upload, feedback logging (Sec 32)
+  - **Receivables & Payment Ledger:** Invoice payment tracking (Invoice Generated → Outstanding → Part Payment → Fully Paid → Closed) (Sec 33)
 - **Status Flows:**
-  - Sales: ENQUIRY → QUOTATION → ORDER RECEIVED → CONFIRMED → PARTIALLY DISPATCHED → FULLY DISPATCHED → CLOSED
+  - Sales: NEW → CONFIRMED → PARTIALLY DISPATCHED → FULLY DISPATCHED → CLOSED
   - Dispatch: DISPATCHED → IN TRANSIT → DELIVERED → POD RECEIVED
   - Payment: INVOICE GENERATED → OUTSTANDING → PART PAYMENT → FULLY PAID → CLOSED
 
 ### 8. Management / Plant Director
-- **Purpose:** High-level visibility into entire plant operation
-- **Screens:** Live Management Dashboard, full traceability view, analytics/reports
-- **Dashboard KPIs:** Vehicles inside plant, RM awaiting QC, RM available stock, Production today vs target, FG awaiting QC, FG stock, Pending orders, Today's dispatches, Outstanding receivables, Average RM cost, Production cost per MT
-- **Key Feature:** Bi-directional traceability (Customer ↔ Supplier)
+- **Purpose:** High-level operational visibility, end-to-end traceability, financial analytics
+- **PDF Sections:** 34 (Traceability), 37 (Dashboard KPIs)
+- **Screens:**
+  - **Executive Operational Dashboard:** Exact 11 core KPIs from PDF Sec 37:
+    - Vehicles Inside Plant
+    - Raw Material Awaiting QC
+    - Raw Material Available (MT)
+    - Production Today vs Production Target
+    - FG Awaiting QC (MT)
+    - Finished Goods Stock (MT)
+    - Orders Pending (MT)
+    - Dispatches Today (count + MT)
+    - Outstanding Receivables (₹)
+    - Raw Material Average Cost (₹/MT)
+    - Production Cost (₹/MT)
+  - **Bi-Directional Digital Traceability Explorer (PDF Sec 34):**
+    - Forward Trace: Supplier → RM Lot → Production Batch → FG Batch → Dispatch → Customer
+    - Reverse Trace: Customer → Dispatch → FG Batch → Production Batch → RM Lot → Supplier
+  - **Plant Operational & Financial Reports:** Daily production, inventory valuation, sales fulfillment, yield & loss analysis, export tools
 
 ---
 

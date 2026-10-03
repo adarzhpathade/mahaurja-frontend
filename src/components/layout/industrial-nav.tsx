@@ -287,22 +287,56 @@ export function IndustrialNav({
 
                   <div className="pt-2.5 space-y-1.5 text-xs">
                     <div className="flex items-center justify-between text-neutral-600">
-                      <span>Post Station:</span>
-                      <strong className="text-neutral-900">Gate 01 Post</strong>
+                      <span>Department:</span>
+                      <strong className="text-neutral-900">{currentRole.department}</strong>
                     </div>
                     <div className="flex items-center justify-between text-neutral-600">
-                      <span>Security Badge:</span>
-                      <strong className="text-neutral-900 font-mono">#SEC-042</strong>
+                      <span>Operator:</span>
+                      <strong className="text-neutral-900 font-mono">{currentRole.userName}</strong>
                     </div>
                     <div className="flex items-center justify-between text-neutral-600">
-                      <span>Shift Schedule:</span>
+                      <span>Duty Shift:</span>
                       <span className="font-medium text-neutral-800">Shift 1 (08:00–16:00)</span>
                     </div>
                     <div className="flex items-center justify-between pt-1 border-t border-neutral-100">
-                      <span className="text-neutral-600">Duty Status:</span>
+                      <span className="text-neutral-600">Station Status:</span>
                       <span className="text-[10px] font-bold text-[#047857] px-1.5 py-0.5 border border-emerald-300 bg-emerald-50">
-                        ON DUTY
+                        ACTIVE ON DUTY
                       </span>
+                    </div>
+
+                    {/* Operational Station Quick Switcher */}
+                    <div className="pt-2.5 mt-2 border-t border-neutral-200">
+                      <div className="text-[10px] font-bold uppercase tracking-wider text-neutral-500 mb-1.5 flex items-center justify-between">
+                        <span>Operational Desks</span>
+                        <span className="text-[9px] text-emerald-600 font-bold">ONLINE</span>
+                      </div>
+                      <div className="space-y-1">
+                        <a
+                          href="/gate"
+                          className={`flex items-center justify-between px-2.5 py-1.5 text-xs font-semibold border transition-colors ${
+                            currentRole.id === "gate-security"
+                              ? "bg-[#18181B] text-white border-[#18181B]"
+                              : "bg-neutral-50 text-neutral-800 border-neutral-200 hover:bg-neutral-100"
+                          }`}
+                          style={{ borderRadius: 0 }}
+                        >
+                          <span>Gate / Security Desk</span>
+                          <span className="text-[10px] opacity-75 font-mono">Role 2</span>
+                        </a>
+                        <a
+                          href="/weighbridge"
+                          className={`flex items-center justify-between px-2.5 py-1.5 text-xs font-semibold border transition-colors ${
+                            currentRole.id === "weighbridge"
+                              ? "bg-[#18181B] text-white border-[#18181B]"
+                              : "bg-neutral-50 text-neutral-800 border-neutral-200 hover:bg-neutral-100"
+                          }`}
+                          style={{ borderRadius: 0 }}
+                        >
+                          <span>Weighbridge Station</span>
+                          <span className="text-[10px] opacity-75 font-mono">Role 3</span>
+                        </a>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -414,6 +448,38 @@ export function IndustrialNav({
                   </button>
                 );
               })}
+            </div>
+
+            {/* Quick Operational Station Switcher for Mobile */}
+            <div className="p-3 bg-[#F8F9FA] space-y-2 border-t border-neutral-200">
+              <div className="text-[10px] font-bold uppercase tracking-wider text-neutral-500 px-1 flex items-center justify-between">
+                <span>Switch Station</span>
+                <span className="text-[9px] text-emerald-600 font-bold">ONLINE</span>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <a
+                  href="/gate"
+                  className={`px-3 py-2 text-xs font-semibold border text-center transition-colors ${
+                    currentRole.id === "gate-security"
+                      ? "bg-[#18181B] text-white border-[#18181B]"
+                      : "bg-white text-neutral-800 border-neutral-300 hover:bg-neutral-50"
+                  }`}
+                  style={{ borderRadius: 0 }}
+                >
+                  Gate Desk
+                </a>
+                <a
+                  href="/weighbridge"
+                  className={`px-3 py-2 text-xs font-semibold border text-center transition-colors ${
+                    currentRole.id === "weighbridge"
+                      ? "bg-[#18181B] text-white border-[#18181B]"
+                      : "bg-white text-neutral-800 border-neutral-300 hover:bg-neutral-50"
+                  }`}
+                  style={{ borderRadius: 0 }}
+                >
+                  Weighbridge
+                </a>
+              </div>
             </div>
 
             {/* Quick Operational Telemetry Strip */}

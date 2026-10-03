@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useMemo, useEffect } from "react";
-import { motion, AnimatePresence } from "motion/react";
 import {
   FileCheck,
   Search,
@@ -13,22 +12,10 @@ import {
   X,
   FileText,
   Truck,
-  User,
-  ExternalLink,
-  QrCode,
-  Scan,
-  Printer,
-  ChevronRight,
   ArrowRight,
-  Sparkles,
-  Building,
-  Calendar,
-  Layers,
-  Scale,
-  RefreshCw,
-  BadgeAlert,
-  HelpCircle,
-  Hash,
+  ExternalLink,
+  SlidersHorizontal,
+  ChevronDown,
 } from "lucide-react";
 import { GateVehicle, GateStage } from "@/lib/types/gate";
 
@@ -42,23 +29,14 @@ export interface DocVerificationItem {
   poOrSoNo: string;
   challanOrLrNo: string;
   consignor: string;
-  consignorGstin: string;
-  consignee: string;
-  consigneeGstin: string;
-  hsnCode: string;
   materialName: string;
   declaredQtyMT: number;
   transporter: string;
   driverName: string;
-  driverLicenseNo: string;
   driverMobile: string;
-  vehicleFitnessValidUntil: string;
-  insuranceValidUntil: string;
-  pucValidUntil: string;
   verificationStatus: "PENDING" | "VERIFIED" | "FLAGGED_MISMATCH" | "EXPIRED";
   mismatchReason?: string;
   verifiedAt?: string;
-  verifiedBy?: string;
   notes?: string;
 }
 
@@ -73,21 +51,13 @@ const INITIAL_DOC_RECORDS: DocVerificationItem[] = [
     poOrSoNo: "PO-2026-0988",
     challanOrLrNo: "CH-559102",
     consignor: "Godavari Agro Biomass Pvt Ltd",
-    consignorGstin: "27AABCG5512L1Z8",
-    consignee: "Bharat Industrial & Renewables LLP",
-    consigneeGstin: "27AAACB1234D1Z5",
-    hsnCode: "14049090 (Paddy Straw Chopped)",
     materialName: "Paddy Straw Chopped (PS)",
     declaredQtyMT: 19.5,
     transporter: "Om Translines Global",
     driverName: "Dnyaneshwar More",
-    driverLicenseNo: "MH-20-2015-0088192",
     driverMobile: "+91 93701 99281",
-    vehicleFitnessValidUntil: "15-Dec-2026",
-    insuranceValidUntil: "28-Feb-2027",
-    pucValidUntil: "10-Nov-2026",
     verificationStatus: "PENDING",
-    notes: "Vehicle arrived at Barrier 01. Physical challan presented, driver DL physically verified.",
+    notes: "Vehicle arrived at Barrier 01. Physical challan presented.",
   },
   {
     id: "doc-002",
@@ -99,23 +69,14 @@ const INITIAL_DOC_RECORDS: DocVerificationItem[] = [
     poOrSoNo: "PO-2026-0982",
     challanOrLrNo: "CH-982104",
     consignor: "Krishi Bio Agro Farmers Co-op",
-    consignorGstin: "27AABCK4819M1Z3",
-    consignee: "Bharat Industrial & Renewables LLP",
-    consigneeGstin: "27AAACB1234D1Z5",
-    hsnCode: "14049090 (Groundnut Shell Raw)",
     materialName: "Groundnut Shell (GS)",
     declaredQtyMT: 24.5,
     transporter: "Shree Ganesh Roadways",
     driverName: "Pandurang Patil",
-    driverLicenseNo: "MH-12-2012-0044192",
     driverMobile: "+91 98224 81920",
-    vehicleFitnessValidUntil: "30-Nov-2026",
-    insuranceValidUntil: "15-Jan-2027",
-    pucValidUntil: "22-Oct-2026",
     verificationStatus: "VERIFIED",
     verifiedAt: "14:18 IST",
-    verifiedBy: "Ramesh Pawar (Gate 1)",
-    notes: "All 4 statutory checks passed. Weight matched against PO quota. Directed to WB-01 Gross scale.",
+    notes: "All checks passed. Directed to Gross weighbridge.",
   },
   {
     id: "doc-003",
@@ -127,49 +88,32 @@ const INITIAL_DOC_RECORDS: DocVerificationItem[] = [
     poOrSoNo: "PO-2026-0984",
     challanOrLrNo: "CH-338190",
     consignor: "Khandesh Agro Producers",
-    consignorGstin: "27AABCK3391J1Z2",
-    consignee: "Bharat Industrial & Renewables LLP",
-    consigneeGstin: "27AAACB1234D1Z5",
-    hsnCode: "14049090 (Cotton Stalk Shredded)",
     materialName: "Cotton Stalk Shredded (CS)",
     declaredQtyMT: 22.8,
     transporter: "Balaji Cargo Movers",
     driverName: "Vinod Shinde",
-    driverLicenseNo: "MH-15-2018-0099412",
     driverMobile: "+91 97631 00293",
-    vehicleFitnessValidUntil: "10-Oct-2026",
-    insuranceValidUntil: "04-Dec-2026",
-    pucValidUntil: "18-Nov-2026",
     verificationStatus: "VERIFIED",
     verifiedAt: "14:42 IST",
-    verifiedBy: "Ramesh Pawar (Gate 1)",
-    notes: "e-Way bill active. Driver credentials verified. Clear for Gross weighment.",
+    notes: "e-Way bill active. Driver credentials verified.",
   },
   {
     id: "doc-004",
     vehicleNo: "MH 31 CB 7721",
     ewayBillNo: "EWB-9912-3401-8821",
     ewayBillDate: "02-Oct-2026, 14:00",
-    validUntil: "03-Oct-2026, 12:00", // Expired
+    validUntil: "03-Oct-2026, 12:00",
     poOrSoNo: "PO-2026-0985",
     challanOrLrNo: "CH-774012",
     consignor: "Vidarbha Wood Processors LLP",
-    consignorGstin: "27AABCV8812K1Z9",
-    consignee: "Bharat Industrial & Renewables LLP",
-    consigneeGstin: "27AAACB1234D1Z5",
-    hsnCode: "44013900 (Sawdust Fine)",
     materialName: "Sawdust Fine (SD)",
     declaredQtyMT: 31.0,
     transporter: "Nagpur Express Fleet",
     driverName: "Prakash Meshram",
-    driverLicenseNo: "MH-31-2011-0022198",
     driverMobile: "+91 98231 44109",
-    vehicleFitnessValidUntil: "19-Jan-2027",
-    insuranceValidUntil: "11-May-2027",
-    pucValidUntil: "05-Nov-2026",
     verificationStatus: "EXPIRED",
-    mismatchReason: "e-Way bill validity expired at 12:00 PM (Overdue by 3h 15m). Supplier needs to extend validity on GST portal before gate entry.",
-    notes: "Driver instructed to halt in holding bay. Contacted consignor dispatch desk to extend validity.",
+    mismatchReason: "e-Way bill expired at 12:00 PM (Overdue by 3h). Needs validity extension on GST portal.",
+    notes: "Driver in holding bay pending consignor validity renewal.",
   },
   {
     id: "doc-005",
@@ -181,54 +125,17 @@ const INITIAL_DOC_RECORDS: DocVerificationItem[] = [
     poOrSoNo: "PO-2026-0981",
     challanOrLrNo: "CH-774012",
     consignor: "Western Bio Residues Co",
-    consignorGstin: "27AABCW1102P1Z4",
-    consignee: "Bharat Industrial & Renewables LLP",
-    consigneeGstin: "27AAACB1234D1Z5",
-    hsnCode: "14049090 (Sawdust Fine)",
     materialName: "Sawdust Fine (SD)",
     declaredQtyMT: 31.2,
     transporter: "Maharashtra Freightways",
     driverName: "Sanjay Thorat",
-    driverLicenseNo: "MH-14-2016-0033109",
     driverMobile: "+91 94220 18239",
-    vehicleFitnessValidUntil: "25-Jan-2027",
-    insuranceValidUntil: "14-Feb-2027",
-    pucValidUntil: "30-Nov-2026",
     verificationStatus: "VERIFIED",
     verifiedAt: "13:52 IST",
-    verifiedBy: "Ramesh Pawar (Gate 1)",
-    notes: "Verified and stamped. Currently unloading at Yard B Bay 04.",
+    notes: "Verified and stamped. Currently unloading in yard.",
   },
   {
     id: "doc-006",
-    vehicleNo: "MH 12 BP 5504",
-    gateEntryNo: "RM-GATE-261003-006",
-    ewayBillNo: "EWB-5501-9981-2231",
-    ewayBillDate: "03-Oct-2026, 11:20",
-    validUntil: "04-Oct-2026, 23:59",
-    poOrSoNo: "PO-2026-0987",
-    challanOrLrNo: "CH-881290",
-    consignor: "Pune Agro Farmers Producer Co",
-    consignorGstin: "27AABCP9901M1Z1",
-    consignee: "Bharat Industrial & Renewables LLP",
-    consigneeGstin: "27AAACB1234D1Z5",
-    hsnCode: "14049090 (Mustard Husk)",
-    materialName: "Mustard Husk Stalk (MH)",
-    declaredQtyMT: 21.0,
-    transporter: "Shree Ganesh Roadways",
-    driverName: "Baburao Kadam",
-    driverLicenseNo: "MH-12-2014-0077189",
-    driverMobile: "+91 98501 22891",
-    vehicleFitnessValidUntil: "14-Dec-2026",
-    insuranceValidUntil: "20-Jan-2027",
-    pucValidUntil: "08-Nov-2026",
-    verificationStatus: "VERIFIED",
-    verifiedAt: "13:18 IST",
-    verifiedBy: "Ramesh Pawar (Gate 1)",
-    notes: "Verified at entry. Tare weighment completed.",
-  },
-  {
-    id: "doc-007",
     vehicleNo: "MH 09 CW 3319",
     ewayBillNo: "EWB-6610-8812-3341",
     ewayBillDate: "03-Oct-2026, 13:00",
@@ -236,21 +143,13 @@ const INITIAL_DOC_RECORDS: DocVerificationItem[] = [
     poOrSoNo: "PO-2026-0982",
     challanOrLrNo: "CH-119420",
     consignor: "Kolhapur Agro Biomass Union",
-    consignorGstin: "27AABCK1194H1Z6",
-    consignee: "Bharat Industrial & Renewables LLP",
-    consigneeGstin: "27AAACB1234D1Z5",
-    hsnCode: "14049090 (Groundnut Shell)",
     materialName: "Groundnut Shell (GS)",
     declaredQtyMT: 26.5,
     transporter: "Sahyadri Logistics",
     driverName: "Sanjay Mane",
-    driverLicenseNo: "MH-09-2017-0055102",
     driverMobile: "+91 98220 11942",
-    vehicleFitnessValidUntil: "12-Jan-2027",
-    insuranceValidUntil: "28-Mar-2027",
-    pucValidUntil: "15-Dec-2026",
     verificationStatus: "PENDING",
-    notes: "Approaching vehicle ETA 8 mins. Pre-verified through advance WhatsApp challan scan.",
+    notes: "Pre-advised consignment. Pre-verified through supplier advance scan.",
   },
 ];
 
@@ -261,8 +160,6 @@ interface GateDocVerificationProps {
 }
 
 export function GateDocVerification({
-  vehicles,
-  onUpdateStage,
   onNavigateTab,
 }: GateDocVerificationProps) {
   // Live Clock
@@ -284,45 +181,40 @@ export function GateDocVerification({
     return () => clearInterval(interval);
   }, []);
 
-  // Filter & Search states
+  // Filter & Search
   const [docRecords, setDocRecords] = useState<DocVerificationItem[]>(INITIAL_DOC_RECORDS);
-  const [statusFilter, setStatusFilter] = useState<"ALL" | "PENDING" | "VERIFIED" | "FLAGGED_MISMATCH" | "EXPIRED">("ALL");
+  const [statusFilter, setStatusFilter] = useState<"ALL" | "PENDING" | "VERIFIED" | "FLAGGED">("ALL");
+  const [showFilters, setShowFilters] = useState(false);
+  const [viewMode, setViewMode] = useState<"CARDS" | "TABLE">("CARDS");
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Scanner Simulator State
-  const [isScanning, setIsScanning] = useState(false);
-  const [scanResult, setScanResult] = useState<string | null>(null);
-
-  // Active Document for Audit Modal
+  // Active Document for Verification Modal
   const [selectedDoc, setSelectedDoc] = useState<DocVerificationItem | null>(null);
 
-  // 4-Point Document Checklist
-  const [docChecklist, setDocChecklist] = useState({
-    ewayBillValid: false,
-    vehicleNoMatched: false,
-    gstinAndPoMatched: false,
-    driverDlAndFitnessValid: false,
-  });
-  const [auditNotes, setAuditNotes] = useState("");
+  // Modal Checklist
+  const [checkEway, setCheckEway] = useState(true);
+  const [checkPO, setCheckPO] = useState(true);
+  const [checkVehicle, setCheckVehicle] = useState(true);
+  const [guardNotes, setGuardNotes] = useState("");
 
-  // Success Verification Stamp Modal
-  const [stampedRecord, setStampedRecord] = useState<DocVerificationItem | null>(null);
+  // Counts
+  const pendingCount = docRecords.filter((d) => d.verificationStatus === "PENDING").length;
+  const verifiedCount = docRecords.filter((d) => d.verificationStatus === "VERIFIED").length;
+  const flaggedCount = docRecords.filter(
+    (d) => d.verificationStatus === "FLAGGED_MISMATCH" || d.verificationStatus === "EXPIRED"
+  ).length;
 
-  // Stats Calculations
-  const stats = useMemo(() => {
-    const total = docRecords.length;
-    const pending = docRecords.filter((d) => d.verificationStatus === "PENDING").length;
-    const verified = docRecords.filter((d) => d.verificationStatus === "VERIFIED").length;
-    const discrepancies = docRecords.filter(
-      (d) => d.verificationStatus === "FLAGGED_MISMATCH" || d.verificationStatus === "EXPIRED"
-    ).length;
-    return { total, pending, verified, discrepancies };
-  }, [docRecords]);
-
-  // Filtered List
-  const filteredRecords = useMemo(() => {
+  const filteredDocs = useMemo(() => {
     return docRecords.filter((doc) => {
-      if (statusFilter !== "ALL" && doc.verificationStatus !== statusFilter) return false;
+      if (statusFilter === "PENDING" && doc.verificationStatus !== "PENDING") return false;
+      if (statusFilter === "VERIFIED" && doc.verificationStatus !== "VERIFIED") return false;
+      if (
+        statusFilter === "FLAGGED" &&
+        doc.verificationStatus !== "FLAGGED_MISMATCH" &&
+        doc.verificationStatus !== "EXPIRED"
+      )
+        return false;
+
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
         return (
@@ -330,1043 +222,634 @@ export function GateDocVerification({
           doc.ewayBillNo.toLowerCase().includes(q) ||
           doc.poOrSoNo.toLowerCase().includes(q) ||
           doc.consignor.toLowerCase().includes(q) ||
-          doc.driverName.toLowerCase().includes(q) ||
-          doc.materialName.toLowerCase().includes(q)
+          doc.materialName.toLowerCase().includes(q) ||
+          doc.driverName.toLowerCase().includes(q)
         );
       }
       return true;
     });
   }, [docRecords, statusFilter, searchQuery]);
 
-  // Open Document Audit Modal
-  const handleOpenAuditModal = (doc: DocVerificationItem) => {
+  const handleOpenModal = (doc: DocVerificationItem) => {
     setSelectedDoc(doc);
-    const isAlreadyVerified = doc.verificationStatus === "VERIFIED";
-    setDocChecklist({
-      ewayBillValid: isAlreadyVerified || doc.verificationStatus !== "EXPIRED",
-      vehicleNoMatched: isAlreadyVerified || doc.verificationStatus !== "FLAGGED_MISMATCH",
-      gstinAndPoMatched: isAlreadyVerified,
-      driverDlAndFitnessValid: isAlreadyVerified,
-    });
-    setAuditNotes(
-      doc.notes ||
-        `Verified e-Way Bill #${doc.ewayBillNo}. Declared ${doc.declaredQtyMT} MT. Transporter: ${doc.transporter}.`
-    );
+    setCheckEway(doc.verificationStatus !== "EXPIRED");
+    setCheckPO(true);
+    setCheckVehicle(true);
+    setGuardNotes(doc.notes || "e-Way bill active. Consignor PO matched.");
   };
 
-  const handleSelectAllChecks = () => {
-    setDocChecklist({
-      ewayBillValid: true,
-      vehicleNoMatched: true,
-      gstinAndPoMatched: true,
-      driverDlAndFitnessValid: true,
-    });
-  };
-
-  const isChecklistComplete =
-    docChecklist.ewayBillValid &&
-    docChecklist.vehicleNoMatched &&
-    docChecklist.gstinAndPoMatched &&
-    docChecklist.driverDlAndFitnessValid;
-
-  // Approve & Stamp Document
-  const handleApproveDocument = () => {
+  const handleVerifyConfirm = () => {
     if (!selectedDoc) return;
-
-    const verifiedRecord: DocVerificationItem = {
-      ...selectedDoc,
-      verificationStatus: "VERIFIED",
-      verifiedAt: `${currentTime} IST`,
-      verifiedBy: "Ramesh Pawar (Gate 1)",
-      notes: auditNotes,
-    };
-
-    // Update state
     setDocRecords((prev) =>
-      prev.map((d) => (d.id === selectedDoc.id ? verifiedRecord : d))
+      prev.map((d) =>
+        d.id === selectedDoc.id
+          ? {
+              ...d,
+              verificationStatus: "VERIFIED",
+              verifiedAt: new Date().toLocaleTimeString("en-IN", {
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: false,
+              }) + " IST",
+              notes: guardNotes,
+            }
+          : d
+      )
     );
-
-    // If there is a matching vehicle in gate vehicles, update stage if needed
-    const matchingVeh = vehicles.find((v) => v.vehicleNo === selectedDoc.vehicleNo);
-    if (matchingVeh && matchingVeh.stage === "ARRIVED_AT_GATE") {
-      onUpdateStage(matchingVeh.id, "WAITING_WEIGHMENT");
-    }
-
-    setSelectedDoc(null);
-    setStampedRecord(verifiedRecord);
-  };
-
-  // Flag Discrepancy / Reject
-  const handleFlagDiscrepancy = (reason: string) => {
-    if (!selectedDoc) return;
-
-    const flaggedRecord: DocVerificationItem = {
-      ...selectedDoc,
-      verificationStatus: "FLAGGED_MISMATCH",
-      mismatchReason: reason,
-      notes: `FLAGGED: ${reason}. Hold vehicle in verification lane.`,
-    };
-
-    setDocRecords((prev) =>
-      prev.map((d) => (d.id === selectedDoc.id ? flaggedRecord : d))
-    );
-
     setSelectedDoc(null);
   };
 
-  // Simulate Scanning QR code / Barcode
-  const handleSimulateScan = () => {
-    setIsScanning(true);
-    setScanResult(null);
-    setTimeout(() => {
-      setIsScanning(false);
-      setScanResult("Scanned: EWB-3301-8842-9901 · Vehicle: MH 49 TR 8819 · Match 100%");
-      // Open the corresponding document
-      const item = docRecords.find((d) => d.ewayBillNo === "EWB-3301-8842-9901");
-      if (item) {
-        handleOpenAuditModal(item);
-      }
-    }, 1800);
+  const handleFlagMismatch = () => {
+    if (!selectedDoc) return;
+    setDocRecords((prev) =>
+      prev.map((d) =>
+        d.id === selectedDoc.id
+          ? {
+              ...d,
+              verificationStatus: "FLAGGED_MISMATCH",
+              mismatchReason: guardNotes || "Discrepancy in declared weight or PO reference.",
+            }
+          : d
+      )
+    );
+    setSelectedDoc(null);
   };
 
   return (
-    <div className="space-y-12 md:space-y-14 select-none">
-      {/* 
-        ============================================================
-        1. COMMAND HEADER & STATUTORY TELEMETRY BAR
-        ============================================================
-      */}
-      <section className="space-y-6">
-        {/* Section Header with Large Typography */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-          <div>
-            <span className="text-xs md:text-sm font-medium text-neutral-400 block tracking-normal">
-              Statutory Rule 138 CGST · GST Portal Integration
-            </span>
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-neutral-900 mt-1">
-              Document Verification Desk
-            </h1>
-          </div>
-
-          {/* Quick Actions & Live Clock (Responsive Grid on Mobile) */}
-          <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 sm:gap-2.5 w-full sm:w-auto">
-            {/* Clock Box */}
-            <div
-              className="col-span-2 sm:col-span-1 px-3.5 h-10 border border-neutral-300 bg-transparent flex items-center justify-between sm:justify-start gap-2 shrink-0"
-              style={{ borderRadius: 0 }}
-            >
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-[#059669] animate-pulse" />
-                <div className="flex items-baseline gap-1.5 whitespace-nowrap">
-                  <span className="text-[11px] font-semibold text-neutral-500 uppercase">IST</span>
-                  <span className="text-xs font-bold text-neutral-900 tabular-nums">
-                    {currentTime || "15:10:00"}
-                  </span>
-                </div>
-              </div>
-              <span className="sm:hidden text-[9px] font-bold text-[#059669] px-1.5 py-0.5 border border-emerald-300 bg-emerald-50">
-                PORTAL LIVE
-              </span>
-            </div>
-
-            {/* Quick QR Scanner Simulator */}
-            <button
-              type="button"
-              onClick={handleSimulateScan}
-              disabled={isScanning}
-              className="col-span-2 sm:col-span-1 h-10 px-3.5 border border-neutral-300 bg-transparent hover:bg-neutral-200/50 text-neutral-800 text-xs font-medium flex items-center justify-center gap-2 cursor-pointer transition-colors shrink-0"
-              style={{ borderRadius: 0 }}
-            >
-              <QrCode className="w-3.5 h-3.5 text-neutral-700 shrink-0" />
-              <span>{isScanning ? "Scanning Optical Code..." : "Scan e-Way Bill QR"}</span>
-            </button>
-
-            {/* Back to Vehicle Tracker */}
-            <button
-              type="button"
-              onClick={() => onNavigateTab("live-tracker")}
-              className="h-10 px-2 sm:px-3.5 border border-neutral-300 bg-transparent hover:bg-neutral-200/50 text-neutral-800 text-[11px] sm:text-xs font-medium flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer transition-colors shrink-0"
-              style={{ borderRadius: 0 }}
-            >
-              <Truck className="w-3.5 h-3.5 text-neutral-600 shrink-0" />
-              <span>Fleet Tracker</span>
-            </button>
-
-            {/* Back to Ops Hub */}
-            <button
-              type="button"
-              onClick={() => onNavigateTab("home")}
-              className="h-10 px-2 sm:px-3.5 bg-[#18181B] hover:bg-black text-white text-[11px] sm:text-xs font-medium flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer transition-colors shrink-0"
-              style={{ borderRadius: 0 }}
-            >
-              <span>Ops Hub</span>
-              <ArrowRight className="w-3.5 h-3.5 text-neutral-300 shrink-0" />
-            </button>
-          </div>
+    <div className="w-full space-y-8 sm:space-y-10 select-none">
+      {/* ========================================================================= */}
+      {/* 1. HEADER                                                                 */}
+      {/* ========================================================================= */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-300 pb-5 sm:pb-6">
+        <div className="py-1 sm:py-1.5">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-neutral-900">
+            Document Verification
+          </h1>
         </div>
 
-        {/* Section 1 Card */}
-        <div
-          className="bg-transparent border border-neutral-300 p-4 sm:p-5 space-y-4"
-          style={{ borderRadius: 0 }}
-        >
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-neutral-200 pb-3">
-            <div className="flex items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 border border-emerald-300 bg-emerald-50/70 text-[10px] font-bold uppercase tracking-wider text-[#047857]">
-                <span className="w-1.5 h-1.5 bg-[#059669] animate-pulse inline-block shrink-0" />
-                <span>GST e-Way Bill API Linked</span>
-              </span>
-              <span className="text-xs text-neutral-400">·</span>
-              <span className="text-[11px] font-semibold text-neutral-600">Statutory Rule 138 CGST</span>
-            </div>
-            <p className="text-xs text-neutral-500">
-              Statutory e-Way bill audit, Part-B vehicle registration matching, PO validation, and driver KYC clearance.
-            </p>
-          </div>
-
-          {/* GST e-Way Bill Integration Health Banner */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 border border-neutral-200 bg-neutral-50">
-            <div className="flex items-center gap-3">
-              <div className="w-2.5 h-2.5 rounded-full bg-[#10B981]" />
-              <div className="text-xs">
-                <span className="font-bold text-neutral-900 uppercase">
-                  GST Common Portal EWB API:
-                </span>{" "}
-                <span className="text-neutral-700 font-semibold">
-                  Online · Response: 32ms · NIC Gateway Active
-                </span>
-                {scanResult && (
-                  <span className="ml-3 text-xs font-bold text-[#059669] animate-pulse">
-                    ● {scanResult}
-                  </span>
-                )}
-              </div>
-            </div>
-
-            <div className="flex items-center gap-4 text-xs text-neutral-500">
-              <span>
-                Plant GSTIN: <strong className="text-neutral-800 font-mono">27AAACB1234D1Z5</strong>
-              </span>
-              <span className="hidden md:inline">|</span>
-              <span>
-                Security Officer: <strong className="text-neutral-800">Ramesh Pawar (#SEC-014)</strong>
-              </span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 
-        ============================================================
-        2. SHIFT 01 STATUTORY VERIFICATION KPIS
-        ============================================================
-      */}
-      <section className="space-y-6">
-        {/* Section Header with Large Typography */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-          <div>
-            <span className="text-xs md:text-sm font-medium text-neutral-400 block tracking-normal">
-              Shift 01 Compliance Audits
-            </span>
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900 mt-1">
-              Statutory Audit Telemetry & Metrics
-            </h2>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 border border-neutral-300 text-xs font-medium text-neutral-700">
-              <span className="w-2 h-2 bg-[#059669] inline-block" />
-              <span>100% Tax Compliant</span>
-            </span>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        {/* KPI 1: Pending Audit Queue */}
-        <div
-          className="bg-white border border-neutral-300 p-4 flex flex-col justify-between"
-          style={{ borderRadius: 0 }}
-        >
-          <div className="flex items-center justify-between text-neutral-500 mb-2">
-            <span className="text-[11px] font-bold uppercase tracking-wider">Awaiting Audit</span>
+        {/* Pending Checks Counter */}
+        <div className="flex items-center gap-2.5 mt-1 sm:mt-0">
+          <div className="h-10 px-3.5 border border-neutral-300 bg-neutral-200/50 flex items-center gap-2 text-xs">
             <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-          </div>
-          <div className="flex items-baseline gap-2">
-            <span className="text-2xl sm:text-3xl font-extrabold text-neutral-900 tabular-nums">
-              {stats.pending}
-            </span>
-            <span className="text-xs text-neutral-500">vehicles</span>
-          </div>
-          <div className="text-[11px] text-neutral-500 border-t border-neutral-200 pt-2 mt-2 flex items-center justify-between">
-            <span>Queue at Gate 01 barrier</span>
-            <span className="font-semibold text-amber-600">Action needed</span>
-          </div>
-        </div>
-
-        {/* KPI 2: Verified Today */}
-        <div
-          className="bg-white border border-neutral-300 p-4 flex flex-col justify-between"
-          style={{ borderRadius: 0 }}
-        >
-          <div className="flex items-center justify-between text-neutral-500 mb-2">
-            <span className="text-[11px] font-bold uppercase tracking-wider">Verified & Cleared</span>
-            <CheckCircle2 className="w-4 h-4 text-[#059669]" />
-          </div>
-          <div className="flex items-baseline gap-2">
-            <span className="text-2xl sm:text-3xl font-extrabold text-neutral-900 tabular-nums">
-              {stats.verified}
-            </span>
-            <span className="text-xs text-neutral-500">consignments</span>
-          </div>
-          <div className="text-[11px] text-neutral-500 border-t border-neutral-200 pt-2 mt-2 flex items-center justify-between">
-            <span>Passes stamped & issued</span>
-            <span className="font-semibold text-neutral-800">Shift 01</span>
-          </div>
-        </div>
-
-        {/* KPI 3: Discrepancies / Flagged */}
-        <div
-          className="bg-white border border-neutral-300 p-4 flex flex-col justify-between"
-          style={{ borderRadius: 0 }}
-        >
-          <div className="flex items-center justify-between text-neutral-500 mb-2">
-            <span className="text-[11px] font-bold uppercase tracking-wider">Flagged / Expired</span>
-            <AlertTriangle className="w-4 h-4 text-red-600" />
-          </div>
-          <div className="flex items-baseline gap-2">
-            <span className="text-2xl sm:text-3xl font-extrabold text-neutral-900 tabular-nums text-red-600">
-              {stats.discrepancies}
-            </span>
-            <span className="text-xs text-neutral-500">held</span>
-          </div>
-          <div className="text-[11px] text-neutral-500 border-t border-neutral-200 pt-2 mt-2 flex items-center justify-between">
-            <span>Expired EWB / Mismatch</span>
-            <span className="font-semibold text-red-600">Held at lane</span>
-          </div>
-        </div>
-
-        {/* KPI 4: Turnaround Speed */}
-        <div
-          className="bg-white border border-neutral-300 p-4 flex flex-col justify-between"
-          style={{ borderRadius: 0 }}
-        >
-          <div className="flex items-center justify-between text-neutral-500 mb-2">
-            <span className="text-[11px] font-bold uppercase tracking-wider">Avg Audit Speed</span>
-            <Clock className="w-4 h-4 text-neutral-500" />
-          </div>
-          <div className="flex items-baseline gap-2">
-            <span className="text-2xl sm:text-3xl font-extrabold text-neutral-900 tabular-nums">
-              3.2
-            </span>
-            <span className="text-xs text-neutral-500">mins / truck</span>
-          </div>
-          <div className="text-[11px] text-neutral-500 border-t border-neutral-200 pt-2 mt-2 flex items-center justify-between">
-            <span>Target: &lt; 5.0 mins</span>
-            <span className="font-semibold text-[#059669]">High Throughput</span>
+            <span className="font-bold text-neutral-900">{pendingCount} Pending Checks</span>
           </div>
         </div>
       </div>
-    </section>
 
-      {/* 
-        ============================================================
-        3. SEARCH & STATUS FILTER CONTROLS & CONSIGNMENTS
-        ============================================================
-      */}
-      <section className="space-y-6">
-        {/* Section Header with Large Typography */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-          <div>
-            <span className="text-xs md:text-sm font-medium text-neutral-400 block tracking-normal">
-              Active Consignment Documentation
-            </span>
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900 mt-1">
-              e-Way Bill & PO Verification Registry
-            </h2>
-          </div>
-
-          <div className="text-xs text-neutral-500">
-            Showing <strong className="text-neutral-900">{filteredRecords.length}</strong> of <strong>{docRecords.length}</strong> statutory documents
-          </div>
-        </div>
-
-        <div
-          className="bg-white border border-neutral-300 p-4 space-y-4"
-          style={{ borderRadius: 0 }}
-        >
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-neutral-200 pb-3">
-          {/* Status Filter Tabs (Scrollable on Mobile) */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 max-w-full md:flex-wrap">
-            {(
-              [
-                { key: "ALL", label: "All Docs", count: stats.total },
-                { key: "PENDING", label: "Pending Verification", count: stats.pending },
-                { key: "VERIFIED", label: "Verified & Cleared", count: stats.verified },
-                { key: "EXPIRED", label: "Expired EWB", count: docRecords.filter(d => d.verificationStatus === "EXPIRED").length },
-                { key: "FLAGGED_MISMATCH", label: "Flagged Mismatch", count: docRecords.filter(d => d.verificationStatus === "FLAGGED_MISMATCH").length },
-              ] as const
-            ).map((tab) => {
-              const isSelected = statusFilter === tab.key;
-              return (
+      {/* ========================================================================= */}
+      {/* 2. MAIN DOCUMENT VERIFICATION TABLE                                       */}
+      {/* ========================================================================= */}
+      <div className="border-0 sm:border sm:border-neutral-300">
+        {/* Controls Bar */}
+        <div className="p-0 sm:p-4 pb-3 sm:pb-4 border-b border-neutral-300 space-y-2.5">
+          {/* Top Row: Search Input (Full Width on mobile) + Filters Toggle (PC) + View Toggle (PC) */}
+          <div className="flex items-center gap-2">
+            <div className="relative w-full flex-1">
+              <Search className="w-4 h-4 text-neutral-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search vehicle no, e-Way bill #, PO, supplier..."
+                className="w-full h-11 sm:h-10 pl-9.5 pr-8 bg-white border border-neutral-300 text-sm text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:border-[#059669] transition-colors"
+              />
+              {searchQuery && (
                 <button
-                  key={tab.key}
                   type="button"
-                  onClick={() => setStatusFilter(tab.key)}
-                  className={`px-3 py-2 text-xs font-bold uppercase tracking-wider border cursor-pointer transition-colors flex items-center gap-2 shrink-0 whitespace-nowrap ${
-                    isSelected
-                      ? "bg-[#18181B] text-white border-[#18181B]"
-                      : "bg-white text-neutral-700 border-neutral-300 hover:bg-neutral-50"
-                  }`}
-                  style={{ borderRadius: 0 }}
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-700 cursor-pointer text-sm"
                 >
-                  <span>{tab.label}</span>
-                  <span
-                    className={`px-1.5 py-0.2 text-[10px] font-bold ${
-                      isSelected
-                        ? "bg-[#059669] text-white"
-                        : "bg-neutral-200 text-neutral-800"
+                  ✕
+                </button>
+              )}
+            </div>
+
+            {/* Filters Toggle Button (PC Only) */}
+            <button
+              type="button"
+              onClick={() => setShowFilters(!showFilters)}
+              className={`hidden sm:flex h-10 px-3.5 border text-xs font-bold uppercase tracking-wider items-center gap-2 transition-colors cursor-pointer shrink-0 ${
+                showFilters || statusFilter !== "ALL"
+                  ? "bg-[#18181B] text-white border-[#18181B]"
+                  : "bg-white text-neutral-700 border-neutral-300 hover:bg-neutral-100"
+              }`}
+            >
+              <SlidersHorizontal className="w-4 h-4" />
+              <span>Filters</span>
+              {statusFilter !== "ALL" && (
+                <span className="text-[10px] bg-[#059669] text-white px-1.5 py-0.2 rounded font-mono font-bold">
+                  1
+                </span>
+              )}
+              <ChevronDown
+                className={`w-3.5 h-3.5 transition-transform ${
+                  showFilters ? "rotate-180" : ""
+                }`}
+              />
+            </button>
+
+            {/* View Toggle (PC Only) */}
+            <div className="hidden sm:inline-flex border border-neutral-300 divide-x divide-neutral-300 text-xs shrink-0 h-10">
+              <button
+                type="button"
+                onClick={() => setViewMode("CARDS")}
+                className={`px-3 py-1.5 transition-colors cursor-pointer flex items-center ${
+                  viewMode === "CARDS"
+                    ? "bg-[#18181B] text-white font-semibold"
+                    : "bg-neutral-200/50 text-neutral-700 hover:bg-neutral-200"
+                }`}
+              >
+                Cards
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode("TABLE")}
+                className={`px-3 py-1.5 transition-colors cursor-pointer flex items-center ${
+                  viewMode === "TABLE"
+                    ? "bg-[#18181B] text-white font-semibold"
+                    : "bg-neutral-200/50 text-neutral-700 hover:bg-neutral-200"
+                }`}
+              >
+                Table
+              </button>
+            </div>
+          </div>
+
+          {/* Active Filter summary chip (PC Only) */}
+          {!showFilters && statusFilter !== "ALL" && (
+            <div className="hidden sm:flex items-center gap-2 pt-0.5 text-xs">
+              <span className="text-neutral-500 font-medium">Filter:</span>
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-neutral-900 text-white font-bold text-[11px] uppercase tracking-wide">
+                <span>
+                  {
+                    [
+                      { key: "PENDING", label: "Pending" },
+                      { key: "VERIFIED", label: "Verified" },
+                      { key: "FLAGGED", label: "Flagged / Expired" },
+                    ].find((f) => f.key === statusFilter)?.label
+                  }
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setStatusFilter("ALL")}
+                  className="hover:text-red-400 cursor-pointer ml-1"
+                >
+                  ✕
+                </button>
+              </span>
+            </div>
+          )}
+
+          {/* Expandable Filter Options (PC Only) */}
+          {showFilters && (
+            <div className="hidden sm:block pt-2 border-t border-neutral-200 space-y-2">
+              <div className="flex flex-wrap items-center gap-1.5">
+                {[
+                  { key: "ALL", label: "All Documents", count: docRecords.length },
+                  { key: "PENDING", label: "Pending", count: pendingCount },
+                  { key: "VERIFIED", label: "Verified", count: verifiedCount },
+                  { key: "FLAGGED", label: "Flagged / Expired", count: flaggedCount },
+                ].map((tab) => (
+                  <button
+                    key={tab.key}
+                    type="button"
+                    onClick={() => setStatusFilter(tab.key as typeof statusFilter)}
+                    className={`px-3 py-1.5 text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer border whitespace-nowrap flex items-center gap-1.5 ${
+                      statusFilter === tab.key
+                        ? "bg-[#18181B] text-white border-[#18181B]"
+                        : "bg-white text-neutral-700 border-neutral-300 hover:bg-neutral-100"
                     }`}
                   >
-                    {tab.count}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-
-          <div className="text-xs text-neutral-500">
-            Showing <strong>{filteredRecords.length}</strong> consignments
-          </div>
+                    <span>{tab.label}</span>
+                    <span className="opacity-75 font-mono text-[11px]">({tab.count})</span>
+                  </button>
+                ))}
+                {statusFilter !== "ALL" && (
+                  <button
+                    type="button"
+                    onClick={() => setStatusFilter("ALL")}
+                    className="text-xs text-neutral-500 hover:text-neutral-900 underline underline-offset-2 ml-2 cursor-pointer font-medium"
+                  >
+                    Reset
+                  </button>
+                )}
+              </div>
+              <div className="text-[11px] text-neutral-500">
+                Showing <strong className="text-neutral-900">{filteredDocs.length}</strong> consignments
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Search Input */}
-        <div className="relative">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search by Vehicle Plate (e.g. MH 49), e-Way Bill #, PO #, Consignor Name, Driver, or Material..."
-            className="w-full pl-9 pr-4 py-2 border border-neutral-300 bg-neutral-50 text-xs text-neutral-900 placeholder-neutral-400 focus:outline-none focus:border-neutral-700 focus:bg-white transition-colors"
-            style={{ borderRadius: 0 }}
-          />
-        </div>
-      </div>
-
-      {/* 
-        ============================================================
-        4. DOCUMENT VERIFICATION CONSIGNMENTS TABLE
-        ============================================================
-      */}
-      <div
-        className="bg-white border border-neutral-300 overflow-hidden"
-        style={{ borderRadius: 0 }}
-      >
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
-            <thead>
-              <tr className="bg-neutral-100 border-b border-neutral-300 text-neutral-700 font-bold uppercase tracking-wider text-[10px]">
-                <th className="py-2.5 px-3">Vehicle No</th>
-                <th className="py-2.5 px-3">e-Way Bill # & Validity</th>
-                <th className="py-2.5 px-3">PO / Challan #</th>
-                <th className="py-2.5 px-3">Consignor (Supplier) & GSTIN</th>
-                <th className="py-2.5 px-3">Material & Declared MT</th>
-                <th className="py-2.5 px-3">Driver & DL</th>
-                <th className="py-2.5 px-3">Statutory Status</th>
-                <th className="py-2.5 px-3 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-neutral-200">
-              {filteredRecords.map((record) => {
-                const isVerified = record.verificationStatus === "VERIFIED";
-                const isExpired = record.verificationStatus === "EXPIRED";
-                const isFlagged = record.verificationStatus === "FLAGGED_MISMATCH";
+        {/* Content: Cards Grid or Table */}
+        {filteredDocs.length === 0 ? (
+          <div className="py-10 text-center text-neutral-500">
+            <FileCheck className="w-7 h-7 text-neutral-300 mx-auto mb-1.5" />
+            <p className="font-semibold text-neutral-700">No documents match the selected filter</p>
+            <p className="text-[11px] text-neutral-400 mt-0.5">Try clearing the search or switching tabs</p>
+          </div>
+        ) : (
+          <>
+            {/* Cards View: Always on Mobile, respects viewMode on Desktop */}
+            <div className={viewMode === "CARDS" ? "px-0 py-3 sm:p-4" : "px-0 py-3 sm:hidden"}>
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+              {filteredDocs.map((doc) => {
+                const isVerified = doc.verificationStatus === "VERIFIED";
+                const isPending = doc.verificationStatus === "PENDING";
+                const isFlagged =
+                  doc.verificationStatus === "FLAGGED_MISMATCH" ||
+                  doc.verificationStatus === "EXPIRED";
 
                 return (
-                  <tr key={record.id} className="hover:bg-neutral-50 transition-colors">
-                    {/* Vehicle Plate */}
-                    <td className="py-3 px-3">
-                      <div className="font-bold text-neutral-900 text-xs px-2 py-0.5 border border-neutral-400 bg-neutral-50 inline-block">
-                        {record.vehicleNo}
-                      </div>
-                      {record.gateEntryNo && (
+                  <div
+                    key={doc.id}
+                    onClick={() => handleOpenModal(doc)}
+                    className="border border-neutral-300 p-3.5 hover:border-neutral-900 transition-all cursor-pointer group bg-transparent flex flex-col justify-between space-y-3"
+                  >
+                    {/* Top: Plate + Gate Pass + Status Pill */}
+                    <div className="flex items-start justify-between gap-2 border-b border-neutral-200 pb-2">
+                      <div>
+                        <div className="font-mono font-bold text-neutral-900 text-sm group-hover:text-[#059669] transition-colors">
+                          {doc.vehicleNo}
+                        </div>
                         <div className="text-[10px] text-neutral-500 font-mono mt-0.5">
-                          {record.gateEntryNo}
+                          {doc.gateEntryNo || "Pre-Advised"}
                         </div>
-                      )}
-                    </td>
-
-                    {/* e-Way Bill & Validity */}
-                    <td className="py-3 px-3">
-                      <div className="font-bold text-neutral-900 font-mono text-[11px]">
-                        {record.ewayBillNo}
                       </div>
-                      <div className="text-[10px] text-neutral-500">
-                        Valid: <span className={isExpired ? "text-red-600 font-bold" : "text-neutral-700"}>{record.validUntil}</span>
-                      </div>
-                    </td>
 
-                    {/* PO & Challan */}
-                    <td className="py-3 px-3">
-                      <div className="font-semibold text-neutral-800">{record.poOrSoNo}</div>
-                      <div className="text-[10px] text-neutral-500">{record.challanOrLrNo}</div>
-                    </td>
-
-                    {/* Consignor */}
-                    <td className="py-3 px-3">
-                      <div className="font-semibold text-neutral-900">{record.consignor}</div>
-                      <div className="text-[10px] text-neutral-500 font-mono">{record.consignorGstin}</div>
-                    </td>
-
-                    {/* Material & Declared MT */}
-                    <td className="py-3 px-3">
-                      <div className="font-bold text-neutral-900">{record.materialName}</div>
-                      <div className="text-[11px] font-bold text-[#059669] tabular-nums">
-                        {record.declaredQtyMT.toFixed(2)} MT
-                      </div>
-                    </td>
-
-                    {/* Driver & License */}
-                    <td className="py-3 px-3">
-                      <div className="text-neutral-800 font-medium">{record.driverName}</div>
-                      <div className="text-[10px] text-neutral-500 font-mono">{record.driverLicenseNo}</div>
-                    </td>
-
-                    {/* Status Badge */}
-                    <td className="py-3 px-3">
-                      <span
-                        className={`text-[10px] font-bold px-2 py-0.5 border inline-flex items-center gap-1 ${
-                          isVerified
-                            ? "bg-[#ECFDF5] text-[#059669] border-[#A7F3D0]"
-                            : isExpired
-                            ? "bg-red-50 text-red-700 border-red-300"
-                            : isFlagged
-                            ? "bg-amber-50 text-amber-700 border-amber-300"
-                            : "bg-blue-50 text-blue-700 border-blue-300"
-                        }`}
-                      >
-                        {isVerified && <Check className="w-3 h-3" />}
-                        {isExpired && <AlertTriangle className="w-3 h-3" />}
-                        {isFlagged && <AlertTriangle className="w-3 h-3" />}
-                        {record.verificationStatus.replace(/_/g, " ")}
-                      </span>
-                      {record.verifiedAt && (
-                        <div className="text-[9px] text-neutral-500 mt-0.5">
-                          {record.verifiedAt} · {record.verifiedBy?.split(" ")[0]}
-                        </div>
+                      {isVerified ? (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[#047857] px-2 py-0.5 bg-emerald-50 border border-emerald-300 shrink-0">
+                          <Check className="w-3 h-3" strokeWidth={2.5} />
+                          <span>Verified</span>
+                        </span>
+                      ) : isPending ? (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-800 px-2 py-0.5 bg-amber-50 border border-amber-300 shrink-0">
+                          <Clock className="w-3 h-3" />
+                          <span>Pending Check</span>
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-red-700 px-2 py-0.5 bg-red-50 border border-red-300 shrink-0">
+                          <AlertTriangle className="w-3 h-3" />
+                          <span>{doc.verificationStatus === "EXPIRED" ? "e-Way Expired" : "Mismatch"}</span>
+                        </span>
                       )}
-                      {record.mismatchReason && (
-                        <div className="text-[10px] text-red-600 mt-0.5 max-w-[200px] leading-tight">
-                          {record.mismatchReason}
-                        </div>
-                      )}
-                    </td>
+                    </div>
 
-                    {/* Actions */}
-                    <td className="py-3 px-3 text-right">
+                    {/* Middle: Cargo, e-Way, PO */}
+                    <div className="space-y-1.5 text-xs">
+                      <div className="flex items-baseline justify-between gap-2">
+                        <span className="font-semibold text-neutral-900 truncate">
+                          {doc.materialName}
+                        </span>
+                        <span className="font-mono font-bold text-neutral-900 tabular-nums text-xs shrink-0">
+                          {doc.declaredQtyMT.toFixed(1)} MT
+                        </span>
+                      </div>
+
+                      <div className="flex items-center justify-between text-[11px] text-neutral-600">
+                        <span className="font-mono truncate">{doc.ewayBillNo}</span>
+                        <span className="text-[10px] text-neutral-400 shrink-0">Exp: {doc.validUntil.split(",")[0]}</span>
+                      </div>
+
+                      <div className="text-[11px] text-neutral-600 truncate">
+                        {doc.consignor}
+                      </div>
+
+                      <div className="text-[10px] text-neutral-400 flex items-center justify-between gap-1">
+                        <span className="font-mono">{doc.poOrSoNo}</span>
+                        <span className="truncate">{doc.transporter}</span>
+                      </div>
+                    </div>
+
+                    {/* Bottom: Driver & Action */}
+                    <div className="pt-2 border-t border-neutral-200 flex items-center justify-between gap-2">
+                      <div className="text-[11px] text-neutral-600 truncate">
+                        <span className="font-medium text-neutral-800">{doc.driverName}</span>
+                      </div>
+
                       <button
                         type="button"
-                        onClick={() => handleOpenAuditModal(record)}
-                        className={`px-3 py-1.5 text-xs font-bold transition-colors cursor-pointer inline-flex items-center gap-1.5 ${
-                          isVerified
-                            ? "bg-white border border-neutral-300 text-neutral-800 hover:bg-neutral-100"
-                            : "bg-[#059669] hover:bg-[#047857] text-white shadow-sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleOpenModal(doc);
+                        }}
+                        className={`px-3 py-1 text-[10px] font-bold uppercase tracking-wider transition-colors cursor-pointer inline-flex items-center gap-1 shrink-0 ${
+                          isPending
+                            ? "bg-[#059669] hover:bg-[#047857] text-white shadow-xs"
+                            : "border border-neutral-300 hover:bg-neutral-200/60 text-neutral-700 bg-transparent"
                         }`}
-                        style={{ borderRadius: 0 }}
                       >
                         <ShieldCheck className="w-3.5 h-3.5" />
-                        <span>{isVerified ? "Review Audit" : "Audit Documents"}</span>
+                        <span>{isPending ? "Verify" : "Inspect"}</span>
                       </button>
-                    </td>
-                  </tr>
-                );
-              })}
-
-              {filteredRecords.length === 0 && (
-                <tr>
-                  <td colSpan={8} className="py-10 text-center text-xs text-neutral-500">
-                    No documents found matching the selected filter or search query.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-      {/* 
-        ============================================================
-        5. DOCUMENT AUDIT & STATUTORY CHECKLIST MODAL
-        ============================================================
-      */}
-      <AnimatePresence>
-        {selectedDoc && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.98, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.98, y: 10 }}
-              transition={{ duration: 0.15 }}
-              className="bg-white border border-neutral-800 w-full max-w-4xl overflow-hidden shadow-2xl flex flex-col max-h-[92vh]"
-              style={{ borderRadius: 0 }}
-            >
-              {/* Modal Header */}
-              <div className="p-4 bg-[#18181B] text-white flex items-center justify-between border-b border-neutral-800">
-                <div className="flex items-center gap-3">
-                  <div
-                    className="w-8 h-8 bg-[#059669] text-white flex items-center justify-center font-bold text-sm"
-                    style={{ borderRadius: 0 }}
-                  >
-                    <FileCheck className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-bold tracking-tight">
-                      Statutory Document Verification · e-Way Bill & PO Audit
-                    </h3>
-                    <div className="text-[11px] text-neutral-300">
-                      Vehicle: <strong className="text-white">{selectedDoc.vehicleNo}</strong> · e-Way Bill:{" "}
-                      <span className="font-mono text-[#A7F3D0]">{selectedDoc.ewayBillNo}</span>
                     </div>
                   </div>
-                </div>
+                );
+              })}
+            </div>
+          </div>
 
+          {/* Table View (PC Only) */}
+          <div className={viewMode === "TABLE" ? "hidden sm:block overflow-x-auto" : "hidden"}>
+            <table className="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr className="bg-neutral-200/50 border-b border-neutral-300 text-[10px] uppercase font-bold text-neutral-600 tracking-wider">
+                  <th className="py-2.5 px-3">Vehicle & Pass No</th>
+                  <th className="py-2.5 px-3">e-Way Bill & Validity</th>
+                  <th className="py-2.5 px-3">PO & Challan Ref</th>
+                  <th className="py-2.5 px-3">Consignor / Supplier</th>
+                  <th className="py-2.5 px-3">Commodity & Declared</th>
+                  <th className="py-2.5 px-3">Driver & Contact</th>
+                  <th className="py-2.5 px-3">Status</th>
+                  <th className="py-2.5 px-3 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-neutral-300">
+                {filteredDocs.map((doc) => {
+                  const isVerified = doc.verificationStatus === "VERIFIED";
+                  const isPending = doc.verificationStatus === "PENDING";
+                  const isFlagged =
+                    doc.verificationStatus === "FLAGGED_MISMATCH" ||
+                    doc.verificationStatus === "EXPIRED";
+
+                  return (
+                    <tr
+                      key={doc.id}
+                      onClick={() => handleOpenModal(doc)}
+                      className="hover:bg-neutral-200/40 transition-colors cursor-pointer"
+                    >
+                      <td className="py-2.5 px-3">
+                        <div className="font-mono font-bold text-neutral-900 text-xs">
+                          {doc.vehicleNo}
+                        </div>
+                        <div className="text-[10px] text-neutral-500 mt-0.5">
+                          {doc.gateEntryNo || "Pre-Advised Consignment"}
+                        </div>
+                      </td>
+
+                      <td className="py-2.5 px-3">
+                        <div className="font-mono font-bold text-neutral-900 text-xs">
+                          {doc.ewayBillNo}
+                        </div>
+                        <div className="text-[10px] text-neutral-500">
+                          Valid: {doc.validUntil.split(",")[0]}
+                        </div>
+                      </td>
+
+                      <td className="py-2.5 px-3 font-mono text-[11px]">
+                        <div className="text-neutral-900 font-semibold">{doc.poOrSoNo}</div>
+                        <div className="text-neutral-500">{doc.challanOrLrNo}</div>
+                      </td>
+
+                      <td className="py-2.5 px-3">
+                        <div className="font-semibold text-neutral-800 truncate max-w-[170px]">
+                          {doc.consignor}
+                        </div>
+                        <div className="text-[10px] text-neutral-500 truncate max-w-[170px]">
+                          {doc.transporter}
+                        </div>
+                      </td>
+
+                      <td className="py-2.5 px-3">
+                        <div className="font-medium text-neutral-900 truncate max-w-[150px]">
+                          {doc.materialName}
+                        </div>
+                        <div className="text-[11px] text-neutral-500 tabular-nums font-mono">
+                          {doc.declaredQtyMT.toFixed(1)} MT declared
+                        </div>
+                      </td>
+
+                      <td className="py-2.5 px-3">
+                        <div className="font-medium text-neutral-800">{doc.driverName}</div>
+                        <div className="text-[10px] text-neutral-500 font-mono">{doc.driverMobile}</div>
+                      </td>
+
+                      <td className="py-2.5 px-3 whitespace-nowrap">
+                        {isVerified ? (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[#047857] px-2 py-0.5 bg-emerald-50 border border-emerald-300">
+                            <Check className="w-3 h-3" strokeWidth={2.5} />
+                            <span>Verified</span>
+                          </span>
+                        ) : isPending ? (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-800 px-2 py-0.5 bg-amber-50 border border-amber-300">
+                            <Clock className="w-3 h-3" />
+                            <span>Pending Check</span>
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-red-700 px-2 py-0.5 bg-red-50 border border-red-300">
+                            <AlertTriangle className="w-3 h-3" />
+                            <span>{doc.verificationStatus === "EXPIRED" ? "e-Way Expired" : "Mismatch"}</span>
+                          </span>
+                        )}
+                      </td>
+
+                      <td className="py-2.5 px-3 text-right whitespace-nowrap">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleOpenModal(doc);
+                          }}
+                          className={`px-3 py-1 text-[11px] font-bold uppercase tracking-wider transition-colors cursor-pointer inline-flex items-center gap-1 ${
+                            isPending
+                              ? "bg-[#059669] hover:bg-[#047857] text-white shadow-xs"
+                              : "border border-neutral-300 hover:bg-neutral-200/60 text-neutral-700 bg-transparent"
+                          }`}
+                        >
+                          <ShieldCheck className="w-3 h-3" />
+                          <span>{isPending ? "Verify" : "Inspect"}</span>
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
+
+        {/* Footer */}
+        <div className="p-3 border-t border-neutral-300 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-neutral-500">
+          <div>
+            Statutory Goods Access Verification · GST e-Way Bill Standard System
+          </div>
+          <div>
+            Showing <strong className="text-neutral-900">{filteredDocs.length}</strong> records
+          </div>
+        </div>
+      </div>
+
+      {/* ========================================================================= */}
+      {/* 3. VERIFICATION POPUP MODAL                                               */}
+      {/* ========================================================================= */}
+      {selectedDoc && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="w-full max-w-lg border border-neutral-300 bg-[#F4F5F7] shadow-xl p-5 space-y-4">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-neutral-300 pb-3">
+              <div className="flex items-center gap-2">
+                <FileCheck className="w-5 h-5 text-[#059669]" />
+                <h3 className="text-sm font-bold text-neutral-900 uppercase tracking-wide">
+                  Verify Documents · {selectedDoc.vehicleNo}
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedDoc(null)}
+                className="text-neutral-400 hover:text-neutral-700 cursor-pointer font-bold px-1"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Document Details Card */}
+            <div className="p-3 bg-white border border-neutral-300 space-y-2 text-xs">
+              <div className="grid grid-cols-2 gap-2 pb-2 border-b border-neutral-200">
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-neutral-500 block">e-Way Bill No</span>
+                  <span className="font-mono font-bold text-neutral-900">{selectedDoc.ewayBillNo}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-neutral-500 block">Validity</span>
+                  <span className="font-bold text-neutral-800">{selectedDoc.validUntil}</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-neutral-500 block">PO / SO Ref</span>
+                  <span className="font-mono font-bold text-neutral-900">{selectedDoc.poOrSoNo}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-neutral-500 block">Challan / LR</span>
+                  <span className="font-mono text-neutral-800">{selectedDoc.challanOrLrNo}</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 pt-2 border-t border-neutral-200">
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-neutral-500 block">Consignor</span>
+                  <span className="font-semibold text-neutral-800 truncate block">{selectedDoc.consignor}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-neutral-500 block">Cargo & Declared MT</span>
+                  <span className="font-semibold text-neutral-900">{selectedDoc.materialName} ({selectedDoc.declaredQtyMT} MT)</span>
+                </div>
+              </div>
+
+              {selectedDoc.mismatchReason && (
+                <div className="p-2 bg-red-50 border border-red-200 text-red-700 text-xs">
+                  <strong>Mismatch Reason:</strong> {selectedDoc.mismatchReason}
+                </div>
+              )}
+            </div>
+
+            {/* Verification Checklist */}
+            <div className="space-y-2 text-xs">
+              <span className="text-xs font-bold uppercase tracking-wider text-neutral-700 block">
+                Statutory Verification Checks
+              </span>
+
+              <label className="flex items-start gap-2.5 p-2 bg-white border border-neutral-300 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={checkEway}
+                  onChange={(e) => setCheckEway(e.target.checked)}
+                  className="mt-0.5 w-4 h-4 accent-[#059669] cursor-pointer"
+                />
+                <div>
+                  <span className="font-semibold text-neutral-900 block">
+                    e-Way Bill Active & Unexpired
+                  </span>
+                  <span className="text-[11px] text-neutral-500">
+                    Validity verified on government portal. Vehicle number matches.
+                  </span>
+                </div>
+              </label>
+
+              <label className="flex items-start gap-2.5 p-2 bg-white border border-neutral-300 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={checkPO}
+                  onChange={(e) => setCheckPO(e.target.checked)}
+                  className="mt-0.5 w-4 h-4 accent-[#059669] cursor-pointer"
+                />
+                <div>
+                  <span className="font-semibold text-neutral-900 block">
+                    Purchase Order & Challan Matched
+                  </span>
+                  <span className="text-[11px] text-neutral-500">
+                    Declared cargo and quantity conform to active PO order quota.
+                  </span>
+                </div>
+              </label>
+
+              <label className="flex items-start gap-2.5 p-2 bg-white border border-neutral-300 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={checkVehicle}
+                  onChange={(e) => setCheckVehicle(e.target.checked)}
+                  className="mt-0.5 w-4 h-4 accent-[#059669] cursor-pointer"
+                />
+                <div>
+                  <span className="font-semibold text-neutral-900 block">
+                    Driver & Vehicle Credentials Verified
+                  </span>
+                  <span className="text-[11px] text-neutral-500">
+                    Physical vehicle plate matches transporter and driver mobile on pass.
+                  </span>
+                </div>
+              </label>
+            </div>
+
+            {/* Notes */}
+            <div>
+              <label className="text-[11px] font-semibold text-neutral-700 block mb-1">
+                Guard Verification Notes
+              </label>
+              <input
+                type="text"
+                value={guardNotes}
+                onChange={(e) => setGuardNotes(e.target.value)}
+                placeholder="e.g. All documents verified. Approved for gross scale."
+                className="w-full h-9 px-3 bg-white border border-neutral-300 text-xs text-neutral-900 focus:outline-none focus:border-[#059669]"
+              />
+            </div>
+
+            {/* Modal Actions */}
+            <div className="pt-3 border-t border-neutral-300 flex items-center justify-between gap-2">
+              <button
+                type="button"
+                onClick={handleFlagMismatch}
+                className="px-3.5 py-1.5 border border-red-300 bg-red-50 hover:bg-red-100 text-red-700 text-xs font-semibold cursor-pointer transition-colors"
+              >
+                Flag Mismatch
+              </button>
+
+              <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => setSelectedDoc(null)}
-                  className="p-1 hover:bg-neutral-800 text-neutral-400 hover:text-white cursor-pointer"
+                  className="px-3.5 py-1.5 border border-neutral-300 hover:bg-neutral-200/60 text-neutral-700 text-xs font-semibold cursor-pointer transition-colors"
                 >
-                  <X className="w-5 h-5" />
+                  Cancel
                 </button>
-              </div>
 
-              {/* Modal Body */}
-              <div className="p-5 overflow-y-auto space-y-5 text-xs">
-                {/* Two-Column Document Inspection Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  {/* Left Column: Digital e-Way Bill Manifest Card */}
-                  <div className="border border-neutral-300 p-4 space-y-3 bg-neutral-50/50">
-                    <div className="flex items-center justify-between border-b border-neutral-200 pb-2">
-                      <span className="font-bold uppercase tracking-wider text-neutral-900 text-[11px] flex items-center gap-1.5">
-                        <FileText className="w-3.5 h-3.5 text-neutral-700" />
-                        e-Way Bill Manifest Data (GST Portal)
-                      </span>
-                      <span className="font-mono text-[10px] text-neutral-500">NIC API v1.03</span>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2.5 text-[11px]">
-                      <div>
-                        <span className="text-[10px] text-neutral-500 uppercase block font-semibold">e-Way Bill #</span>
-                        <span className="font-bold text-neutral-900 font-mono text-xs">{selectedDoc.ewayBillNo}</span>
-                      </div>
-                      <div>
-                        <span className="text-[10px] text-neutral-500 uppercase block font-semibold">Gen Date</span>
-                        <span className="text-neutral-800">{selectedDoc.ewayBillDate}</span>
-                      </div>
-                      <div>
-                        <span className="text-[10px] text-neutral-500 uppercase block font-semibold">Valid Until</span>
-                        <span className="font-bold text-neutral-900">{selectedDoc.validUntil}</span>
-                      </div>
-                      <div>
-                        <span className="text-[10px] text-neutral-500 uppercase block font-semibold">HSN Code</span>
-                        <span className="text-neutral-800 font-mono">{selectedDoc.hsnCode}</span>
-                      </div>
-                      <div>
-                        <span className="text-[10px] text-neutral-500 uppercase block font-semibold">Consignor (Supplier)</span>
-                        <span className="font-bold text-neutral-900">{selectedDoc.consignor}</span>
-                        <span className="font-mono text-[10px] text-neutral-500 block">{selectedDoc.consignorGstin}</span>
-                      </div>
-                      <div>
-                        <span className="text-[10px] text-neutral-500 uppercase block font-semibold">Consignee (Plant)</span>
-                        <span className="font-bold text-neutral-900">{selectedDoc.consignee}</span>
-                        <span className="font-mono text-[10px] text-neutral-500 block">{selectedDoc.consigneeGstin}</span>
-                      </div>
-                      <div>
-                        <span className="text-[10px] text-neutral-500 uppercase block font-semibold">Declared Cargo</span>
-                        <span className="font-bold text-neutral-900">{selectedDoc.materialName}</span>
-                      </div>
-                      <div>
-                        <span className="text-[10px] text-neutral-500 uppercase block font-semibold">Declared Weight</span>
-                        <span className="font-extrabold text-[#059669] text-xs tabular-nums">
-                          {selectedDoc.declaredQtyMT.toFixed(2)} MT
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Driver & Commercial Vehicle Statutory Validity Strip */}
-                    <div className="p-2.5 bg-white border border-neutral-300 space-y-1.5 mt-2">
-                      <div className="text-[10px] font-bold uppercase text-neutral-700">
-                        Driver & Vehicle Statutory Validity
-                      </div>
-                      <div className="grid grid-cols-3 gap-2 text-center text-[10px]">
-                        <div className="bg-neutral-50 p-1 border border-neutral-200">
-                          <span className="text-neutral-500 block">Fitness Valid</span>
-                          <strong className="text-neutral-800">{selectedDoc.vehicleFitnessValidUntil}</strong>
-                        </div>
-                        <div className="bg-neutral-50 p-1 border border-neutral-200">
-                          <span className="text-neutral-500 block">Insurance</span>
-                          <strong className="text-neutral-800">{selectedDoc.insuranceValidUntil}</strong>
-                        </div>
-                        <div className="bg-neutral-50 p-1 border border-neutral-200">
-                          <span className="text-neutral-500 block">PUCC</span>
-                          <strong className="text-neutral-800">{selectedDoc.pucValidUntil}</strong>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Right Column: 4-Point Mandatory Statutory Audit Checklist */}
-                  <div className="space-y-3 flex flex-col justify-between">
-                    <div>
-                      <div className="flex items-center justify-between border-b border-neutral-200 pb-2 mb-3">
-                        <span className="font-bold uppercase tracking-wider text-neutral-900 text-[11px] flex items-center gap-1.5">
-                          <ShieldCheck className="w-3.5 h-3.5 text-neutral-700" />
-                          Mandatory Gate Checklist (4 Checks)
-                        </span>
-                        <button
-                          type="button"
-                          onClick={handleSelectAllChecks}
-                          className="text-[11px] font-semibold text-[#059669] hover:underline cursor-pointer"
-                        >
-                          Select All Checks
-                        </button>
-                      </div>
-
-                      <div className="space-y-2">
-                        {/* Check 1 */}
-                        <label
-                          onClick={() =>
-                            setDocChecklist((p) => ({ ...p, ewayBillValid: !p.ewayBillValid }))
-                          }
-                          className={`p-2.5 border cursor-pointer transition-colors flex items-start gap-2.5 ${
-                            docChecklist.ewayBillValid
-                              ? "bg-[#ECFDF5] border-[#A7F3D0]"
-                              : "bg-white border-neutral-300 hover:border-neutral-500"
-                          }`}
-                          style={{ borderRadius: 0 }}
-                        >
-                          <div
-                            className={`w-4 h-4 mt-0.5 border flex items-center justify-center shrink-0 ${
-                              docChecklist.ewayBillValid
-                                ? "bg-[#059669] border-[#059669] text-white"
-                                : "border-neutral-400 bg-white"
-                            }`}
-                          >
-                            {docChecklist.ewayBillValid && <Check className="w-3 h-3" />}
-                          </div>
-                          <div>
-                            <div className="font-bold text-neutral-900">
-                              1. e-Way Bill Active & Unexpired
-                            </div>
-                            <div className="text-[10px] text-neutral-600">
-                              Valid until {selectedDoc.validUntil}. Status verified against NIC GST API.
-                            </div>
-                          </div>
-                        </label>
-
-                        {/* Check 2 */}
-                        <label
-                          onClick={() =>
-                            setDocChecklist((p) => ({ ...p, vehicleNoMatched: !p.vehicleNoMatched }))
-                          }
-                          className={`p-2.5 border cursor-pointer transition-colors flex items-start gap-2.5 ${
-                            docChecklist.vehicleNoMatched
-                              ? "bg-[#ECFDF5] border-[#A7F3D0]"
-                              : "bg-white border-neutral-300 hover:border-neutral-500"
-                          }`}
-                          style={{ borderRadius: 0 }}
-                        >
-                          <div
-                            className={`w-4 h-4 mt-0.5 border flex items-center justify-center shrink-0 ${
-                              docChecklist.vehicleNoMatched
-                                ? "bg-[#059669] border-[#059669] text-white"
-                                : "border-neutral-400 bg-white"
-                            }`}
-                          >
-                            {docChecklist.vehicleNoMatched && <Check className="w-3 h-3" />}
-                          </div>
-                          <div>
-                            <div className="font-bold text-neutral-900">
-                              2. Part-B Vehicle Number Matches Plate
-                            </div>
-                            <div className="text-[10px] text-neutral-600">
-                              Physical plate <strong>{selectedDoc.vehicleNo}</strong> exactly matches e-Way bill Part-B conveyance details.
-                            </div>
-                          </div>
-                        </label>
-
-                        {/* Check 3 */}
-                        <label
-                          onClick={() =>
-                            setDocChecklist((p) => ({ ...p, gstinAndPoMatched: !p.gstinAndPoMatched }))
-                          }
-                          className={`p-2.5 border cursor-pointer transition-colors flex items-start gap-2.5 ${
-                            docChecklist.gstinAndPoMatched
-                              ? "bg-[#ECFDF5] border-[#A7F3D0]"
-                              : "bg-white border-neutral-300 hover:border-neutral-500"
-                          }`}
-                          style={{ borderRadius: 0 }}
-                        >
-                          <div
-                            className={`w-4 h-4 mt-0.5 border flex items-center justify-center shrink-0 ${
-                              docChecklist.gstinAndPoMatched
-                                ? "bg-[#059669] border-[#059669] text-white"
-                                : "border-neutral-400 bg-white"
-                            }`}
-                          >
-                            {docChecklist.gstinAndPoMatched && <Check className="w-3 h-3" />}
-                          </div>
-                          <div>
-                            <div className="font-bold text-neutral-900">
-                              3. PO / SO Reference & Plant GSTIN Verified
-                            </div>
-                            <div className="text-[10px] text-neutral-600">
-                              {selectedDoc.poOrSoNo} cross-checked with ERP quota. Consignee GSTIN confirmed.
-                            </div>
-                          </div>
-                        </label>
-
-                        {/* Check 4 */}
-                        <label
-                          onClick={() =>
-                            setDocChecklist((p) => ({
-                              ...p,
-                              driverDlAndFitnessValid: !p.driverDlAndFitnessValid,
-                            }))
-                          }
-                          className={`p-2.5 border cursor-pointer transition-colors flex items-start gap-2.5 ${
-                            docChecklist.driverDlAndFitnessValid
-                              ? "bg-[#ECFDF5] border-[#A7F3D0]"
-                              : "bg-white border-neutral-300 hover:border-neutral-500"
-                          }`}
-                          style={{ borderRadius: 0 }}
-                        >
-                          <div
-                            className={`w-4 h-4 mt-0.5 border flex items-center justify-center shrink-0 ${
-                              docChecklist.driverDlAndFitnessValid
-                                ? "bg-[#059669] border-[#059669] text-white"
-                                : "border-neutral-400 bg-white"
-                            }`}
-                          >
-                            {docChecklist.driverDlAndFitnessValid && <Check className="w-3 h-3" />}
-                          </div>
-                          <div>
-                            <div className="font-bold text-neutral-900">
-                              4. Driver License & Vehicle Statutory Fitness
-                            </div>
-                            <div className="text-[10px] text-neutral-600">
-                              DL #{selectedDoc.driverLicenseNo} verified. Fitness, PUC, and Insurance in date.
-                            </div>
-                          </div>
-                        </label>
-                      </div>
-                    </div>
-
-                    {/* Officer Notes */}
-                    <div>
-                      <label className="text-[10px] text-neutral-500 uppercase block font-semibold mb-1">
-                        Security Verification Remarks
-                      </label>
-                      <input
-                        type="text"
-                        value={auditNotes}
-                        onChange={(e) => setAuditNotes(e.target.value)}
-                        placeholder="Add compliance notes or observation details..."
-                        className="w-full px-3 py-2 border border-neutral-300 bg-neutral-50 text-xs focus:outline-none focus:border-neutral-700"
-                        style={{ borderRadius: 0 }}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Modal Footer */}
-              <div className="p-4 bg-neutral-100 border-t border-neutral-300 flex flex-wrap items-center justify-between gap-3">
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => handleFlagDiscrepancy("Vehicle plate does not match e-Way bill Part-B conveyance.")}
-                    className="px-3 py-2 border border-red-300 bg-white hover:bg-red-50 text-red-700 text-xs font-semibold cursor-pointer"
-                    style={{ borderRadius: 0 }}
-                  >
-                    Flag Plate Mismatch
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleFlagDiscrepancy("e-Way bill validity expired. Extension required.")}
-                    className="px-3 py-2 border border-amber-300 bg-white hover:bg-amber-50 text-amber-700 text-xs font-semibold cursor-pointer"
-                    style={{ borderRadius: 0 }}
-                  >
-                    Flag Expired EWB
-                  </button>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setSelectedDoc(null)}
-                    className="px-4 py-2 border border-neutral-300 bg-white text-xs font-semibold text-neutral-700 hover:bg-neutral-50 cursor-pointer"
-                    style={{ borderRadius: 0 }}
-                  >
-                    Cancel
-                  </button>
-
-                  <button
-                    type="button"
-                    disabled={!isChecklistComplete}
-                    onClick={handleApproveDocument}
-                    className={`px-5 py-2 text-xs font-bold flex items-center gap-2 cursor-pointer transition-all ${
-                      isChecklistComplete
-                        ? "bg-[#059669] hover:bg-[#047857] text-white shadow-md"
-                        : "bg-neutral-300 text-neutral-500 cursor-not-allowed"
-                    }`}
-                    style={{ borderRadius: 0 }}
-                  >
-                    <CheckCircle2 className="w-4 h-4" />
-                    <span>APPROVE & STAMP GATE PASS</span>
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
-      {/* 
-        ============================================================
-        6. PRINTABLE DOCUMENT VERIFICATION SLIP MODAL
-        ============================================================
-      */}
-      <AnimatePresence>
-        {stampedRecord && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.98 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.98 }}
-              className="bg-white border border-neutral-900 w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col"
-              style={{ borderRadius: 0 }}
-            >
-              {/* Slip Toolbar */}
-              <div className="p-3 bg-[#18181B] text-white flex items-center justify-between">
-                <div className="flex items-center gap-2 text-xs font-semibold">
-                  <CheckCircle2 className="w-4 h-4 text-[#10B981]" />
-                  <span>Statutory Document Verification Certificate Stamped</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => window.print()}
-                    className="px-3 py-1 bg-white hover:bg-neutral-100 text-neutral-900 text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
-                    style={{ borderRadius: 0 }}
-                  >
-                    <Printer className="w-3.5 h-3.5" />
-                    <span>Print Slip</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setStampedRecord(null)}
-                    className="p-1 hover:bg-neutral-800 text-neutral-400 hover:text-white cursor-pointer"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Printable Certificate Content */}
-              <div className="p-6 space-y-4 text-neutral-900 bg-white select-text">
-                <div className="border-b-2 border-neutral-900 pb-3 flex items-start justify-between">
-                  <div>
-                    <h2 className="text-base font-extrabold tracking-tight uppercase">
-                      Bharat Industrial & Renewables LLP
-                    </h2>
-                    <p className="text-[11px] text-neutral-600">
-                      Plant Security Operations · Inbound / Outbound Gate Checkpoint
-                    </p>
-                    <p className="text-[10px] text-neutral-500 uppercase tracking-widest mt-0.5">
-                      Statutory GST e-Way Bill & Delivery Verification Clearance
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-[11px] font-bold text-neutral-500 uppercase">Verification Slip</div>
-                    <div className="text-sm font-extrabold tabular-nums tracking-wider text-neutral-900">
-                      DOC-261003-{stampedRecord.id.replace("doc-", "")}
-                    </div>
-                    <div className="text-[10px] text-neutral-500 mt-0.5">{stampedRecord.verifiedAt}</div>
-                  </div>
-                </div>
-
-                {/* Details Table */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs border-b border-neutral-200 pb-3">
-                  <div>
-                    <span className="text-[10px] text-neutral-500 uppercase block font-semibold">Vehicle Plate</span>
-                    <span className="font-extrabold text-sm text-neutral-900">{stampedRecord.vehicleNo}</span>
-                  </div>
-                  <div>
-                    <span className="text-[10px] text-neutral-500 uppercase block font-semibold">e-Way Bill #</span>
-                    <span className="font-bold font-mono text-neutral-800">{stampedRecord.ewayBillNo}</span>
-                  </div>
-                  <div>
-                    <span className="text-[10px] text-neutral-500 uppercase block font-semibold">PO Reference</span>
-                    <span className="font-semibold text-neutral-800">{stampedRecord.poOrSoNo}</span>
-                  </div>
-                  <div>
-                    <span className="text-[10px] text-neutral-500 uppercase block font-semibold">Declared Weight</span>
-                    <span className="font-extrabold text-[#059669]">{stampedRecord.declaredQtyMT.toFixed(2)} MT</span>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3 text-xs border-b border-neutral-200 pb-3">
-                  <div>
-                    <span className="text-[10px] text-neutral-500 uppercase block font-semibold">Consignor</span>
-                    <span className="font-semibold text-neutral-900">{stampedRecord.consignor}</span>
-                    <span className="text-[10px] text-neutral-500 font-mono block">{stampedRecord.consignorGstin}</span>
-                  </div>
-                  <div>
-                    <span className="text-[10px] text-neutral-500 uppercase block font-semibold">Transporter & Driver</span>
-                    <span className="font-semibold text-neutral-900">{stampedRecord.transporter}</span>
-                    <span className="text-[10px] text-neutral-600 block">
-                      Driver: {stampedRecord.driverName} ({stampedRecord.driverMobile})
-                    </span>
-                  </div>
-                </div>
-
-                {/* Statutory Stamped Box */}
-                <div className="border border-neutral-400 p-3 bg-neutral-50 flex items-center justify-between">
-                  <div>
-                    <div className="text-[10px] uppercase font-bold text-[#059669] tracking-wider flex items-center gap-1.5">
-                      <ShieldCheck className="w-4 h-4 text-[#059669]" />
-                      <span>STATUTORY CLEARANCE PASSED · GATE ENTRY AUTHORIZED</span>
-                    </div>
-                    <div className="text-[11px] text-neutral-700 mt-1">
-                      Verified & Stamped by: <strong>{stampedRecord.verifiedBy}</strong>
-                    </div>
-                    <div className="text-[10px] text-neutral-500 mt-0.5">
-                      e-Way Bill, Part-B conveyance, and driver statutory credentials verified. Proceed to Weighbridge Platform 01.
-                    </div>
-                  </div>
-                  <div className="w-16 h-16 border border-neutral-400 bg-white flex flex-col items-center justify-center shrink-0">
-                    <QrCode className="w-10 h-10 text-neutral-800" />
-                    <span className="text-[8px] font-mono text-neutral-500 mt-0.5">AUTHENTIC</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Modal Footer */}
-              <div className="p-3 bg-neutral-100 border-t border-neutral-300 flex justify-end">
                 <button
                   type="button"
-                  onClick={() => setStampedRecord(null)}
-                  className="px-4 py-2 bg-[#18181B] text-white text-xs font-semibold cursor-pointer"
-                  style={{ borderRadius: 0 }}
+                  disabled={!checkEway || !checkPO || !checkVehicle}
+                  onClick={handleVerifyConfirm}
+                  className="px-5 py-2 bg-[#059669] hover:bg-[#047857] disabled:bg-neutral-300 disabled:text-neutral-500 disabled:cursor-not-allowed text-white text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer flex items-center gap-1.5 shadow-xs"
                 >
-                  Close & Proceed
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span>Mark Verified</span>
                 </button>
               </div>
-            </motion.div>
+            </div>
           </div>
-        )}
-      </AnimatePresence>
+        </div>
+      )}
     </div>
   );
 }
