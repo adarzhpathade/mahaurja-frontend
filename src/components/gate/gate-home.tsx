@@ -332,21 +332,21 @@ export function GateHome({ onNavigateTab, onOpenEntryModal }: GateHomeProps) {
       {/* ========================================================================= */}
       {/* SECTION 1: MASTER COMMAND HEADER WITH LIVE TELEMETRY CLOCK                */}
       {/* ========================================================================= */}
-      <section className="bg-transparent border border-neutral-300 p-5 md:p-6 relative">
-        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-5 pb-5 border-b border-neutral-200">
+      <section className="bg-transparent border border-neutral-300 p-3.5 sm:p-5 md:p-6 relative">
+        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 sm:gap-5 pb-4 sm:pb-5 border-b border-neutral-200">
           <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 border border-emerald-300 bg-emerald-50/60 text-[10px] font-bold uppercase tracking-wider text-[#047857]">
-                <span className="w-1.5 h-1.5 bg-[#059669] animate-pulse inline-block" />
+            <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 mb-2.5">
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 border border-emerald-300 bg-emerald-50/70 text-[10px] font-bold uppercase tracking-wider text-[#047857] w-fit shrink-0 whitespace-nowrap">
+                <span className="w-1.5 h-1.5 bg-[#059669] animate-pulse inline-block shrink-0" />
                 <span>PLANT PERIMETER · STATION GATE 01 ONLINE</span>
               </span>
-              <span className="text-xs text-neutral-400">·</span>
-              <span className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wider">
+              <span className="hidden sm:inline text-xs text-neutral-400">·</span>
+              <span className="text-[10px] sm:text-[11px] font-semibold text-neutral-500 uppercase tracking-wider truncate sm:overflow-visible">
                 BHARAT INDUSTRIAL & RENEWABLES LLP
               </span>
             </div>
 
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-neutral-900 leading-snug">
               Gate Security & Operations Center
             </h1>
             <p className="text-xs text-neutral-600 mt-1 max-w-3xl leading-relaxed">
@@ -659,7 +659,7 @@ export function GateHome({ onNavigateTab, onOpenEntryModal }: GateHomeProps) {
       {/* ========================================================================= */}
       {/* SECTION 3: TACTICAL GUARD RAPID WORKFLOW LAUNCHPAD                        */}
       {/* ========================================================================= */}
-      <section className="bg-transparent border border-neutral-300 p-5 space-y-4">
+      <section className="bg-transparent border border-neutral-300 p-3.5 sm:p-5 space-y-4">
         <div className="flex items-center justify-between border-b border-neutral-200 pb-3">
           <div className="flex items-center gap-2">
             <Zap className="w-4 h-4 text-[#059669]" />
@@ -667,7 +667,7 @@ export function GateHome({ onNavigateTab, onOpenEntryModal }: GateHomeProps) {
               Tactical Workflows & Rapid Actions
             </h2>
           </div>
-          <span className="text-[11px] text-neutral-500">
+          <span className="hidden sm:inline text-[11px] text-neutral-500">
             Click any operational workflow tile to initiate immediate action
           </span>
         </div>
@@ -774,7 +774,7 @@ export function GateHome({ onNavigateTab, onOpenEntryModal }: GateHomeProps) {
       {/* ========================================================================= */}
       {/* SECTION 4: EXPECTED INBOUND FLEET (WITH 1-CLICK TACTICAL CHECK-IN)        */}
       {/* ========================================================================= */}
-      <section className="bg-transparent border border-neutral-300 p-5 space-y-4">
+      <section className="bg-transparent border border-neutral-300 p-3.5 sm:p-5 space-y-4">
         {/* Section Header + Search + Filters */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-neutral-200 pb-3">
           <div className="flex items-center gap-2">
@@ -1068,7 +1068,7 @@ export function GateHome({ onNavigateTab, onOpenEntryModal }: GateHomeProps) {
       {/* ========================================================================= */}
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left 2 Cols: Activity Timeline */}
-        <div className="lg:col-span-2 bg-transparent border border-neutral-300 p-5 space-y-4">
+        <div className="lg:col-span-2 bg-transparent border border-neutral-300 p-3.5 sm:p-5 space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-neutral-200 pb-3">
             <div className="flex items-center gap-2">
               <Clock className="w-4 h-4 text-neutral-700" />
@@ -1146,7 +1146,7 @@ export function GateHome({ onNavigateTab, onOpenEntryModal }: GateHomeProps) {
         </div>
 
         {/* Right Col: Interactive Guard Security Checklist */}
-        <div className="bg-transparent border border-neutral-300 p-5 flex flex-col justify-between space-y-4">
+        <div className="bg-transparent border border-neutral-300 p-3.5 sm:p-5 flex flex-col justify-between space-y-4">
           <div>
             <div className="flex items-center justify-between border-b border-neutral-200 pb-3">
               <div className="flex items-center gap-2">
