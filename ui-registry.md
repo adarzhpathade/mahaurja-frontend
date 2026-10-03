@@ -163,6 +163,108 @@ Print-ready official legal metrology weight certificate with Bharat Industrial &
 
 ---
 
+### Segmented Direction / Mode Switcher (Dual/Multi Pill Toggle)
+
+File: `src/components/gate/gate-entry.tsx`
+Last updated: 04 Oct 2026
+
+| Property         | Class                                                |
+| ---------------- | ---------------------------------------------------- |
+| Background       | Container: `bg-neutral-100`, Active Inbound: `bg-[#059669]`, Active Outbound: `bg-[#18181B]`, Inactive: `hover:bg-neutral-200` |
+| Border           | Outer container: `border border-neutral-300 p-0.5`   |
+| Border radius    | `style={{ borderRadius: 0 }}` (Sharp industrial)    |
+| Text — primary   | Active: `text-white font-bold text-xs uppercase tracking-wider` |
+| Text — secondary | Inactive: `text-neutral-700 hover:text-neutral-900`  |
+| Spacing          | `h-9 sm:h-8 px-2 sm:px-3 gap-1.5`, Grid: `grid grid-cols-2 sm:flex gap-1` |
+| Hover state      | `hover:bg-neutral-200`                               |
+| Shadow           | Active: `shadow-xs`                                  |
+| Accent usage     | `bg-[#059669]` (Inbound RM / primary state), `bg-[#18181B]` (Outbound / dark charcoal state) |
+
+**Pattern notes:**
+Tactile, zero-radius segmented control for mode switching (Inbound vs Outbound, RM vs FG, Shift A vs B, or Stage tabs). Automatically adapts from a 2-column mobile grid to a flex row on desktop with short labels on mobile (`Inbound RM`) and full labels on desktop (`Inbound Biomass RM`). Highly reusable across QC (RM vs FG testing), Inventory, and Production.
+
+---
+
+### Quick Preset Action Chips (Tactile Inspection Pills)
+
+File: `src/components/gate/gate-entry.tsx`
+Last updated: 04 Oct 2026
+
+| Property         | Class                                                |
+| ---------------- | ---------------------------------------------------- |
+| Background       | `bg-white hover:bg-neutral-100`                      |
+| Border           | `border border-neutral-300 hover:border-neutral-400` |
+| Border radius    | `style={{ borderRadius: 0 }}`                        |
+| Text — primary   | `text-xs font-medium text-neutral-700`               |
+| Text — secondary | `text-[11px] text-neutral-500 font-medium` (label)   |
+| Spacing          | Container: `gap-2.5 sm:gap-3 py-1`, Chip: `px-3 py-1.5` |
+| Hover state      | `hover:bg-neutral-100 hover:border-neutral-400`      |
+| Shadow           | `shadow-2xs`                                         |
+| Accent usage     | Prefix `+` or subtle emerald hover ring              |
+
+**Pattern notes:**
+Standardized quick-action pills used to append structured remarks with a single tap. Enforces minimum touch target ergonomics (`px-3 py-1.5 text-xs`) and vertical/horizontal wrap breathing room (`gap-2.5 sm:gap-3`). Reusable for QC sample observations (Moisture High, Foreign Matter, Clean Lot), Production downtime reasons (Feeder Jam, Power Trip, Screen Choke), and Dispatch gate clearance notes.
+
+---
+
+### Industrial Form Architecture & Section Spacing Pattern
+
+File: `src/components/gate/gate-entry.tsx`
+Last updated: 04 Oct 2026
+
+| Property         | Class                                                |
+| ---------------- | ---------------------------------------------------- |
+| Outer container  | `bg-transparent border-0 p-0 sm:border sm:border-neutral-300 sm:p-5 sm:bg-white` |
+| Section divider  | `mt-6 sm:mt-5 pt-5 sm:pt-4 border-t border-neutral-200 space-y-3` |
+| Field grid       | `grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4` |
+| Field input      | `h-10 px-3 bg-white border border-neutral-300 text-xs font-medium text-neutral-900 focus:border-[#059669]` |
+| Textarea         | `w-full min-h-[56px] sm:min-h-[48px] p-3 text-xs leading-relaxed resize-none` |
+| Form footer      | `mt-6 sm:mt-5 pt-5 sm:pt-4 border-t border-neutral-300 flex flex-col sm:flex-row sm:items-center justify-between gap-3` |
+| Primary submit   | `h-10 px-5 bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold uppercase tracking-wider` |
+| Reset / Clear    | `h-10 px-4 border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-700 text-xs font-semibold uppercase` |
+
+**Pattern notes:**
+Standard architectural layout for all high-throughput operational forms. Guarantees zero vertical scroll on desktop viewports (< 650px total height) by packing fields into balanced 3-column rows, while eliminating nested white containers on mobile devices (≤ 640px) to maximize touch width and fit seamlessly on the `#F4F5F7` mist canvas. Reusable for QC Sample Entry, Production Planning, Material Issue, and Sales Orders.
+
+---
+
+### Entity Inspection Drawer (Slide-Over Panel)
+
+File: `src/components/gate/vehicle-details-drawer.tsx`
+Last updated: 04 Oct 2026
+
+| Property         | Class                                                |
+| ---------------- | ---------------------------------------------------- |
+| Drawer canvas    | `max-w-md w-full bg-white border-l border-neutral-300 shadow-2xl` |
+| Backdrop         | `fixed inset-0 bg-black/40 backdrop-blur-[2px] z-50` |
+| Header           | `p-4 sm:p-5 border-b border-neutral-200 flex items-center justify-between` |
+| Nav tabs         | Segmented sub-tabs (`Overview`, `Documents`, `Timeline`) with active emerald border-b |
+| Data rows        | Alternating or bordered key-value pairs with monospace values |
+| Print action     | Quick slip print button in drawer footer             |
+
+**Pattern notes:**
+Universal slide-over panel that opens from the right without navigating away from the active workbench. Used for inspecting vehicles in Gate & Weighbridge, inspecting production batches in Processing, reviewing RM lots in Warehouse, and checking sales order delivery status in Dispatch.
+
+---
+
+### Document Verification & Clearance Checklist
+
+File: `src/components/gate/gate-doc-verification.tsx` / `gate-exit.tsx`
+Last updated: 04 Oct 2026
+
+| Property         | Class                                                |
+| ---------------- | ---------------------------------------------------- |
+| Checklist item   | `p-3 bg-neutral-50 border border-neutral-200 flex items-center justify-between gap-3` |
+| Verified badge   | `bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-semibold px-2 py-0.5` |
+| Pending badge    | `bg-amber-50 text-amber-800 border border-amber-200 text-xs font-medium px-2 py-0.5` |
+| Toggle control   | Tactile binary switch or single-tap verification stamp button |
+| Sign-off block   | Digital operator stamp with employee ID, timestamp, and signature disclaimer |
+
+**Pattern notes:**
+Operational verification pattern that requires explicit security/operator confirmation before authorizing transitions (e.g. Weighbridge Slip verified before gate exit; COA & Invoice verified before dispatch exit; Sample test results verified before RM storage). Reusable for Gate Exit, Loading Authorization, QC Sampling Release, and Delivery Confirmation.
+
+---
+
 ## Animation Patterns
 
 ### Page Transitions

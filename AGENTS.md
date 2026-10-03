@@ -66,7 +66,11 @@ The color system is inspired by high-end minimalist industrial design: **80% Gra
 
 - **Awwwards-level UI** — Every screen must feel premium, polished, state-of-the-art, and visually stunning. No generic, basic, or stripped-down interfaces.
 - **Rich Industrial Operations & Control Workbenches** — Retain the rich, immersive industrial operational design currently in place: live vehicle flow tracking, interactive weighbridge console with scale stabilization telemetry, QC testing workbenches, production line flow monitors, location-wise warehouse maps, and executive management KPIs.
-- **No Kiosk / No Tile Grid** — Do NOT reduce screens to 4–6 button kiosk tile grids or push all operations exclusively into popup modals. Preserve the multi-panel, high-productivity industrial layout matching the current codebase (e.g., `gate-home.tsx`, `weighbridge-home.tsx`).
+- **Large, Bold Typography** — Command-level page headers (`text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-neutral-900`). Bold uppercase section labels with letter-spacing (`text-xs font-bold uppercase tracking-wider text-neutral-800`). No subtitle clutter, decorative chips, or redundant paragraphs in page headers.
+- **Section Spacing & Visual Hierarchy** — Always provide generous vertical breathing room between major form sections (`mt-6 sm:mt-5 pt-5 sm:pt-4 border-t border-neutral-200`). Never cram fields or subsections directly against preceding inputs without clear margin.
+- **Minimal Cards & Zero-Scroll Desktop Experience** — Eliminate decorative, superfluous KPI card grids on primary data entry and control screens (Gate Entry, Weighbridge Capture, QC Testing). On desktop, organize operational forms using balanced multi-column grids (2 or 3 columns) so the entire workbench fits in a standard 1080p/900p viewport with **zero vertical scrolling** (< 650px height).
+- **Clean Mobile Architecture** — On mobile (≤ 640px), eliminate thick nested white card containers with heavy borders; use transparent container backgrounds (`bg-transparent border-0 p-0 sm:border sm:border-neutral-300 sm:p-5 sm:bg-white`) so fields sit directly on the `#F4F5F7` canvas and maximize usable width.
+- **Plain English UI (Easy Words)** — Ban academic, legalistic, or overly complex industrial jargon. Always use simple, intuitive, plain English terms that plant operators and drivers understand immediately.
 - **Mobile-first & Responsive** — Every page must be fully responsive and adapt smoothly across mobile devices (375px+), tablets, and wide industrial desktop consoles.
 - **Micro-animations everywhere** — Use Motion for page transitions, staggered reveals, layout animations, and tab transitions. Use Tailwind transitions for hover states, focus rings, and subtle interactive feedback.
 - **Smooth scrolling** — Lenis for buttery scroll experience across all pages.
@@ -74,6 +78,49 @@ The color system is inspired by high-end minimalist industrial design: **80% Gra
 - **Glassmorphism, gradients, and depth** — Use modern design patterns: subtle glass effects, layered cards with shadows, vibrant gradients, and visual depth.
 - **Dark mode ready** — Design with dark mode as a first-class citizen.
 - **Typography matters** — Use premium typography (Switzer), proper hierarchy (size, weight, spacing), and never rely on browser defaults.
+
+---
+
+## 📐 Core UI Standards (Spacing, Typography & Layout)
+
+### 1. Section Spacing & Breathing Room
+- **Major Form Sections:** Must use `mt-6 sm:mt-5 pt-5 sm:pt-4 border-t border-neutral-200 space-y-3`. This creates a crisp hairline separator and deliberate vertical space.
+- **Sub-section Headers:** Display an icon + uppercase label: `<div className="flex items-center gap-2"><Icon className="w-4 h-4 text-[#059669] shrink-0" /><label className="text-xs font-bold uppercase tracking-wider text-neutral-800">Section Name</label></div>`.
+- **Action Preset Chips / Pills:** Must have comfortable padding and gaps: `px-3 py-1.5 text-xs font-medium border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-700 shadow-2xs` with `gap-2.5 sm:gap-3 py-1` flex-wrap layout. Never use tiny cramped tags (`py-0.5` or `gap-1`).
+- **Remarks & Notes Textarea:** Multi-line inputs must have ample height and comfortable padding: `min-h-[56px] sm:min-h-[48px] p-3 text-xs leading-relaxed resize-none`.
+- **Form Action Footer:** Must have a dedicated top margin and divider: `mt-6 sm:mt-5 pt-5 sm:pt-4 border-t border-neutral-300 flex flex-col sm:flex-row sm:items-center justify-between gap-3`.
+
+### 2. Typography Standard
+- **Page Titles:** `<h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-neutral-900">`
+- **Section Headers:** `<label className="text-xs font-bold uppercase tracking-wider text-neutral-800">`
+- **Field Labels:** `<label className="text-[11px] font-semibold text-neutral-700 block mb-1">`
+- **Inputs & Selects:** `h-10 px-3 bg-white border border-neutral-300 text-xs font-medium text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-[#059669]`
+- **Numeric Telemetry & Live Weights:** Monospace tabular numbers: `font-mono font-black text-2xl` up to `text-7xl`.
+
+### 3. Minimal Cards & Container Rules
+- **No Decorative KPI Grids on Data Entry Pages:** Never clutter primary transaction forms (Gate Entry, Gross/Tare Weighment, Sampling) with 4-card metric grids. Keep operational forms clean and focused.
+- **Desktop Zero-Scroll:** Keep form height below 650px total on desktop viewports by utilizing 3-column field grids (`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4`).
+- **Mobile Container Transparent:** On mobile viewports (≤ 640px), the outer container MUST be `bg-transparent border-0 p-0 sm:border sm:border-neutral-300 sm:p-5 sm:bg-white` to prevent cramped nested boxes.
+
+### 4. Plain English UI Vocabulary (Easy Words)
+Always replace complex or bureaucratic jargon with direct, easy-to-read terms:
+
+| ❌ Hard / Jargon Word | ✅ Plain English Term (Use in UI) | Context |
+| -------------------- | --------------------------------- | ------- |
+| Consignor | **Supplier** | Raw Material Source |
+| Consignee | **Customer** | Finished Goods Destination |
+| Commodity | **Material** | Raw Material / Finished Goods |
+| Statutory / Compliance | **Required** | Form validation / Required fields |
+| Weighment Reconciliation | **Weight Record / Weight History** | Weighbridge ledger & slips |
+| Dwell Time / Detention | **Time Inside** | Total duration vehicle stayed in plant |
+| Turnaround Time | **Visit Time** | Total vehicle arrival-to-exit time |
+| Consignment Manifest | **Gate Pass** | Gate pass & entry slip |
+| Movement Identifier | **Pass Number (e.g., RM-GATE-...)** | Tracking reference ID |
+| Annotations / Observations | **Remarks / Notes** | Inspection & driver notes |
+| Purge Buffer / Reset Cache | **Clear** | Form reset button |
+| Execute Authorization | **Issue Pass / Confirm** | Primary submission action |
+| Tare Quantification | **Empty Weight (Tare)** | Weighbridge tare capture |
+| Gross Metrology | **Loaded Weight (Gross)** | Weighbridge gross capture |
 
 ---
 
@@ -104,14 +151,17 @@ If something is ambiguous in the design image, ask for clarification rather than
 - Add proper `aria-` attributes and keyboard navigation for accessibility
 - Keep bundle size minimal — lazy load heavy components with `next/dynamic`
 - Maintain rich, highly functional industrial consoles that empower operators with immediate context, quick actions, and clear status visibility
+- Register newly refined or reusable component patterns in `ui-registry.md`
 
 ### DON'T:
 - ❌ Do NOT run lint checks, build checks, or type checks after every step. Only run checks when explicitly asked or at the end of a complete feature.
 - ❌ Do NOT use placeholder images — generate real assets using the image generation tool when needed
 - ❌ Do NOT create basic/minimal UIs or dumbed-down kiosk tile grids — every screen and component must look premium and operational
+- ❌ Do NOT clutter primary data entry forms with decorative KPI cards that cause unnecessary vertical scrolling
 - ❌ Do NOT hardcode data — use proper TypeScript types/interfaces even for mock data
 - ❌ Do NOT skip animations — every page transition, list render, and interactive element should have motion
 - ❌ Do NOT ignore mobile — test every layout mentally for 375px (mobile), 768px (tablet), and 1440px (desktop)
+- ❌ Do NOT use complex, legalistic, or academic jargon in the UI — always use plain English easy words
 
 ---
 
