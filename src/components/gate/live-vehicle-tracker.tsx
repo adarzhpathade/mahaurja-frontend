@@ -208,15 +208,15 @@ export function LiveVehicleTracker({
           </div>
 
           {/* Quick Header Utility Badges (Transparent, neutral borders, no bg color) */}
-          <div className="flex flex-wrap items-center gap-2.5">
+          <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 sm:gap-2.5 w-full sm:w-auto">
             {/* Date Pill */}
-            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-transparent border border-neutral-300 text-xs font-medium text-neutral-700">
+            <div className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-transparent border border-neutral-300 text-xs font-medium text-neutral-700">
               <Calendar className="w-3.5 h-3.5 text-neutral-500" />
               <span>Today · 03 Oct</span>
             </div>
 
             {/* Station Dropdown Pill */}
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-transparent border border-neutral-300 text-xs font-medium text-neutral-800 cursor-pointer hover:bg-neutral-200/40">
+            <div className="flex items-center justify-center gap-2 px-3 py-1.5 bg-transparent border border-neutral-300 text-xs font-medium text-neutral-800 cursor-pointer hover:bg-neutral-200/40">
               <span className="w-1.5 h-1.5 bg-[#059669] inline-block" />
               <span>Gate Station 01</span>
               <ChevronDown className="w-3.5 h-3.5 text-neutral-400" />
@@ -226,7 +226,7 @@ export function LiveVehicleTracker({
             <button
               type="button"
               onClick={() => setIsModalOpen(true)}
-              className="flex items-center gap-1.5 px-4 py-1.5 bg-[#059669] hover:bg-[#047857] text-white text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer"
+              className="col-span-2 sm:col-span-1 flex items-center justify-center gap-1.5 px-4 py-2 sm:py-1.5 bg-[#059669] hover:bg-[#047857] text-white text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer"
             >
               <Plus className="w-4 h-4" strokeWidth={2.5} />
               <span>New Gate Pass</span>
@@ -588,24 +588,24 @@ export function LiveVehicleTracker({
 
         {/* Filter Tabs & Search Bar (Transparent, neutral borders, no bg color) */}
         <div className="bg-transparent border border-neutral-300 p-3 flex flex-col md:flex-row md:items-center justify-between gap-3">
-          {/* Spaced Rectangular Tab Filters */}
-          <div className="flex flex-wrap items-center gap-1.5">
+          {/* Spaced Rectangular Tab Filters (Scrollable on mobile) */}
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 max-w-full md:flex-wrap">
             <button
               type="button"
               onClick={() => setActiveTab("ALL")}
-              className={`px-3 py-1.5 text-xs font-medium border cursor-pointer transition-colors ${
+              className={`px-3 py-1.5 text-xs font-medium border cursor-pointer transition-colors shrink-0 ${
                 activeTab === "ALL"
                   ? "bg-[#18181B] text-white border-[#18181B]"
                   : "bg-transparent text-neutral-700 border-neutral-300 hover:bg-neutral-200/50"
               }`}
             >
-              All Vehicles ({stats.totalInside})
+              All ({stats.totalInside})
             </button>
 
             <button
               type="button"
               onClick={() => setActiveTab("INBOUND_RM")}
-              className={`px-3 py-1.5 text-xs font-medium border cursor-pointer transition-colors ${
+              className={`px-3 py-1.5 text-xs font-medium border cursor-pointer transition-colors shrink-0 whitespace-nowrap ${
                 activeTab === "INBOUND_RM"
                   ? "bg-[#18181B] text-white border-[#18181B]"
                   : "bg-transparent text-neutral-700 border-neutral-300 hover:bg-neutral-200/50"
@@ -617,37 +617,37 @@ export function LiveVehicleTracker({
             <button
               type="button"
               onClick={() => setActiveTab("OUTBOUND_DISPATCH")}
-              className={`px-3 py-1.5 text-xs font-medium border cursor-pointer transition-colors ${
+              className={`px-3 py-1.5 text-xs font-medium border cursor-pointer transition-colors shrink-0 whitespace-nowrap ${
                 activeTab === "OUTBOUND_DISPATCH"
                   ? "bg-[#18181B] text-white border-[#18181B]"
                   : "bg-transparent text-neutral-700 border-neutral-300 hover:bg-neutral-200/50"
               }`}
             >
-              Outbound Dispatch ({stats.outboundFG})
+              Outbound ({stats.outboundFG})
             </button>
 
             <button
               type="button"
               onClick={() => setActiveTab("WAITING_WEIGHMENT")}
-              className={`px-3 py-1.5 text-xs font-medium border cursor-pointer transition-colors ${
+              className={`px-3 py-1.5 text-xs font-medium border cursor-pointer transition-colors shrink-0 whitespace-nowrap ${
                 activeTab === "WAITING_WEIGHMENT"
                   ? "bg-[#18181B] text-white border-[#18181B]"
                   : "bg-transparent text-neutral-700 border-neutral-300 hover:bg-neutral-200/50"
               }`}
             >
-              Awaiting Weighment ({stats.awaitingWeighbridge})
+              Awaiting Scale ({stats.awaitingWeighbridge})
             </button>
 
             <button
               type="button"
               onClick={() => setActiveTab("CLEARED_EXIT")}
-              className={`px-3 py-1.5 text-xs font-medium border cursor-pointer transition-colors ${
+              className={`px-3 py-1.5 text-xs font-medium border cursor-pointer transition-colors shrink-0 whitespace-nowrap ${
                 activeTab === "CLEARED_EXIT"
                   ? "bg-[#18181B] text-white border-[#18181B]"
                   : "bg-transparent text-neutral-700 border-neutral-300 hover:bg-neutral-200/50"
               }`}
             >
-              Cleared Exit ({stats.clearedForExit})
+              Exit Queue ({stats.clearedForExit})
             </button>
           </div>
 
@@ -934,59 +934,61 @@ export function LiveVehicleTracker({
                                     </span>
                                   </div>
 
-                                  <div className="relative">
-                                    {/* Connecting Pipeline Tracks */}
-                                    <div className="absolute top-4 left-6 right-6 h-0.5 bg-neutral-200 z-0" />
-                                    <div
-                                      className="absolute top-4 left-6 h-0.5 bg-[#18181B] z-0 transition-all duration-300"
-                                      style={{
-                                        width: `${(currentStep / (LIFECYCLE_STAGES.length - 1)) * 100}%`,
-                                      }}
-                                    />
+                                  <div className="overflow-x-auto pb-1">
+                                    <div className="min-w-[440px] sm:min-w-0 relative">
+                                      {/* Connecting Pipeline Tracks */}
+                                      <div className="absolute top-4 left-6 right-6 h-0.5 bg-neutral-200 z-0" />
+                                      <div
+                                        className="absolute top-4 left-6 h-0.5 bg-[#18181B] z-0 transition-all duration-300"
+                                        style={{
+                                          width: `${(currentStep / (LIFECYCLE_STAGES.length - 1)) * 100}%`,
+                                        }}
+                                      />
 
-                                    <div className="relative z-10 grid grid-cols-5 gap-2">
-                                      {LIFECYCLE_STAGES.map((step, idx) => {
-                                        const Icon = step.icon;
-                                        const isPassed = idx < currentStep;
-                                        const isCurrent = idx === currentStep;
+                                      <div className="relative z-10 grid grid-cols-5 gap-2">
+                                        {LIFECYCLE_STAGES.map((step, idx) => {
+                                          const Icon = step.icon;
+                                          const isPassed = idx < currentStep;
+                                          const isCurrent = idx === currentStep;
 
-                                        return (
-                                          <div key={step.key} className="flex flex-col items-center text-center">
-                                            <div
-                                              className={`w-8 h-8 flex items-center justify-center text-xs mb-1.5 border transition-all relative ${
-                                                isCurrent
-                                                  ? "bg-[#18181B] text-white border-[#18181B] ring-2 ring-[#059669]/50 shadow-sm"
-                                                  : isPassed
-                                                  ? "bg-neutral-900 text-white border-neutral-900"
-                                                  : "bg-white text-neutral-400 border-neutral-300"
-                                              }`}
-                                            >
-                                              {isCurrent && (
-                                                <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-[#059669] animate-ping" />
-                                              )}
-                                              {isPassed ? (
-                                                <Check className="w-4 h-4 text-emerald-400" strokeWidth={2.5} />
-                                              ) : (
-                                                <Icon className="w-4 h-4" />
-                                              )}
+                                          return (
+                                            <div key={step.key} className="flex flex-col items-center text-center">
+                                              <div
+                                                className={`w-8 h-8 flex items-center justify-center text-xs mb-1.5 border transition-all relative ${
+                                                  isCurrent
+                                                    ? "bg-[#18181B] text-white border-[#18181B] ring-2 ring-[#059669]/50 shadow-sm"
+                                                    : isPassed
+                                                    ? "bg-neutral-900 text-white border-neutral-900"
+                                                    : "bg-white text-neutral-400 border-neutral-300"
+                                                }`}
+                                              >
+                                                {isCurrent && (
+                                                  <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-[#059669] animate-ping" />
+                                                )}
+                                                {isPassed ? (
+                                                  <Check className="w-4 h-4 text-emerald-400" strokeWidth={2.5} />
+                                                ) : (
+                                                  <Icon className="w-4 h-4" />
+                                                )}
+                                              </div>
+                                              <span
+                                                className={`text-[10px] sm:text-[11px] leading-tight block ${
+                                                  isCurrent
+                                                    ? "font-bold text-neutral-900"
+                                                    : isPassed
+                                                    ? "text-neutral-700 font-medium"
+                                                    : "text-neutral-400"
+                                                }`}
+                                              >
+                                                {step.label}
+                                              </span>
+                                              <span className="text-[10px] text-neutral-400 block mt-0.5">
+                                                {isCurrent ? "Active Now" : isPassed ? "Complete" : "Pending"}
+                                              </span>
                                             </div>
-                                            <span
-                                              className={`text-[10px] sm:text-[11px] leading-tight block ${
-                                                isCurrent
-                                                  ? "font-bold text-neutral-900"
-                                                  : isPassed
-                                                  ? "text-neutral-700 font-medium"
-                                                  : "text-neutral-400"
-                                              }`}
-                                            >
-                                              {step.label}
-                                            </span>
-                                            <span className="text-[10px] text-neutral-400 block mt-0.5">
-                                              {isCurrent ? "Active Now" : isPassed ? "Complete" : "Pending"}
-                                            </span>
-                                          </div>
-                                        );
-                                      })}
+                                          );
+                                        })}
+                                      </div>
                                     </div>
                                   </div>
                                 </div>

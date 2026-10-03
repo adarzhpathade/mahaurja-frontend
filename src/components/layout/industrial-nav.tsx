@@ -38,7 +38,10 @@ import {
   Layers,
   ChevronDown,
   Check,
+  Menu,
+  X,
 } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
 
 export interface NavItem {
   id: string;
@@ -180,6 +183,7 @@ export function IndustrialNav({
   );
   const [searchQuery, setSearchQuery] = useState("");
   const [roleMenuOpen, setRoleMenuOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const selectedTab = activeTabId !== undefined ? activeTabId : internalActiveTab;
 
@@ -205,15 +209,23 @@ export function IndustrialNav({
     }
   };
 
+  const activeNavItem = currentRole.navItems.find((item) => item.id === selectedTab);
+
   return (
-    <header className="w-full bg-[#F4F5F7] border-b border-[#E2E8F0] select-none">
-      <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
-        {/* Left: Brand Name (No logo image per user instruction, exact clean typography, no corner rounding) */}
-        <div className="flex items-center gap-6 shrink-0">
-          <div className="flex items-center">
+    <header className="w-full bg-[#F4F5F7] border-b border-[#E2E8F0] select-none sticky top-0 z-40">
+      <div className="max-w-[1920px] mx-auto px-3 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between gap-2 sm:gap-4">
+        {/* Left: Brand Name & Active Module Pill for Mobile */}
+        <div className="flex items-center gap-2 sm:gap-6 shrink-0">
+          <div className="flex items-center gap-2">
             <span className="font-bold tracking-tight text-[#0F172A] text-sm md:text-base uppercase tracking-wider">
               MAHAURJA
             </span>
+            {/* Mobile Active Desk Pill */}
+            {activeNavItem && (
+              <span className="md:hidden px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider bg-[#18181B] text-white truncate max-w-[120px]">
+                {activeNavItem.label}
+              </span>
+            )}
           </div>
         </div>
 
@@ -256,8 +268,8 @@ export function IndustrialNav({
           </div>
         </nav>
 
-        {/* Right: Search + Notification + User Profile Menu */}
-        <div className="flex items-center gap-4 sm:gap-6 shrink-0">
+        {/* Right: Search + Notification + User Profile Menu + Mobile Menu Toggle */}
+        <div className="flex items-center gap-2 sm:gap-6 shrink-0">
           {/* Search by ID or location (Dark, crisp opacity) */}
           <div className="hidden sm:flex items-center gap-2">
             <Search className="w-4 h-4 text-neutral-800 shrink-0" strokeWidth={2} />
@@ -284,7 +296,7 @@ export function IndustrialNav({
             <button
               type="button"
               onClick={() => setRoleMenuOpen(!roleMenuOpen)}
-              className="flex items-center gap-1.5 text-neutral-800 hover:text-black transition-colors p-1 cursor-pointer focus:outline-none"
+              className="flex items-center gap-1 text-neutral-800 hover:text-black transition-colors p-1 cursor-pointer focus:outline-none"
               title={`Switch Role (Current: ${currentRole.roleName})`}
             >
               <User className="w-[18px] h-[18px]" strokeWidth={2} />
@@ -303,7 +315,7 @@ export function IndustrialNav({
                   onClick={() => setRoleMenuOpen(false)}
                 />
                 <div
-                  className="absolute right-0 mt-2 w-72 bg-white border border-[#D1D5DB] z-50 py-1"
+                  className="absolute right-0 mt-2 w-72 bg-white border border-[#D1D5DB] z-50 py-1 shadow-lg"
                   style={{ borderRadius: 0 }}
                 >
                   <div className="px-3 py-2 border-b border-[#E2E8F0] bg-[#F8F9FA]">
@@ -354,41 +366,143 @@ export function IndustrialNav({
               </>
             )}
           </div>
+
+          {/* Mobile Collapsible Navigation Toggle Button */}
+          <button
+            type="button"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="md:hidden flex items-center gap-1.5 px-2.5 py-1.5 border border-neutral-400 bg-white hover:bg-neutral-100 text-neutral-900 text-xs font-bold uppercase tracking-wider cursor-pointer transition-colors active:scale-95"
+            style={{ borderRadius: 0 }}
+            aria-expanded={isMobileMenuOpen}
+            aria-label={isMobileMenuOpen ? "Collapse Navigation" : "Expand Navigation"}
+          >
+            {isMobileMenuOpen ? (
+              <>
+                <X className="w-4 h-4 text-neutral-900" />
+                <span className="text-[11px]">CLOSE</span>
+              </>
+            ) : (
+              <>
+                <Menu className="w-4 h-4 text-neutral-900" />
+                <span className="text-[11px]">NAV</span>
+              </>
+            )}
+          </button>
         </div>
       </div>
 
-      {/* Mobile Nav Bar for smaller viewports */}
-      <div className="md:hidden border-t border-neutral-200 bg-[#F4F5F7] px-3 py-2 overflow-x-auto">
-        <div className="inline-flex items-center gap-1.5">
-          {currentRole.navItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = selectedTab === item.id;
-            return (
+      {/* Collapsible Mobile Drawer Panel */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+            className="md:hidden border-t border-neutral-300 bg-white divide-y divide-neutral-200 overflow-hidden shadow-xl"
+          >
+            {/* Active Guard Info & Role Switch Strip */}
+            <div className="p-3 bg-[#F8F9FA] flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2.5">
+                <div className="w-7 h-7 bg-[#18181B] text-white flex items-center justify-center text-xs font-bold shrink-0">
+                  {currentRole.userName.charAt(0)}
+                </div>
+                <div className="min-w-0">
+                  <div className="text-xs font-bold text-neutral-900 leading-tight truncate">
+                    {currentRole.userName}
+                  </div>
+                  <div className="text-[10px] text-neutral-500 font-medium truncate">
+                    {currentRole.roleName}
+                  </div>
+                </div>
+              </div>
               <button
-                key={item.id}
-                onClick={() => handleTabClick(item.id)}
                 type="button"
-                className={`
-                  flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium transition-colors whitespace-nowrap cursor-pointer border
-                  ${
-                    isActive
-                      ? "bg-[#18181B] text-white border-[#18181B]"
-                      : "bg-transparent text-neutral-700 border-neutral-300 hover:bg-neutral-200/50 hover:text-neutral-900"
-                  }
-                `}
+                onClick={() => setRoleMenuOpen(!roleMenuOpen)}
+                className="px-2.5 py-1 border border-neutral-300 bg-white text-[11px] font-semibold text-neutral-800 hover:bg-neutral-100 flex items-center gap-1 shrink-0 cursor-pointer"
                 style={{ borderRadius: 0 }}
               >
-                <Icon
-                  className={`w-3.5 h-3.5 shrink-0 ${
-                    isActive ? "text-white" : "text-neutral-600"
-                  }`}
-                />
-                <span>{item.label}</span>
+                <span>Change Role</span>
+                <ChevronDown className="w-3 h-3" />
               </button>
-            );
-          })}
-        </div>
-      </div>
+            </div>
+
+            {/* Mobile Search Input */}
+            <div className="p-3 bg-white">
+              <div className="relative">
+                <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-neutral-400" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search vehicle plate, PO, ID..."
+                  className="w-full pl-8 pr-3 py-2 text-xs border border-neutral-300 bg-neutral-50 text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:bg-white focus:border-neutral-900"
+                  style={{ borderRadius: 0 }}
+                />
+              </div>
+            </div>
+
+            {/* Role Navigation Items (Full-width Touch-Friendly Buttons) */}
+            <div className="p-3 space-y-1.5 bg-white">
+              <div className="text-[10px] font-bold uppercase tracking-wider text-neutral-500 px-1 mb-1 flex items-center justify-between">
+                <span>{currentRole.roleName} Desks</span>
+                <span className="text-[9px] text-[#059669] font-bold">● STATION ACTIVE</span>
+              </div>
+
+              {currentRole.navItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = selectedTab === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => {
+                      handleTabClick(item.id);
+                      setIsMobileMenuOpen(false);
+                    }}
+                    type="button"
+                    className={`
+                      w-full flex items-center justify-between px-3.5 py-3 text-xs font-semibold border transition-all cursor-pointer active:scale-[0.99]
+                      ${
+                        isActive
+                          ? "bg-[#18181B] text-white border-[#18181B]"
+                          : "bg-white text-neutral-800 border-neutral-200 hover:bg-neutral-50 hover:border-neutral-300"
+                      }
+                    `}
+                    style={{ borderRadius: 0 }}
+                  >
+                    <div className="flex items-center gap-3">
+                      <Icon
+                        className={`w-4 h-4 shrink-0 ${
+                          isActive ? "text-[#10B981]" : "text-neutral-500"
+                        }`}
+                        strokeWidth={isActive ? 2 : 1.75}
+                      />
+                      <span className="text-[13px]">{item.label}</span>
+                    </div>
+
+                    {isActive ? (
+                      <span className="text-[10px] uppercase font-bold tracking-wider text-[#10B981] px-2 py-0.5 border border-[#10B981]/50 bg-black/30">
+                        Current View
+                      </span>
+                    ) : (
+                      <span className="text-neutral-400 text-xs font-normal">→</span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Quick Operational Telemetry Strip */}
+            <div className="p-3 bg-[#F4F5F7] flex items-center justify-between text-[11px] text-neutral-600">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 bg-[#059669]" />
+                <span className="font-semibold text-neutral-800">Gate 01 / Gate 02 Live</span>
+              </div>
+              <span className="text-neutral-500">Day Duty Shift 01</span>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   );
 }

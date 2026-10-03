@@ -472,20 +472,25 @@ export function GateDocVerification({
             </div>
           </div>
 
-          {/* Quick Actions & Live Clock */}
-          <div className="flex flex-wrap items-center gap-2">
+          {/* Quick Actions & Live Clock (Responsive Grid on Mobile) */}
+          <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 w-full lg:w-auto">
             {/* Clock Box */}
             <div
-              className="px-3 h-10 border border-neutral-300 bg-neutral-50 flex items-center gap-2 shrink-0"
+              className="col-span-2 sm:col-span-1 px-3 h-10 border border-neutral-300 bg-neutral-50 flex items-center justify-between sm:justify-start gap-2 shrink-0"
               style={{ borderRadius: 0 }}
             >
-              <span className="w-2 h-2 rounded-full bg-[#059669] animate-pulse" />
-              <div className="flex items-baseline gap-1.5 whitespace-nowrap">
-                <span className="text-[11px] font-semibold text-neutral-500 uppercase">IST</span>
-                <span className="text-xs font-bold text-neutral-900 tabular-nums">
-                  {currentTime || "15:10:00"}
-                </span>
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-[#059669] animate-pulse" />
+                <div className="flex items-baseline gap-1.5 whitespace-nowrap">
+                  <span className="text-[11px] font-semibold text-neutral-500 uppercase">IST</span>
+                  <span className="text-xs font-bold text-neutral-900 tabular-nums">
+                    {currentTime || "15:10:00"}
+                  </span>
+                </div>
               </div>
+              <span className="sm:hidden text-[9px] font-bold text-[#059669] px-1.5 py-0.5 border border-emerald-300 bg-emerald-50">
+                PORTAL LIVE
+              </span>
             </div>
 
             {/* Quick QR Scanner Simulator */}
@@ -493,10 +498,10 @@ export function GateDocVerification({
               type="button"
               onClick={handleSimulateScan}
               disabled={isScanning}
-              className="h-10 px-3.5 border border-neutral-300 bg-white hover:bg-neutral-50 text-neutral-800 text-xs font-semibold flex items-center gap-2 cursor-pointer transition-colors shrink-0"
+              className="col-span-2 sm:col-span-1 h-10 px-3.5 border border-neutral-300 bg-white hover:bg-neutral-50 text-neutral-800 text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer transition-colors shrink-0"
               style={{ borderRadius: 0 }}
             >
-              <QrCode className="w-3.5 h-3.5 text-neutral-700" />
+              <QrCode className="w-3.5 h-3.5 text-neutral-700 shrink-0" />
               <span>{isScanning ? "Scanning Optical Code..." : "Scan e-Way Bill QR"}</span>
             </button>
 
@@ -504,22 +509,22 @@ export function GateDocVerification({
             <button
               type="button"
               onClick={() => onNavigateTab("live-tracker")}
-              className="h-10 px-3.5 border border-neutral-300 bg-white hover:bg-neutral-50 text-neutral-800 text-xs font-semibold flex items-center gap-2 cursor-pointer transition-colors shrink-0"
+              className="h-10 px-2 sm:px-3.5 border border-neutral-300 bg-white hover:bg-neutral-50 text-neutral-800 text-[11px] sm:text-xs font-semibold flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer transition-colors shrink-0"
               style={{ borderRadius: 0 }}
             >
-              <Truck className="w-3.5 h-3.5 text-neutral-600" />
-              <span>Vehicle Tracker</span>
+              <Truck className="w-3.5 h-3.5 text-neutral-600 shrink-0" />
+              <span>Fleet Tracker</span>
             </button>
 
             {/* Back to Ops Hub */}
             <button
               type="button"
               onClick={() => onNavigateTab("home")}
-              className="h-10 px-3.5 bg-[#18181B] hover:bg-black text-white text-xs font-semibold flex items-center gap-2 cursor-pointer transition-colors shrink-0"
+              className="h-10 px-2 sm:px-3.5 bg-[#18181B] hover:bg-black text-white text-[11px] sm:text-xs font-semibold flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer transition-colors shrink-0"
               style={{ borderRadius: 0 }}
             >
-              <span>Operations Hub</span>
-              <ArrowRight className="w-3.5 h-3.5 text-neutral-300" />
+              <span>Ops Hub</span>
+              <ArrowRight className="w-3.5 h-3.5 text-neutral-300 shrink-0" />
             </button>
           </div>
         </div>
@@ -656,14 +661,14 @@ export function GateDocVerification({
         style={{ borderRadius: 0 }}
       >
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-neutral-200 pb-3">
-          {/* Status Filter Tabs */}
-          <div className="flex flex-wrap items-center gap-1.5">
+          {/* Status Filter Tabs (Scrollable on Mobile) */}
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 max-w-full md:flex-wrap">
             {(
               [
-                { key: "ALL", label: "All Documents", count: stats.total },
+                { key: "ALL", label: "All Docs", count: stats.total },
                 { key: "PENDING", label: "Pending Verification", count: stats.pending },
                 { key: "VERIFIED", label: "Verified & Cleared", count: stats.verified },
-                { key: "EXPIRED", label: "Expired E-Way Bill", count: docRecords.filter(d => d.verificationStatus === "EXPIRED").length },
+                { key: "EXPIRED", label: "Expired EWB", count: docRecords.filter(d => d.verificationStatus === "EXPIRED").length },
                 { key: "FLAGGED_MISMATCH", label: "Flagged Mismatch", count: docRecords.filter(d => d.verificationStatus === "FLAGGED_MISMATCH").length },
               ] as const
             ).map((tab) => {
@@ -673,7 +678,7 @@ export function GateDocVerification({
                   key={tab.key}
                   type="button"
                   onClick={() => setStatusFilter(tab.key)}
-                  className={`px-3 py-2 text-xs font-bold uppercase tracking-wider border cursor-pointer transition-colors flex items-center gap-2 ${
+                  className={`px-3 py-2 text-xs font-bold uppercase tracking-wider border cursor-pointer transition-colors flex items-center gap-2 shrink-0 whitespace-nowrap ${
                     isSelected
                       ? "bg-[#18181B] text-white border-[#18181B]"
                       : "bg-white text-neutral-700 border-neutral-300 hover:bg-neutral-50"

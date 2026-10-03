@@ -94,20 +94,20 @@ export function GateEntryModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 select-none">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/50 select-none">
       <div
-        className="w-full max-w-2xl bg-white border border-neutral-300 max-h-[92vh] flex flex-col"
+        className="w-full max-w-2xl bg-white border border-neutral-300 max-h-[96vh] sm:max-h-[92vh] flex flex-col"
         style={{ borderRadius: 0 }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-200 bg-[#F8F9FA]">
-          <div className="flex items-center gap-2.5">
-            <span className="w-2 h-2 bg-[#059669]" />
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 sm:py-4 border-b border-neutral-200 bg-[#F8F9FA]">
+          <div className="flex items-center gap-2 sm:gap-2.5">
+            <span className="w-2 h-2 bg-[#059669] shrink-0" />
             <div>
-              <h2 className="text-sm font-semibold tracking-tight text-neutral-900 uppercase">
+              <h2 className="text-xs sm:text-sm font-semibold tracking-tight text-neutral-900 uppercase">
                 New Gate Entry Pass · Security Checkpoint
               </h2>
-              <p className="text-[11px] text-neutral-500">
+              <p className="text-[10px] sm:text-[11px] text-neutral-500">
                 Entry Pass ID: <span className="font-semibold text-neutral-800 tabular-nums">{generatedId}</span> · Gate Station 01
               </p>
             </div>
@@ -123,20 +123,20 @@ export function GateEntryModal({
 
         {/* Error Alert */}
         {error && (
-          <div className="mx-6 mt-4 p-3 bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2" style={{ borderRadius: 0 }}>
+          <div className="mx-4 sm:mx-6 mt-4 p-3 bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2" style={{ borderRadius: 0 }}>
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
         {/* Form Body */}
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-5 text-xs">
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-5 text-xs">
           {/* Direction Toggle */}
           <div>
             <label className="block font-semibold text-neutral-700 uppercase tracking-wider text-[11px] mb-1.5">
               Operation Type *
             </label>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <button
                 type="button"
                 onClick={() => setDirection("INBOUND_RM")}
@@ -389,11 +389,11 @@ export function GateEntryModal({
         </form>
 
         {/* Footer Actions (Surgical Bio-Emerald Primary Action) */}
-        <div className="px-6 py-4 border-t border-neutral-200 bg-[#F8F9FA] flex items-center justify-between">
+        <div className="px-4 sm:px-6 py-3 sm:py-4 border-t border-neutral-200 bg-[#F8F9FA] flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 text-xs font-medium text-neutral-600 hover:text-neutral-900 cursor-pointer transition-colors"
+            className="w-full sm:w-auto px-4 py-2 text-xs font-semibold text-neutral-600 hover:text-neutral-900 border border-neutral-300 sm:border-transparent text-center cursor-pointer transition-colors"
           >
             Cancel
           </button>
@@ -401,11 +401,11 @@ export function GateEntryModal({
           <button
             type="button"
             onClick={handleSubmit}
-            className="px-5 py-2 text-xs font-semibold text-white bg-[#059669] hover:bg-[#047857] transition-colors cursor-pointer flex items-center gap-2"
+            className="w-full sm:w-auto px-5 py-2.5 sm:py-2 text-xs font-semibold text-white bg-[#059669] hover:bg-[#047857] transition-colors cursor-pointer flex items-center justify-center gap-2 shadow-sm"
             style={{ borderRadius: 0 }}
           >
             <Truck className="w-4 h-4" />
-            <span>Generate Gate Pass & Route to Weighbridge</span>
+            <span>Generate Pass & Route to WB</span>
           </button>
         </div>
       </div>

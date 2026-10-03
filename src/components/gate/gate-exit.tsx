@@ -294,53 +294,58 @@ export function GateExit({ vehicles, onUpdateStage, onNavigateTab }: GateExitPro
             </div>
           </div>
 
-          {/* Quick Actions & Live Clock */}
-          <div className="flex flex-wrap items-center gap-2">
+          {/* Quick Actions & Live Clock (Responsive Grid on Mobile) */}
+          <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 w-full lg:w-auto">
             {/* Clock Box */}
             <div
-              className="px-3 h-10 border border-neutral-300 bg-neutral-50 flex items-center gap-2 shrink-0"
+              className="col-span-2 sm:col-span-1 px-3 h-10 border border-neutral-300 bg-neutral-50 flex items-center justify-between sm:justify-start gap-2 shrink-0"
               style={{ borderRadius: 0 }}
             >
-              <span className="w-2 h-2 rounded-full bg-[#059669] animate-pulse" />
-              <div className="flex items-baseline gap-1.5 whitespace-nowrap">
-                <span className="text-[11px] font-semibold text-neutral-500 uppercase">IST</span>
-                <span className="text-xs font-bold text-neutral-900 tabular-nums">
-                  {currentTime || "14:52:00"}
-                </span>
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-[#059669] animate-pulse" />
+                <div className="flex items-baseline gap-1.5 whitespace-nowrap">
+                  <span className="text-[11px] font-semibold text-neutral-500 uppercase">IST</span>
+                  <span className="text-xs font-bold text-neutral-900 tabular-nums">
+                    {currentTime || "14:52:00"}
+                  </span>
+                </div>
               </div>
+              <span className="sm:hidden text-[9px] font-bold text-[#059669] px-1.5 py-0.5 border border-emerald-300 bg-emerald-50">
+                ACTIVE
+              </span>
             </div>
 
             {/* Manual Barrier Override Button */}
             <button
               type="button"
               onClick={() => setIsBarrierOverrideModalOpen(true)}
-              className="h-10 px-3.5 border border-neutral-300 bg-white hover:bg-neutral-50 text-neutral-800 text-xs font-semibold flex items-center gap-2 cursor-pointer transition-colors shrink-0"
+              className="h-10 px-2 sm:px-3.5 border border-neutral-300 bg-white hover:bg-neutral-50 text-neutral-800 text-[11px] sm:text-xs font-semibold flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer transition-colors shrink-0"
               style={{ borderRadius: 0 }}
             >
-              <Radio className="w-3.5 h-3.5 text-amber-600" />
-              <span>Barrier 02 Override</span>
+              <Radio className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+              <span>Override</span>
             </button>
 
             {/* Back to Tracker */}
             <button
               type="button"
               onClick={() => onNavigateTab("live-tracker")}
-              className="h-10 px-3.5 border border-neutral-300 bg-white hover:bg-neutral-50 text-neutral-800 text-xs font-semibold flex items-center gap-2 cursor-pointer transition-colors shrink-0"
+              className="h-10 px-2 sm:px-3.5 border border-neutral-300 bg-white hover:bg-neutral-50 text-neutral-800 text-[11px] sm:text-xs font-semibold flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer transition-colors shrink-0"
               style={{ borderRadius: 0 }}
             >
-              <Truck className="w-3.5 h-3.5 text-neutral-600" />
-              <span>Vehicle Tracker</span>
+              <Truck className="w-3.5 h-3.5 text-neutral-600 shrink-0" />
+              <span>Fleet Tracker</span>
             </button>
 
             {/* Back to Hub */}
             <button
               type="button"
               onClick={() => onNavigateTab("home")}
-              className="h-10 px-3.5 bg-[#18181B] hover:bg-black text-white text-xs font-semibold flex items-center gap-2 cursor-pointer transition-colors shrink-0"
+              className="col-span-2 sm:col-span-1 h-10 px-3.5 bg-[#18181B] hover:bg-black text-white text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer transition-colors shrink-0"
               style={{ borderRadius: 0 }}
             >
               <span>Operations Hub</span>
-              <ArrowRight className="w-3.5 h-3.5 text-neutral-300" />
+              <ArrowRight className="w-3.5 h-3.5 text-neutral-300 shrink-0" />
             </button>
           </div>
         </div>
@@ -493,19 +498,19 @@ export function GateExit({ vehicles, onUpdateStage, onNavigateTab }: GateExitPro
         style={{ borderRadius: 0 }}
       >
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-neutral-200 pb-3">
-          {/* Main View Tabs */}
-          <div className="flex flex-wrap items-center gap-1.5">
+          {/* Main View Tabs (Scrollable on Mobile) */}
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 max-w-full md:flex-wrap">
             <button
               type="button"
               onClick={() => setActiveTab("QUEUE")}
-              className={`px-3 py-2 text-xs font-bold uppercase tracking-wider border cursor-pointer transition-colors flex items-center gap-2 ${
+              className={`px-3 py-2 text-xs font-bold uppercase tracking-wider border cursor-pointer transition-colors flex items-center gap-2 shrink-0 whitespace-nowrap ${
                 activeTab === "QUEUE"
                   ? "bg-[#18181B] text-white border-[#18181B]"
                   : "bg-white text-neutral-700 border-neutral-300 hover:bg-neutral-50"
               }`}
               style={{ borderRadius: 0 }}
             >
-              <span>Ready for Exit Clearance</span>
+              <span>Ready for Exit</span>
               <span
                 className={`px-1.5 py-0.2 text-[10px] font-bold ${
                   activeTab === "QUEUE"
@@ -520,7 +525,7 @@ export function GateExit({ vehicles, onUpdateStage, onNavigateTab }: GateExitPro
             <button
               type="button"
               onClick={() => setActiveTab("ALL_INSIDE")}
-              className={`px-3 py-2 text-xs font-bold uppercase tracking-wider border cursor-pointer transition-colors flex items-center gap-2 ${
+              className={`px-3 py-2 text-xs font-bold uppercase tracking-wider border cursor-pointer transition-colors flex items-center gap-2 shrink-0 whitespace-nowrap ${
                 activeTab === "ALL_INSIDE"
                   ? "bg-[#18181B] text-white border-[#18181B]"
                   : "bg-white text-neutral-700 border-neutral-300 hover:bg-neutral-50"
@@ -542,14 +547,14 @@ export function GateExit({ vehicles, onUpdateStage, onNavigateTab }: GateExitPro
             <button
               type="button"
               onClick={() => setActiveTab("DEPARTED")}
-              className={`px-3 py-2 text-xs font-bold uppercase tracking-wider border cursor-pointer transition-colors flex items-center gap-2 ${
+              className={`px-3 py-2 text-xs font-bold uppercase tracking-wider border cursor-pointer transition-colors flex items-center gap-2 shrink-0 whitespace-nowrap ${
                 activeTab === "DEPARTED"
                   ? "bg-[#18181B] text-white border-[#18181B]"
                   : "bg-white text-neutral-700 border-neutral-300 hover:bg-neutral-50"
               }`}
               style={{ borderRadius: 0 }}
             >
-              <span>Departed Today (Audit Log)</span>
+              <span>Departed Today</span>
               <span
                 className={`px-1.5 py-0.2 text-[10px] font-bold ${
                   activeTab === "DEPARTED"
@@ -563,13 +568,13 @@ export function GateExit({ vehicles, onUpdateStage, onNavigateTab }: GateExitPro
           </div>
 
           {/* Direction Filter Pills */}
-          <div className="flex items-center gap-1 border border-neutral-300 p-0.5 bg-neutral-50">
+          <div className="flex items-center gap-1 border border-neutral-300 p-0.5 bg-neutral-50 overflow-x-auto shrink-0 self-start md:self-auto">
             {(["ALL", "INBOUND_RM", "OUTBOUND_DISPATCH"] as const).map((dir) => (
               <button
                 key={dir}
                 type="button"
                 onClick={() => setDirectionFilter(dir)}
-                className={`px-2.5 py-1 text-[11px] font-semibold transition-colors cursor-pointer ${
+                className={`px-2.5 py-1 text-[11px] font-semibold transition-colors cursor-pointer shrink-0 whitespace-nowrap ${
                   directionFilter === dir
                     ? "bg-[#18181B] text-white"
                     : "text-neutral-600 hover:text-neutral-900"

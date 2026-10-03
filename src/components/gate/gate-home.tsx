@@ -356,47 +356,51 @@ export function GateHome({ onNavigateTab, onOpenEntryModal }: GateHomeProps) {
           </div>
 
           {/* Master Live Clock & Top Quick Hotbar */}
-          <div className="flex flex-wrap sm:flex-nowrap items-center gap-2.5 shrink-0">
+          <div className="grid grid-cols-2 sm:flex sm:flex-nowrap items-center gap-2 sm:gap-2.5 shrink-0 w-full sm:w-auto">
             {/* High-Precision Digital Master Clock */}
-            <div className="h-10 px-3.5 border border-neutral-300 bg-white/90 flex items-center gap-3 shrink-0 whitespace-nowrap">
-              <Clock className="w-4 h-4 text-neutral-500 shrink-0" />
-              <div className="flex flex-col justify-center leading-none">
-                <div className="text-xs font-bold text-neutral-900 tabular-nums flex items-center gap-1">
-                  <span>{currentTime || "16:45:00"}</span>
-                  <span className="text-[9px] font-semibold text-neutral-500">IST</span>
-                </div>
-                <div className="text-[9px] text-neutral-500 uppercase font-medium tracking-wide mt-0.5">
-                  {currentDate || "Today · 03 Oct 2026"}
+            <div className="col-span-2 sm:col-span-1 h-10 px-3.5 border border-neutral-300 bg-white/90 flex items-center justify-between sm:justify-start gap-3 shrink-0 whitespace-nowrap">
+              <div className="flex items-center gap-2">
+                <Clock className="w-4 h-4 text-neutral-500 shrink-0" />
+                <div className="flex flex-col justify-center leading-none">
+                  <div className="text-xs font-bold text-neutral-900 tabular-nums flex items-center gap-1">
+                    <span>{currentTime || "16:45:00"}</span>
+                    <span className="text-[9px] font-semibold text-neutral-500">IST</span>
+                  </div>
+                  <div className="text-[9px] text-neutral-500 uppercase font-medium tracking-wide mt-0.5">
+                    {currentDate || "Today · 03 Oct 2026"}
+                  </div>
                 </div>
               </div>
+              <span className="sm:hidden text-[9px] font-bold text-[#059669] px-1.5 py-0.5 border border-emerald-300 bg-emerald-50">
+                LIVE
+              </span>
             </div>
 
             {/* Emergency / Intercom Button */}
             <button
               type="button"
               onClick={() => setShowIntercomModal(true)}
-              className="h-10 px-3.5 border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-800 text-xs font-semibold uppercase tracking-wider shrink-0 whitespace-nowrap inline-flex items-center justify-center gap-2 transition-colors cursor-pointer active:scale-95"
+              className="h-10 px-2 sm:px-3.5 border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-800 text-[11px] sm:text-xs font-semibold uppercase tracking-wider shrink-0 whitespace-nowrap inline-flex items-center justify-center gap-1.5 sm:gap-2 transition-colors cursor-pointer active:scale-95"
             >
               <Phone className="w-3.5 h-3.5 text-neutral-600 shrink-0" />
-              <span>Intercom Desk</span>
+              <span>Intercom</span>
             </button>
 
             {/* Launch Vehicle Tracker */}
             <button
               type="button"
               onClick={() => onNavigateTab("live-tracker")}
-              className="h-10 px-3.5 border border-neutral-900 bg-[#18181B] hover:bg-neutral-800 text-white text-xs font-bold uppercase tracking-wider shrink-0 whitespace-nowrap inline-flex items-center justify-center gap-2 transition-colors cursor-pointer active:scale-95"
+              className="h-10 px-2 sm:px-3.5 border border-neutral-900 bg-[#18181B] hover:bg-neutral-800 text-white text-[11px] sm:text-xs font-bold uppercase tracking-wider shrink-0 whitespace-nowrap inline-flex items-center justify-center gap-1.5 sm:gap-2 transition-colors cursor-pointer active:scale-95"
             >
               <Truck className="w-3.5 h-3.5 shrink-0" />
-              <span>Vehicle Tracker</span>
-              <ArrowRight className="w-3.5 h-3.5 shrink-0" />
+              <span>Fleet Tracker</span>
             </button>
 
             {/* Issue Gate Pass */}
             <button
               type="button"
               onClick={() => onOpenEntryModal()}
-              className="h-10 px-4 bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold uppercase tracking-wider shrink-0 whitespace-nowrap inline-flex items-center justify-center gap-2 transition-colors cursor-pointer active:scale-95"
+              className="col-span-2 sm:col-span-1 h-10 px-4 bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold uppercase tracking-wider shrink-0 whitespace-nowrap inline-flex items-center justify-center gap-2 transition-colors cursor-pointer active:scale-95"
             >
               <Plus className="w-4 h-4 shrink-0" strokeWidth={2.5} />
               <span>New Gate Pass</span>
@@ -785,25 +789,25 @@ export function GateHome({ onNavigateTab, onOpenEntryModal }: GateHomeProps) {
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
             {/* Search Input */}
-            <div className="relative">
+            <div className="relative w-full sm:w-56">
               <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-neutral-400" />
               <input
                 type="text"
                 placeholder="Filter plate, supplier, PO..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-8 pr-3 py-1 text-xs border border-neutral-300 bg-white text-neutral-900 placeholder-neutral-400 focus:outline-none focus:border-neutral-800 w-48 sm:w-56"
+                className="w-full pl-8 pr-3 py-1.5 sm:py-1 text-xs border border-neutral-300 bg-white text-neutral-900 placeholder-neutral-400 focus:outline-none focus:border-neutral-800"
               />
             </div>
 
             {/* Filter Pills */}
-            <div className="flex items-center border border-neutral-300 divide-x divide-neutral-300 text-[11px]">
+            <div className="grid grid-cols-3 sm:flex items-center border border-neutral-300 divide-x divide-neutral-300 text-[11px] text-center">
               <button
                 type="button"
                 onClick={() => setFilterType("ALL")}
-                className={`px-2.5 py-1 cursor-pointer transition-colors ${
+                className={`px-2 py-1.5 sm:py-1 cursor-pointer transition-colors ${
                   filterType === "ALL"
                     ? "bg-[#18181B] text-white font-semibold"
                     : "bg-white text-neutral-700 hover:bg-neutral-100"
@@ -814,31 +818,133 @@ export function GateHome({ onNavigateTab, onOpenEntryModal }: GateHomeProps) {
               <button
                 type="button"
                 onClick={() => setFilterType("APPROACHING")}
-                className={`px-2.5 py-1 cursor-pointer transition-colors ${
+                className={`px-2 py-1.5 sm:py-1 cursor-pointer transition-colors ${
                   filterType === "APPROACHING"
                     ? "bg-[#18181B] text-white font-semibold"
                     : "bg-white text-neutral-700 hover:bg-neutral-100"
                 }`}
               >
-                Approaching (1)
+                Near (1)
               </button>
               <button
                 type="button"
                 onClick={() => setFilterType("SCHEDULED")}
-                className={`px-2.5 py-1 cursor-pointer transition-colors ${
+                className={`px-2 py-1.5 sm:py-1 cursor-pointer transition-colors ${
                   filterType === "SCHEDULED"
                     ? "bg-[#18181B] text-white font-semibold"
                     : "bg-white text-neutral-700 hover:bg-neutral-100"
                 }`}
               >
-                Scheduled (2)
+                Sched (2)
               </button>
             </div>
           </div>
         </div>
 
-        {/* Expected Trucks Table */}
-        <div className="overflow-x-auto border border-neutral-300">
+        {/* Expected Trucks — Mobile Card View (< md) */}
+        <div className="md:hidden space-y-3">
+          {filteredExpected.length === 0 ? (
+            <div className="p-6 text-center text-xs text-neutral-500 border border-neutral-300 bg-white">
+              No matching scheduled arrivals found.
+            </div>
+          ) : (
+            filteredExpected.map((item) => {
+              const isCheckedIn = checkedInIds.includes(item.id);
+
+              return (
+                <div
+                  key={`mobile-${item.id}`}
+                  className={`border border-neutral-300 p-3.5 space-y-2.5 transition-colors ${
+                    isCheckedIn ? "bg-emerald-50/50 border-emerald-300" : "bg-white"
+                  }`}
+                >
+                  {/* Top Bar: Plate + Status Badge */}
+                  <div className="flex items-center justify-between gap-2">
+                    <div>
+                      <div className="font-bold text-neutral-900 text-sm tracking-tight">
+                        {item.vehicleNo}
+                      </div>
+                      <div className="text-[10px] text-neutral-500 font-medium">
+                        {item.transporter} · Ref: {item.poNo}
+                      </div>
+                    </div>
+
+                    {item.status === "APPROACHING" ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 border border-sky-300 text-sky-700 text-[10px] font-bold uppercase tracking-wider bg-sky-50/50 shrink-0">
+                        <span className="w-1.5 h-1.5 bg-sky-600 animate-pulse inline-block" />
+                        <span>~{item.etaMinutes}m ETA</span>
+                      </span>
+                    ) : item.status === "ON_SCHEDULE" ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 border border-neutral-300 text-neutral-700 text-[10px] font-semibold uppercase tracking-wider bg-neutral-100 shrink-0">
+                        <span>On Schedule</span>
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 border border-amber-300 text-amber-800 text-[10px] font-bold uppercase tracking-wider bg-amber-50/50 shrink-0">
+                        <AlertTriangle className="w-3 h-3 text-amber-600" />
+                        <span>Delayed</span>
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Cargo & Supplier Details */}
+                  <div className="grid grid-cols-2 gap-2 text-xs pt-1 border-t border-neutral-200">
+                    <div>
+                      <span className="text-[10px] uppercase font-bold text-neutral-400 block">
+                        Cargo
+                      </span>
+                      <span className="font-semibold text-neutral-900 truncate block">
+                        {item.materialName}
+                      </span>
+                      <span className="text-[10px] text-neutral-500 tabular-nums">
+                        {item.expectedWeightMT.toFixed(1)} MT declared
+                      </span>
+                    </div>
+
+                    <div>
+                      <span className="text-[10px] uppercase font-bold text-neutral-400 block">
+                        Supplier / Driver
+                      </span>
+                      <span className="font-semibold text-neutral-900 truncate block">
+                        {item.supplierName}
+                      </span>
+                      <span className="text-[10px] text-neutral-500 truncate block">
+                        {item.driverName}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Window */}
+                  <div className="flex items-center justify-between text-[11px] text-neutral-500 bg-neutral-50 px-2.5 py-1 border border-neutral-200">
+                    <span>Window: <strong className="text-neutral-800">{item.timeWindow}</strong></span>
+                    <span>Cluster: <strong className="text-neutral-800">{item.farmCluster.split("(")[0]}</strong></span>
+                  </div>
+
+                  {/* Action Button */}
+                  <div className="pt-1">
+                    {isCheckedIn ? (
+                      <div className="w-full py-2 bg-emerald-100/60 border border-emerald-300 text-[#047857] text-xs font-bold text-center flex items-center justify-center gap-1.5">
+                        <Check className="w-3.5 h-3.5" strokeWidth={2.5} />
+                        <span>Pass Created & Issued</span>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => handleFastCheckIn(item)}
+                        className="w-full py-2.5 bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition-colors cursor-pointer active:scale-98"
+                      >
+                        <Zap className="w-3.5 h-3.5" />
+                        <span>1-Click Fast Check-In</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+
+        {/* Expected Trucks — Desktop Table (>= md) */}
+        <div className="hidden md:block overflow-x-auto border border-neutral-300">
           <table className="w-full text-left border-collapse text-xs">
             <thead>
               <tr className="border-b border-neutral-300 bg-neutral-200/60 text-neutral-700 font-bold uppercase tracking-wider text-[11px]">
