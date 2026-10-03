@@ -251,54 +251,29 @@ export function GateExit({ vehicles, onUpdateStage, onNavigateTab }: GateExitPro
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-12 md:space-y-14 select-none">
       {/* 
         ============================================================
         1. COMMAND HEADER & LIVE EXIT TELEMETRY BAR
         ============================================================
       */}
-      <section
-        className="bg-white border border-neutral-300 p-4 sm:p-5"
-        style={{ borderRadius: 0 }}
-      >
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-neutral-200 pb-4">
-          {/* Station Title & Guard Info */}
-          <div className="flex items-start sm:items-center gap-3">
-            <div
-              className="w-10 h-10 bg-[#18181B] text-white flex items-center justify-center shrink-0 border border-neutral-800"
-              style={{ borderRadius: 0 }}
-            >
-              <LogOut className="w-5 h-5 text-[#10B981]" />
-            </div>
-            <div>
-              <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-base sm:text-lg font-bold text-neutral-900 tracking-tight">
-                  Outward Exit Station · Gate 02
-                </h1>
-                <span
-                  className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0]"
-                  style={{ borderRadius: 0 }}
-                >
-                  Boom Barrier Active
-                </span>
-                <span
-                  className="px-2 py-0.5 text-[10px] font-semibold text-neutral-600 border border-neutral-300 bg-neutral-50"
-                  style={{ borderRadius: 0 }}
-                >
-                  Shift 01 · 08:00 – 16:00
-                </span>
-              </div>
-              <p className="text-xs text-neutral-500 mt-0.5">
-                Physical security inspection, tare weight slip audit, driver sign-off, and barrier dispatch.
-              </p>
-            </div>
+      <section className="space-y-6">
+        {/* Section Header with Large Typography */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <span className="text-xs md:text-sm font-medium text-neutral-400 block tracking-normal">
+              Physical Dispatch Inspection & Outward Despatch
+            </span>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-neutral-900 mt-1">
+              Vehicle Exit Station
+            </h1>
           </div>
 
           {/* Quick Actions & Live Clock (Responsive Grid on Mobile) */}
-          <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 w-full lg:w-auto">
+          <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 sm:gap-2.5 w-full sm:w-auto">
             {/* Clock Box */}
             <div
-              className="col-span-2 sm:col-span-1 px-3 h-10 border border-neutral-300 bg-neutral-50 flex items-center justify-between sm:justify-start gap-2 shrink-0"
+              className="col-span-2 sm:col-span-1 px-3.5 h-10 border border-neutral-300 bg-transparent flex items-center justify-between sm:justify-start gap-2 shrink-0"
               style={{ borderRadius: 0 }}
             >
               <div className="flex items-center gap-2">
@@ -319,7 +294,7 @@ export function GateExit({ vehicles, onUpdateStage, onNavigateTab }: GateExitPro
             <button
               type="button"
               onClick={() => setIsBarrierOverrideModalOpen(true)}
-              className="h-10 px-2 sm:px-3.5 border border-neutral-300 bg-white hover:bg-neutral-50 text-neutral-800 text-[11px] sm:text-xs font-semibold flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer transition-colors shrink-0"
+              className="h-10 px-2 sm:px-3.5 border border-neutral-300 bg-transparent hover:bg-neutral-200/50 text-neutral-800 text-[11px] sm:text-xs font-medium flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer transition-colors shrink-0"
               style={{ borderRadius: 0 }}
             >
               <Radio className="w-3.5 h-3.5 text-amber-600 shrink-0" />
@@ -330,7 +305,7 @@ export function GateExit({ vehicles, onUpdateStage, onNavigateTab }: GateExitPro
             <button
               type="button"
               onClick={() => onNavigateTab("live-tracker")}
-              className="h-10 px-2 sm:px-3.5 border border-neutral-300 bg-white hover:bg-neutral-50 text-neutral-800 text-[11px] sm:text-xs font-semibold flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer transition-colors shrink-0"
+              className="h-10 px-2 sm:px-3.5 border border-neutral-300 bg-transparent hover:bg-neutral-200/50 text-neutral-800 text-[11px] sm:text-xs font-medium flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer transition-colors shrink-0"
               style={{ borderRadius: 0 }}
             >
               <Truck className="w-3.5 h-3.5 text-neutral-600 shrink-0" />
@@ -341,7 +316,7 @@ export function GateExit({ vehicles, onUpdateStage, onNavigateTab }: GateExitPro
             <button
               type="button"
               onClick={() => onNavigateTab("home")}
-              className="col-span-2 sm:col-span-1 h-10 px-3.5 bg-[#18181B] hover:bg-black text-white text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer transition-colors shrink-0"
+              className="col-span-2 sm:col-span-1 h-10 px-3.5 bg-[#18181B] hover:bg-black text-white text-xs font-medium flex items-center justify-center gap-2 cursor-pointer transition-colors shrink-0"
               style={{ borderRadius: 0 }}
             >
               <span>Operations Hub</span>
@@ -350,49 +325,69 @@ export function GateExit({ vehicles, onUpdateStage, onNavigateTab }: GateExitPro
           </div>
         </div>
 
-        {/* Live Boom Barrier Status Alert Banner */}
-        <div className="mt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 border border-neutral-200 bg-neutral-50">
-          <div className="flex items-center gap-3">
-            <div
-              className={`w-3 h-3 ${
-                barrierState === "RAISED"
-                  ? "bg-[#10B981] animate-ping"
-                  : "bg-neutral-900"
-              }`}
-            />
-            <div className="flex items-center gap-2 text-xs">
-              <span className="font-bold text-neutral-900 uppercase tracking-wide">
-                Boom Barrier 02:
+        {/* Section 1 Card */}
+        <div
+          className="bg-transparent border border-neutral-300 p-4 sm:p-5 space-y-4"
+          style={{ borderRadius: 0 }}
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-neutral-200 pb-3">
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 border border-emerald-300 bg-emerald-50/70 text-[10px] font-bold uppercase tracking-wider text-[#047857]">
+                <span className="w-1.5 h-1.5 bg-[#059669] animate-pulse inline-block shrink-0" />
+                <span>EXIT BARRIER 02 · DESK ACTIVE</span>
               </span>
-              <span
-                className={`font-semibold px-2 py-0.5 border ${
-                  barrierState === "RAISED"
-                    ? "bg-[#ECFDF5] text-[#059669] border-[#A7F3D0]"
-                    : "bg-white text-neutral-800 border-neutral-300"
-                }`}
-              >
-                {barrierState === "RAISED"
-                  ? "RAISED · VEHICLE PASSING"
-                  : "LOWERED · PHYSICAL LOCK ACTIVE"}
-              </span>
-              {barrierMessage && (
-                <span className="text-xs font-bold text-[#059669] animate-pulse">
-                  ● {barrierMessage}
-                </span>
-              )}
+              <span className="text-xs text-neutral-400">·</span>
+              <span className="text-[11px] font-semibold text-neutral-600">Shift 01 (08:00 – 16:00)</span>
             </div>
+            <p className="text-xs text-neutral-500">
+              Physical security inspection, tare weight slip audit, driver sign-off, and barrier dispatch.
+            </p>
           </div>
 
-          <div className="flex items-center gap-4 text-xs text-neutral-500">
-            <span className="flex items-center gap-1.5">
-              <Camera className="w-3.5 h-3.5 text-neutral-600" />
-              <span>ANPR CAM-04 (Exit Plate Reader): <strong className="text-neutral-800">ONLINE (99.4%)</strong></span>
-            </span>
-            <span className="hidden md:inline">|</span>
-            <span className="flex items-center gap-1.5">
-              <User className="w-3.5 h-3.5 text-neutral-600" />
-              <span>Officer on Post: <strong className="text-neutral-800">Ramesh Pawar (#SEC-014)</strong></span>
-            </span>
+          {/* Live Boom Barrier Status Alert Banner */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 border border-neutral-200 bg-neutral-50">
+            <div className="flex items-center gap-3">
+              <div
+                className={`w-3 h-3 ${
+                  barrierState === "RAISED"
+                    ? "bg-[#10B981] animate-ping"
+                    : "bg-neutral-900"
+                }`}
+              />
+              <div className="flex items-center gap-2 text-xs">
+                <span className="font-bold text-neutral-900 uppercase tracking-wide">
+                  Boom Barrier 02:
+                </span>
+                <span
+                  className={`font-semibold px-2 py-0.5 border ${
+                    barrierState === "RAISED"
+                      ? "bg-[#ECFDF5] text-[#059669] border-[#A7F3D0]"
+                      : "bg-white text-neutral-800 border-neutral-300"
+                  }`}
+                >
+                  {barrierState === "RAISED"
+                    ? "RAISED · VEHICLE PASSING"
+                    : "LOWERED · PHYSICAL LOCK ACTIVE"}
+                </span>
+                {barrierMessage && (
+                  <span className="text-xs font-bold text-[#059669] animate-pulse">
+                    ● {barrierMessage}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4 text-xs text-neutral-500">
+              <span className="flex items-center gap-1.5">
+                <Camera className="w-3.5 h-3.5 text-neutral-600" />
+                <span>ANPR CAM-04 (Exit Plate Reader): <strong className="text-neutral-800">ONLINE (99.4%)</strong></span>
+              </span>
+              <span className="hidden md:inline">|</span>
+              <span className="flex items-center gap-1.5">
+                <User className="w-3.5 h-3.5 text-neutral-600" />
+                <span>Officer on Post: <strong className="text-neutral-800">Ramesh Pawar (#SEC-014)</strong></span>
+              </span>
+            </div>
           </div>
         </div>
       </section>
@@ -402,7 +397,27 @@ export function GateExit({ vehicles, onUpdateStage, onNavigateTab }: GateExitPro
         2. SHIFT 01 EXIT TELEMETRY KPIS
         ============================================================
       */}
-      <section className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      <section className="space-y-6">
+        {/* Section Header with Large Typography */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <span className="text-xs md:text-sm font-medium text-neutral-400 block tracking-normal">
+              Today&apos;s Departure Telemetry
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900 mt-1">
+              Exit Queue & Dispatch Throughput
+            </h2>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 border border-neutral-300 text-xs font-medium text-neutral-700">
+              <span className="w-2 h-2 bg-[#059669] inline-block" />
+              <span>Shift 01 Dispatch Flow</span>
+            </span>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {/* KPI 1: Ready in Queue */}
         <div
           className="bg-white border border-neutral-300 p-4 flex flex-col justify-between"
@@ -486,17 +501,37 @@ export function GateExit({ vehicles, onUpdateStage, onNavigateTab }: GateExitPro
             <span className="font-semibold text-neutral-800">100% Stamped</span>
           </div>
         </div>
-      </section>
+      </div>
+    </section>
 
       {/* 
         ============================================================
         3. QUEUE NAVIGATION, SEARCH & FILTER CONTROLS
         ============================================================
       */}
-      <section
-        className="bg-white border border-neutral-300 p-4 space-y-4"
-        style={{ borderRadius: 0 }}
-      >
+      <section className="space-y-6">
+        {/* Section Header with Large Typography */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <span className="text-xs md:text-sm font-medium text-neutral-400 block tracking-normal">
+              Inspection & Barrier Release Registry
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900 mt-1">
+              Vehicle Exit Queue & Departure Registry
+            </h2>
+          </div>
+
+          <div className="text-xs text-neutral-500">
+            {activeTab === "DEPARTED"
+              ? `Showing ${filteredDepartedLog.length} departures logged today`
+              : `Showing ${displayedVehicles.length} vehicles in view`}
+          </div>
+        </div>
+
+        <div
+          className="bg-white border border-neutral-300 p-4 space-y-4"
+          style={{ borderRadius: 0 }}
+        >
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-neutral-200 pb-3">
           {/* Main View Tabs (Scrollable on Mobile) */}
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 max-w-full md:flex-wrap">
@@ -603,7 +638,8 @@ export function GateExit({ vehicles, onUpdateStage, onNavigateTab }: GateExitPro
             style={{ borderRadius: 0 }}
           />
         </div>
-      </section>
+      </div>
+    </section>
 
       {/* 
         ============================================================

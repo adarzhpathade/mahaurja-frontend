@@ -328,37 +328,26 @@ export function GateHome({ onNavigateTab, onOpenEntryModal }: GateHomeProps) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-12 md:space-y-14 select-none">
       {/* ========================================================================= */}
       {/* SECTION 1: MASTER COMMAND HEADER WITH LIVE TELEMETRY CLOCK                */}
       {/* ========================================================================= */}
-      <section className="bg-transparent border border-neutral-300 p-3.5 sm:p-5 md:p-6 relative">
-        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 sm:gap-5 pb-4 sm:pb-5 border-b border-neutral-200">
+      <section className="space-y-6">
+        {/* Section Header with Large Typography */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
-            <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 mb-2.5">
-              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 border border-emerald-300 bg-emerald-50/70 text-[10px] font-bold uppercase tracking-wider text-[#047857] w-fit shrink-0 whitespace-nowrap">
-                <span className="w-1.5 h-1.5 bg-[#059669] animate-pulse inline-block shrink-0" />
-                <span>PLANT PERIMETER · STATION GATE 01 ONLINE</span>
-              </span>
-              <span className="hidden sm:inline text-xs text-neutral-400">·</span>
-              <span className="text-[10px] sm:text-[11px] font-semibold text-neutral-500 uppercase tracking-wider truncate sm:overflow-visible">
-                BHARAT INDUSTRIAL & RENEWABLES LLP
-              </span>
-            </div>
-
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-neutral-900 leading-snug">
-              Gate Security & Operations Center
+            <span className="text-xs md:text-sm font-medium text-neutral-400 block tracking-normal">
+              Perimeter Security & Plant Access Control
+            </span>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-neutral-900 mt-1">
+              Operations Command Center
             </h1>
-            <p className="text-xs text-neutral-600 mt-1 max-w-3xl leading-relaxed">
-              Main security access control and physical logistics hub. Monitor inbound biomass consignments,
-              fast-track scheduled farmer deliveries, and manage physical gate barrier authorization.
-            </p>
           </div>
 
           {/* Master Live Clock & Top Quick Hotbar */}
-          <div className="grid grid-cols-2 sm:flex sm:flex-nowrap items-center gap-2 sm:gap-2.5 shrink-0 w-full sm:w-auto">
+          <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 sm:gap-2.5 w-full sm:w-auto">
             {/* High-Precision Digital Master Clock */}
-            <div className="col-span-2 sm:col-span-1 h-10 px-3.5 border border-neutral-300 bg-white/90 flex items-center justify-between sm:justify-start gap-3 shrink-0 whitespace-nowrap">
+            <div className="col-span-2 sm:col-span-1 h-10 px-3.5 border border-neutral-300 bg-transparent flex items-center justify-between sm:justify-start gap-3 shrink-0 whitespace-nowrap">
               <div className="flex items-center gap-2">
                 <Clock className="w-4 h-4 text-neutral-500 shrink-0" />
                 <div className="flex flex-col justify-center leading-none">
@@ -380,7 +369,7 @@ export function GateHome({ onNavigateTab, onOpenEntryModal }: GateHomeProps) {
             <button
               type="button"
               onClick={() => setShowIntercomModal(true)}
-              className="h-10 px-2 sm:px-3.5 border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-800 text-[11px] sm:text-xs font-semibold uppercase tracking-wider shrink-0 whitespace-nowrap inline-flex items-center justify-center gap-1.5 sm:gap-2 transition-colors cursor-pointer active:scale-95"
+              className="h-10 px-2 sm:px-3.5 border border-neutral-300 bg-transparent hover:bg-neutral-200/50 text-neutral-800 text-[11px] sm:text-xs font-medium uppercase tracking-wider shrink-0 whitespace-nowrap inline-flex items-center justify-center gap-1.5 sm:gap-2 transition-colors cursor-pointer"
             >
               <Phone className="w-3.5 h-3.5 text-neutral-600 shrink-0" />
               <span>Intercom</span>
@@ -390,9 +379,9 @@ export function GateHome({ onNavigateTab, onOpenEntryModal }: GateHomeProps) {
             <button
               type="button"
               onClick={() => onNavigateTab("live-tracker")}
-              className="h-10 px-2 sm:px-3.5 border border-neutral-900 bg-[#18181B] hover:bg-neutral-800 text-white text-[11px] sm:text-xs font-bold uppercase tracking-wider shrink-0 whitespace-nowrap inline-flex items-center justify-center gap-1.5 sm:gap-2 transition-colors cursor-pointer active:scale-95"
+              className="h-10 px-2 sm:px-3.5 border border-neutral-300 bg-transparent hover:bg-neutral-200/50 text-neutral-900 text-[11px] sm:text-xs font-medium uppercase tracking-wider shrink-0 whitespace-nowrap inline-flex items-center justify-center gap-1.5 sm:gap-2 transition-colors cursor-pointer"
             >
-              <Truck className="w-3.5 h-3.5 shrink-0" />
+              <Truck className="w-3.5 h-3.5 text-neutral-700 shrink-0" />
               <span>Fleet Tracker</span>
             </button>
 
@@ -400,7 +389,7 @@ export function GateHome({ onNavigateTab, onOpenEntryModal }: GateHomeProps) {
             <button
               type="button"
               onClick={() => onOpenEntryModal()}
-              className="col-span-2 sm:col-span-1 h-10 px-4 bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold uppercase tracking-wider shrink-0 whitespace-nowrap inline-flex items-center justify-center gap-2 transition-colors cursor-pointer active:scale-95"
+              className="col-span-2 sm:col-span-1 h-10 px-4 bg-[#059669] hover:bg-[#047857] text-white text-xs font-semibold uppercase tracking-wider shrink-0 whitespace-nowrap inline-flex items-center justify-center gap-2 transition-colors cursor-pointer"
             >
               <Plus className="w-4 h-4 shrink-0" strokeWidth={2.5} />
               <span>New Gate Pass</span>
@@ -408,8 +397,26 @@ export function GateHome({ onNavigateTab, onOpenEntryModal }: GateHomeProps) {
           </div>
         </div>
 
-        {/* Operational Guard Shift Banner & Telemetry Strip */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 pt-4">
+        {/* Section 1 Operational Status Card */}
+        <div className="bg-transparent border border-neutral-300 p-3.5 sm:p-5 md:p-6 relative space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-neutral-200">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2">
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 border border-emerald-300 bg-emerald-50/70 text-[10px] font-bold uppercase tracking-wider text-[#047857] w-fit shrink-0 whitespace-nowrap">
+                <span className="w-1.5 h-1.5 bg-[#059669] animate-pulse inline-block shrink-0" />
+                <span>PLANT PERIMETER · STATION GATE 01 ONLINE</span>
+              </span>
+              <span className="hidden sm:inline text-xs text-neutral-400">·</span>
+              <span className="text-[10px] sm:text-[11px] font-semibold text-neutral-500 uppercase tracking-wider truncate sm:overflow-visible">
+                BHARAT INDUSTRIAL & RENEWABLES LLP
+              </span>
+            </div>
+            <p className="text-xs text-neutral-600 max-w-2xl leading-relaxed">
+              Main security access control and physical logistics hub. Monitor inbound biomass consignments, fast-track scheduled farmer deliveries, and manage physical gate barrier authorization.
+            </p>
+          </div>
+
+          {/* Operational Guard Shift Banner & Telemetry Strip */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 pt-1">
           {/* Shift Details */}
           <div className="border border-neutral-300 p-3.5 bg-white/80 flex flex-col justify-between min-h-[112px] space-y-2">
             <div className="flex items-center justify-between">
@@ -504,12 +511,33 @@ export function GateHome({ onNavigateTab, onOpenEntryModal }: GateHomeProps) {
             </div>
           </div>
         </div>
-      </section>
+      </div>
+    </section>
 
       {/* ========================================================================= */}
       {/* SECTION 2: SHIFT PULSE KPIS (HIGH-DENSITY INDUSTRIAL TELEMETRY DECK)      */}
       {/* ========================================================================= */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <section className="space-y-6">
+        {/* Section Header with Large Typography */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <span className="text-xs md:text-sm font-medium text-neutral-400 block tracking-normal">
+              Shift 01 Telemetry & Plant Pulse
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900 mt-1">
+              Operational Metrics & Plant Throughput
+            </h2>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 border border-neutral-300 text-xs font-medium text-neutral-700">
+              <span className="w-2 h-2 bg-[#059669] inline-block" />
+              <span>Shift 01 Active (Day Duty)</span>
+            </span>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Metric 1: Total Movements Handled */}
         <div className="border border-neutral-300 p-5 bg-transparent flex flex-col justify-between hover:border-neutral-400 transition-colors">
           <div>
@@ -654,22 +682,27 @@ export function GateHome({ onNavigateTab, onOpenEntryModal }: GateHomeProps) {
             </div>
           </div>
         </div>
-      </section>
+      </div>
+    </section>
 
       {/* ========================================================================= */}
       {/* SECTION 3: TACTICAL GUARD RAPID WORKFLOW LAUNCHPAD                        */}
       {/* ========================================================================= */}
-      <section className="bg-transparent border border-neutral-300 p-3.5 sm:p-5 space-y-4">
-        <div className="flex items-center justify-between border-b border-neutral-200 pb-3">
-          <div className="flex items-center gap-2">
-            <Zap className="w-4 h-4 text-[#059669]" />
-            <h2 className="text-xs font-bold uppercase tracking-wider text-neutral-900">
+      <section className="space-y-6">
+        {/* Section Header with Large Typography */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <span className="text-xs md:text-sm font-medium text-neutral-400 block tracking-normal">
+              Quick-Action Access & Despatch Controls
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900 mt-1">
               Tactical Workflows & Rapid Actions
             </h2>
           </div>
-          <span className="hidden sm:inline text-[11px] text-neutral-500">
+
+          <div className="text-xs text-neutral-500">
             Click any operational workflow tile to initiate immediate action
-          </span>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
@@ -774,22 +807,40 @@ export function GateHome({ onNavigateTab, onOpenEntryModal }: GateHomeProps) {
       {/* ========================================================================= */}
       {/* SECTION 4: EXPECTED INBOUND FLEET (WITH 1-CLICK TACTICAL CHECK-IN)        */}
       {/* ========================================================================= */}
-      <section className="bg-transparent border border-neutral-300 p-3.5 sm:p-5 space-y-4">
-        {/* Section Header + Search + Filters */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-neutral-200 pb-3">
-          <div className="flex items-center gap-2">
-            <Calendar className="w-4 h-4 text-neutral-700" />
-            <div>
-              <h2 className="text-xs font-bold uppercase tracking-wider text-neutral-900">
-                Expected Inbound Trucks · Today&apos;s Arrival Roster
-              </h2>
-              <p className="text-[11px] text-neutral-500 mt-0.5">
-                Pre-advised supplier fleet. When the truck arrives at Barrier 01, click &apos;1-Click Check-In&apos; to prefill pass.
-              </p>
-            </div>
+      <section className="space-y-6">
+        {/* Section Header with Large Typography */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <span className="text-xs md:text-sm font-medium text-neutral-400 block tracking-normal">
+              Pre-Advised Biomass Consignments
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900 mt-1">
+              Expected Inbound Fleet & Arrival Roster
+            </h2>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+          <div className="text-xs text-neutral-500">
+            Showing <strong className="text-neutral-900">{filteredExpected.length}</strong> of{" "}
+            <strong>{expectedList.length}</strong> pre-advised trucks
+          </div>
+        </div>
+
+        <div className="bg-transparent border border-neutral-300 p-3.5 sm:p-5 space-y-4">
+          {/* Subheader + Search + Filters */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-neutral-200 pb-3">
+            <div className="flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-neutral-700" />
+              <div>
+                <span className="text-xs font-bold uppercase tracking-wider text-neutral-900 block">
+                  Today&apos;s Supplier Consignment Schedule
+                </span>
+                <p className="text-[11px] text-neutral-500 mt-0.5">
+                  Pre-advised supplier fleet. When the truck arrives at Barrier 01, click &apos;1-Click Check-In&apos; to prefill pass.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
             {/* Search Input */}
             <div className="relative w-full sm:w-56">
               <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-neutral-400" />
@@ -1061,12 +1112,33 @@ export function GateHome({ onNavigateTab, onOpenEntryModal }: GateHomeProps) {
             </tbody>
           </table>
         </div>
-      </section>
+      </div>
+    </section>
 
       {/* ========================================================================= */}
       {/* SECTION 5: LIVE SHIFT ACTIVITY STREAM & TACTICAL CHECKLIST DECK           */}
       {/* ========================================================================= */}
-      <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <section className="space-y-6">
+        {/* Section Header with Large Typography */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <span className="text-xs md:text-sm font-medium text-neutral-400 block tracking-normal">
+              Real-Time Event Stream & Station Handover
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900 mt-1">
+              Gate Audit Log & Safety Checklist
+            </h2>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 border border-neutral-300 text-xs font-medium text-neutral-700">
+              <span className="w-2 h-2 bg-[#059669] inline-block" />
+              <span>Station 01 Handover Register</span>
+            </span>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left 2 Cols: Activity Timeline */}
         <div className="lg:col-span-2 bg-transparent border border-neutral-300 p-3.5 sm:p-5 space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-neutral-200 pb-3">
@@ -1237,7 +1309,8 @@ export function GateHome({ onNavigateTab, onOpenEntryModal }: GateHomeProps) {
             </button>
           </div>
         </div>
-      </section>
+      </div>
+    </section>
 
       {/* ========================================================================= */}
       {/* INTERCOM MODAL / POPUP                                                    */}

@@ -430,53 +430,29 @@ export function GateDocVerification({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-12 md:space-y-14 select-none">
       {/* 
         ============================================================
         1. COMMAND HEADER & STATUTORY TELEMETRY BAR
         ============================================================
       */}
-      <section
-        className="bg-white border border-neutral-300 p-4 sm:p-5"
-        style={{ borderRadius: 0 }}
-      >
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-neutral-200 pb-4">
-          <div className="flex items-start sm:items-center gap-3">
-            <div
-              className="w-10 h-10 bg-[#18181B] text-white flex items-center justify-center shrink-0 border border-neutral-800"
-              style={{ borderRadius: 0 }}
-            >
-              <FileCheck className="w-5 h-5 text-[#10B981]" />
-            </div>
-            <div>
-              <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-base sm:text-lg font-bold text-neutral-900 tracking-tight">
-                  Document Verification & Statutory Gate Desk
-                </h1>
-                <span
-                  className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0]"
-                  style={{ borderRadius: 0 }}
-                >
-                  GST e-Way Bill API Linked
-                </span>
-                <span
-                  className="px-2 py-0.5 text-[10px] font-semibold text-neutral-600 border border-neutral-300 bg-neutral-50"
-                  style={{ borderRadius: 0 }}
-                >
-                  Statutory Rule 138 CGST
-                </span>
-              </div>
-              <p className="text-xs text-neutral-500 mt-0.5">
-                Statutory e-Way bill audit, Part-B vehicle registration matching, PO validation, and driver KYC clearance.
-              </p>
-            </div>
+      <section className="space-y-6">
+        {/* Section Header with Large Typography */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <span className="text-xs md:text-sm font-medium text-neutral-400 block tracking-normal">
+              Statutory Rule 138 CGST · GST Portal Integration
+            </span>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-neutral-900 mt-1">
+              Document Verification Desk
+            </h1>
           </div>
 
           {/* Quick Actions & Live Clock (Responsive Grid on Mobile) */}
-          <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 w-full lg:w-auto">
+          <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 sm:gap-2.5 w-full sm:w-auto">
             {/* Clock Box */}
             <div
-              className="col-span-2 sm:col-span-1 px-3 h-10 border border-neutral-300 bg-neutral-50 flex items-center justify-between sm:justify-start gap-2 shrink-0"
+              className="col-span-2 sm:col-span-1 px-3.5 h-10 border border-neutral-300 bg-transparent flex items-center justify-between sm:justify-start gap-2 shrink-0"
               style={{ borderRadius: 0 }}
             >
               <div className="flex items-center gap-2">
@@ -498,7 +474,7 @@ export function GateDocVerification({
               type="button"
               onClick={handleSimulateScan}
               disabled={isScanning}
-              className="col-span-2 sm:col-span-1 h-10 px-3.5 border border-neutral-300 bg-white hover:bg-neutral-50 text-neutral-800 text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer transition-colors shrink-0"
+              className="col-span-2 sm:col-span-1 h-10 px-3.5 border border-neutral-300 bg-transparent hover:bg-neutral-200/50 text-neutral-800 text-xs font-medium flex items-center justify-center gap-2 cursor-pointer transition-colors shrink-0"
               style={{ borderRadius: 0 }}
             >
               <QrCode className="w-3.5 h-3.5 text-neutral-700 shrink-0" />
@@ -509,7 +485,7 @@ export function GateDocVerification({
             <button
               type="button"
               onClick={() => onNavigateTab("live-tracker")}
-              className="h-10 px-2 sm:px-3.5 border border-neutral-300 bg-white hover:bg-neutral-50 text-neutral-800 text-[11px] sm:text-xs font-semibold flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer transition-colors shrink-0"
+              className="h-10 px-2 sm:px-3.5 border border-neutral-300 bg-transparent hover:bg-neutral-200/50 text-neutral-800 text-[11px] sm:text-xs font-medium flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer transition-colors shrink-0"
               style={{ borderRadius: 0 }}
             >
               <Truck className="w-3.5 h-3.5 text-neutral-600 shrink-0" />
@@ -520,7 +496,7 @@ export function GateDocVerification({
             <button
               type="button"
               onClick={() => onNavigateTab("home")}
-              className="h-10 px-2 sm:px-3.5 bg-[#18181B] hover:bg-black text-white text-[11px] sm:text-xs font-semibold flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer transition-colors shrink-0"
+              className="h-10 px-2 sm:px-3.5 bg-[#18181B] hover:bg-black text-white text-[11px] sm:text-xs font-medium flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer transition-colors shrink-0"
               style={{ borderRadius: 0 }}
             >
               <span>Ops Hub</span>
@@ -529,33 +505,53 @@ export function GateDocVerification({
           </div>
         </div>
 
-        {/* GST e-Way Bill Integration Health Banner */}
-        <div className="mt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 border border-neutral-200 bg-neutral-50">
-          <div className="flex items-center gap-3">
-            <div className="w-2.5 h-2.5 rounded-full bg-[#10B981]" />
-            <div className="text-xs">
-              <span className="font-bold text-neutral-900 uppercase">
-                GST Common Portal EWB API:
-              </span>{" "}
-              <span className="text-neutral-700 font-semibold">
-                Online · Response: 32ms · NIC Gateway Active
+        {/* Section 1 Card */}
+        <div
+          className="bg-transparent border border-neutral-300 p-4 sm:p-5 space-y-4"
+          style={{ borderRadius: 0 }}
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-neutral-200 pb-3">
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 border border-emerald-300 bg-emerald-50/70 text-[10px] font-bold uppercase tracking-wider text-[#047857]">
+                <span className="w-1.5 h-1.5 bg-[#059669] animate-pulse inline-block shrink-0" />
+                <span>GST e-Way Bill API Linked</span>
               </span>
-              {scanResult && (
-                <span className="ml-3 text-xs font-bold text-[#059669] animate-pulse">
-                  ● {scanResult}
-                </span>
-              )}
+              <span className="text-xs text-neutral-400">·</span>
+              <span className="text-[11px] font-semibold text-neutral-600">Statutory Rule 138 CGST</span>
             </div>
+            <p className="text-xs text-neutral-500">
+              Statutory e-Way bill audit, Part-B vehicle registration matching, PO validation, and driver KYC clearance.
+            </p>
           </div>
 
-          <div className="flex items-center gap-4 text-xs text-neutral-500">
-            <span>
-              Plant GSTIN: <strong className="text-neutral-800 font-mono">27AAACB1234D1Z5</strong>
-            </span>
-            <span className="hidden md:inline">|</span>
-            <span>
-              Security Officer: <strong className="text-neutral-800">Ramesh Pawar (#SEC-014)</strong>
-            </span>
+          {/* GST e-Way Bill Integration Health Banner */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 border border-neutral-200 bg-neutral-50">
+            <div className="flex items-center gap-3">
+              <div className="w-2.5 h-2.5 rounded-full bg-[#10B981]" />
+              <div className="text-xs">
+                <span className="font-bold text-neutral-900 uppercase">
+                  GST Common Portal EWB API:
+                </span>{" "}
+                <span className="text-neutral-700 font-semibold">
+                  Online · Response: 32ms · NIC Gateway Active
+                </span>
+                {scanResult && (
+                  <span className="ml-3 text-xs font-bold text-[#059669] animate-pulse">
+                    ● {scanResult}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4 text-xs text-neutral-500">
+              <span>
+                Plant GSTIN: <strong className="text-neutral-800 font-mono">27AAACB1234D1Z5</strong>
+              </span>
+              <span className="hidden md:inline">|</span>
+              <span>
+                Security Officer: <strong className="text-neutral-800">Ramesh Pawar (#SEC-014)</strong>
+              </span>
+            </div>
           </div>
         </div>
       </section>
@@ -565,7 +561,27 @@ export function GateDocVerification({
         2. SHIFT 01 STATUTORY VERIFICATION KPIS
         ============================================================
       */}
-      <section className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      <section className="space-y-6">
+        {/* Section Header with Large Typography */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <span className="text-xs md:text-sm font-medium text-neutral-400 block tracking-normal">
+              Shift 01 Compliance Audits
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900 mt-1">
+              Statutory Audit Telemetry & Metrics
+            </h2>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 border border-neutral-300 text-xs font-medium text-neutral-700">
+              <span className="w-2 h-2 bg-[#059669] inline-block" />
+              <span>100% Tax Compliant</span>
+            </span>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {/* KPI 1: Pending Audit Queue */}
         <div
           className="bg-white border border-neutral-300 p-4 flex flex-col justify-between"
@@ -649,17 +665,35 @@ export function GateDocVerification({
             <span className="font-semibold text-[#059669]">High Throughput</span>
           </div>
         </div>
-      </section>
+      </div>
+    </section>
 
       {/* 
         ============================================================
-        3. SEARCH & STATUS FILTER CONTROLS
+        3. SEARCH & STATUS FILTER CONTROLS & CONSIGNMENTS
         ============================================================
       */}
-      <section
-        className="bg-white border border-neutral-300 p-4 space-y-4"
-        style={{ borderRadius: 0 }}
-      >
+      <section className="space-y-6">
+        {/* Section Header with Large Typography */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <span className="text-xs md:text-sm font-medium text-neutral-400 block tracking-normal">
+              Active Consignment Documentation
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900 mt-1">
+              e-Way Bill & PO Verification Registry
+            </h2>
+          </div>
+
+          <div className="text-xs text-neutral-500">
+            Showing <strong className="text-neutral-900">{filteredRecords.length}</strong> of <strong>{docRecords.length}</strong> statutory documents
+          </div>
+        </div>
+
+        <div
+          className="bg-white border border-neutral-300 p-4 space-y-4"
+          style={{ borderRadius: 0 }}
+        >
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-neutral-200 pb-3">
           {/* Status Filter Tabs (Scrollable on Mobile) */}
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 max-w-full md:flex-wrap">
@@ -717,14 +751,14 @@ export function GateDocVerification({
             style={{ borderRadius: 0 }}
           />
         </div>
-      </section>
+      </div>
 
       {/* 
         ============================================================
         4. DOCUMENT VERIFICATION CONSIGNMENTS TABLE
         ============================================================
       */}
-      <section
+      <div
         className="bg-white border border-neutral-300 overflow-hidden"
         style={{ borderRadius: 0 }}
       >
@@ -858,7 +892,8 @@ export function GateDocVerification({
             </tbody>
           </table>
         </div>
-      </section>
+      </div>
+    </section>
 
       {/* 
         ============================================================
