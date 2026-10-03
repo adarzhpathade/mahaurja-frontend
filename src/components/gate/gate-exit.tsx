@@ -889,7 +889,7 @@ export function GateExit({ vehicles, onUpdateStage, onNavigateTab }: GateExitPro
       */}
       <AnimatePresence>
         {selectedVehicleForExit && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-xs">
             <motion.div
               initial={{ opacity: 0, scale: 0.98, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -899,20 +899,22 @@ export function GateExit({ vehicles, onUpdateStage, onNavigateTab }: GateExitPro
               style={{ borderRadius: 0 }}
             >
               {/* Modal Header */}
-              <div className="p-4 bg-[#18181B] text-white flex items-center justify-between border-b border-neutral-800">
-                <div className="flex items-center gap-3">
+              <div className="p-3.5 sm:p-4 bg-[#18181B] text-white flex items-start sm:items-center justify-between gap-3 border-b border-neutral-800">
+                <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
                   <div
-                    className="w-8 h-8 bg-[#059669] text-white flex items-center justify-center font-bold text-sm"
+                    className="w-8 h-8 bg-[#059669] text-white flex items-center justify-center font-bold text-sm shrink-0"
                     style={{ borderRadius: 0 }}
                   >
                     <ShieldCheck className="w-4 h-4" />
                   </div>
-                  <div>
-                    <h3 className="text-sm font-bold tracking-tight">
-                      Security Exit Clearance & Barrier Dispatch
+                  <div className="min-w-0">
+                    <h3 className="text-xs sm:text-sm font-bold tracking-tight uppercase truncate">
+                      Security Exit Clearance
                     </h3>
-                    <div className="text-[11px] text-neutral-300">
-                      Vehicle: <strong className="text-white">{selectedVehicleForExit.vehicleNo}</strong> · Pass: {selectedVehicleForExit.gateEntryNo}
+                    <div className="text-[11px] text-neutral-300 flex flex-wrap items-center gap-1.5 mt-0.5">
+                      <span className="font-mono font-bold text-white text-xs">{selectedVehicleForExit.vehicleNo}</span>
+                      <span className="text-neutral-500">·</span>
+                      <span className="text-[11px] text-neutral-400 font-mono truncate">{selectedVehicleForExit.gateEntryNo}</span>
                     </div>
                   </div>
                 </div>
@@ -920,40 +922,41 @@ export function GateExit({ vehicles, onUpdateStage, onNavigateTab }: GateExitPro
                 <button
                   type="button"
                   onClick={() => setSelectedVehicleForExit(null)}
-                  className="p-1 hover:bg-neutral-800 text-neutral-400 hover:text-white cursor-pointer"
+                  className="w-8 h-8 flex items-center justify-center hover:bg-neutral-800 text-neutral-400 hover:text-white cursor-pointer shrink-0 transition-colors"
+                  title="Close"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
               {/* Modal Body */}
-              <div className="p-5 overflow-y-auto space-y-5 text-xs">
+              <div className="p-3.5 sm:p-5 overflow-y-auto space-y-4 sm:space-y-5 text-xs">
                 {/* Vehicle & Weighment Overview Strip */}
-                <div className="p-3.5 bg-neutral-50 border border-neutral-300 grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div className="p-3 sm:p-3.5 bg-neutral-50 border border-neutral-300 grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
                   <div>
                     <span className="text-[10px] text-neutral-500 uppercase block font-semibold">Direction</span>
-                    <span className="font-bold text-neutral-900">
-                      {selectedVehicleForExit.direction === "INBOUND_RM" ? "Inbound Raw Material" : "Outbound Finished Goods"}
+                    <span className="font-bold text-neutral-900 text-xs">
+                      {selectedVehicleForExit.direction === "INBOUND_RM" ? "Inbound RM" : "Outbound FG"}
                     </span>
                   </div>
                   <div>
                     <span className="text-[10px] text-neutral-500 uppercase block font-semibold">Material</span>
-                    <span className="font-bold text-neutral-900 truncate block">
+                    <span className="font-bold text-neutral-900 text-xs block break-words">
                       {selectedVehicleForExit.materialName}
                     </span>
                   </div>
                   <div>
                     <span className="text-[10px] text-neutral-500 uppercase block font-semibold">Driver & Phone</span>
-                    <span className="font-semibold text-neutral-800 block">
+                    <span className="font-semibold text-neutral-800 block text-xs">
                       {selectedVehicleForExit.driverName}
                     </span>
-                    <span className="text-[10px] text-neutral-500">
+                    <span className="text-[10px] text-neutral-500 font-mono">
                       {selectedVehicleForExit.driverMobile}
                     </span>
                   </div>
                   <div>
                     <span className="text-[10px] text-neutral-500 uppercase block font-semibold">Net Cargo Weight</span>
-                    <span className="font-extrabold text-[#059669] text-sm tabular-nums">
+                    <span className="font-extrabold text-[#059669] text-xs sm:text-sm tabular-nums">
                       {selectedVehicleForExit.netWeightMT ||
                         Math.abs(
                           (selectedVehicleForExit.grossWeightMT || 42.8) -
@@ -966,15 +969,15 @@ export function GateExit({ vehicles, onUpdateStage, onNavigateTab }: GateExitPro
 
                 {/* Mandatory 4-Point Physical Gate Checklist */}
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between border-b border-neutral-200 pb-2">
-                    <span className="font-bold uppercase tracking-wider text-neutral-900 text-[11px] flex items-center gap-1.5">
-                      <Lock className="w-3.5 h-3.5 text-neutral-700" />
-                      Mandatory Physical Security Checklist (Gate 02)
+                  <div className="flex items-center justify-between gap-2 border-b border-neutral-200 pb-2">
+                    <span className="font-bold uppercase tracking-wider text-neutral-900 text-[10px] sm:text-[11px] flex items-center gap-1.5 truncate">
+                      <Lock className="w-3.5 h-3.5 text-neutral-700 shrink-0" />
+                      <span>Security Checklist</span>
                     </span>
                     <button
                       type="button"
                       onClick={handleSelectAllChecks}
-                      className="text-[11px] font-semibold text-[#059669] hover:underline cursor-pointer"
+                      className="text-[11px] font-bold text-[#059669] hover:underline cursor-pointer shrink-0"
                     >
                       Select All 4 Checks
                     </button>
@@ -1138,19 +1141,19 @@ export function GateExit({ vehicles, onUpdateStage, onNavigateTab }: GateExitPro
               </div>
 
               {/* Modal Footer CTA */}
-              <div className="p-4 bg-neutral-100 border-t border-neutral-300 flex items-center justify-between">
+              <div className="p-3.5 sm:p-4 bg-neutral-100 border-t border-neutral-300 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3">
                 <button
                   type="button"
                   onClick={() => setSelectedVehicleForExit(null)}
-                  className="px-4 py-2 border border-neutral-300 bg-white text-xs font-semibold text-neutral-700 hover:bg-neutral-50 cursor-pointer"
+                  className="order-2 sm:order-1 w-full sm:w-auto px-4 py-2 border border-neutral-300 bg-white text-xs font-semibold text-neutral-700 hover:bg-neutral-50 cursor-pointer text-center"
                   style={{ borderRadius: 0 }}
                 >
                   Cancel
                 </button>
 
-                <div className="flex items-center gap-3">
+                <div className="order-1 sm:order-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
                   {!isInspectionComplete && (
-                    <span className="text-[11px] text-neutral-500 hidden sm:inline">
+                    <span className="text-[11px] text-neutral-500 text-center sm:text-right hidden sm:inline">
                       Complete all 4 checklist points to unlock barrier
                     </span>
                   )}
@@ -1158,7 +1161,7 @@ export function GateExit({ vehicles, onUpdateStage, onNavigateTab }: GateExitPro
                     type="button"
                     disabled={!isInspectionComplete}
                     onClick={handleAuthorizeExit}
-                    className={`px-5 py-2.5 text-xs font-bold flex items-center gap-2 cursor-pointer transition-all ${
+                    className={`w-full sm:w-auto px-5 py-2.5 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer transition-all ${
                       isInspectionComplete
                         ? "bg-[#059669] hover:bg-[#047857] text-white shadow-md"
                         : "bg-neutral-300 text-neutral-500 cursor-not-allowed"
@@ -1166,7 +1169,7 @@ export function GateExit({ vehicles, onUpdateStage, onNavigateTab }: GateExitPro
                     style={{ borderRadius: 0 }}
                   >
                     <Unlock className="w-4 h-4" />
-                    <span>AUTHORIZE & RAISE EXIT BARRIER 02</span>
+                    <span>Authorize & Raise Barrier</span>
                   </button>
                 </div>
               </div>
