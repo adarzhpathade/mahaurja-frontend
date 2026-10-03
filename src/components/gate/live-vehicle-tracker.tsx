@@ -33,8 +33,21 @@ import { GateEntryModal } from "@/components/gate/gate-entry-modal";
 
 type FilterTab = "ALL" | "INBOUND_RM" | "OUTBOUND_DISPATCH" | "WAITING_WEIGHMENT" | "CLEARED_EXIT";
 
-export function LiveVehicleTracker() {
-  const [vehicles, setVehicles] = useState<GateVehicle[]>(INITIAL_GATE_VEHICLES);
+export interface LiveVehicleTrackerProps {
+  vehicles?: GateVehicle[];
+  onUpdateStage?: (vehicleId: string, newStage: GateStage) => void;
+  onAddVehicle?: (vehicle: GateVehicle) => void;
+  onNavigateTab?: (tabId: string) => void;
+}
+
+export function LiveVehicleTracker({
+  vehicles: externalVehicles,
+  onUpdateStage: externalUpdateStage,
+  onAddVehicle: externalAddVehicle,
+  onNavigateTab,
+}: LiveVehicleTrackerProps = {}) {
+  const [internalVehicles, setInternalVehicles] = useState<GateVehicle[]>(INITIAL_GATE_VEHICLES);
+  const vehicles = externalVehicles || internalVehicles;
   const [activeTab, setActiveTab] = useState<FilterTab>("ALL");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedVehicle, setSelectedVehicle] = useState<GateVehicle | null>(null);
@@ -94,17 +107,26 @@ export function LiveVehicleTracker() {
   }, [vehicles, activeTab, searchQuery]);
 
   const handleAddVehicle = (newVehicle: GateVehicle) => {
-    setVehicles((prev) => [newVehicle, ...prev]);
+    if (externalAddVehicle) {
+      externalAddVehicle(newVehicle);
+    } else {
+      setInternalVehicles((prev) => [newVehicle, ...prev]);
+    }
   };
 
   const handleUpdateStage = (vehicleId: string, newStage: GateStage) => {
-    setVehicles((prev) =>
-      prev.map((v) => (v.id === vehicleId ? { ...v, stage: newStage } : v))
-    );
+    if (externalUpdateStage) {
+      externalUpdateStage(vehicleId, newStage);
+    } else {
+      setInternalVehicles((prev) =>
+        prev.map((v) => (v.id === vehicleId ? { ...v, stage: newStage } : v))
+      );
+    }
     if (selectedVehicle && selectedVehicle.id === vehicleId) {
       setSelectedVehicle((prev) => (prev ? { ...prev, stage: newStage } : null));
     }
   };
+
 
   // Distinct stage colors for guard visibility (Transparent backgrounds, no color fill)
   const getStageConfig = (stage: GateStage) => {
@@ -309,24 +331,38 @@ export function LiveVehicleTracker() {
                   </div>
 
                   <div className="mt-4 pt-3 border-t border-neutral-200">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const exitVehicle = vehicles.find((v) => v.stage === "CLEARED_EXIT");
-                        if (exitVehicle) {
-                          handleUpdateStage(exitVehicle.id, "EXIT_COMPLETED");
-                          setExitBarrierMessage(`Exit Barrier Raised · Vehicle ${exitVehicle.vehicleNo} Exited Plant`);
-                          setTimeout(() => setExitBarrierMessage(null), 4000);
-                        } else {
-                          setExitBarrierMessage("All cleared vehicles have departed.");
-                          setTimeout(() => setExitBarrierMessage(null), 3000);
-                        }
-                      }}
-                      className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 bg-[#18181B] hover:bg-neutral-800 text-white text-[11px] font-bold uppercase tracking-wider transition-colors cursor-pointer"
-                    >
-                      <CheckCircle2 className="w-3.5 h-3.5 text-[#059669]" strokeWidth={2} />
-                      <span>Verify & Raise Exit Barrier</span>
-                    </button>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const exitVehicle = vehicles.find((v) => v.stage === "CLEARED_EXIT" || v.stage === "TARE_WEIGHED");
+                          if (exitVehicle) {
+                            handleUpdateStage(exitVehicle.id, "EXIT_COMPLETED");
+                            setExitBarrierMessage(`Exit Barrier Raised · Vehicle ${exitVehicle.vehicleNo} Exited Plant`);
+                            setTimeout(() => setExitBarrierMessage(null), 4000);
+                          } else {
+                            setExitBarrierMessage("All cleared vehicles have departed.");
+                            setTimeout(() => setExitBarrierMessage(null), 3000);
+                          }
+                        }}
+                        className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 bg-[#18181B] hover:bg-neutral-800 text-white text-[11px] font-bold uppercase tracking-wider transition-colors cursor-pointer"
+                        style={{ borderRadius: 0 }}
+                      >
+                        <CheckCircle2 className="w-3.5 h-3.5 text-[#059669]" strokeWidth={2} />
+                        <span>Quick Raise Barrier</span>
+                      </button>
+                      {onNavigateTab && (
+                        <button
+                          type="button"
+                          onClick={() => onNavigateTab("exit")}
+                          className="px-2.5 py-1.5 border border-neutral-300 hover:bg-neutral-100 text-neutral-800 text-[11px] font-bold transition-colors cursor-pointer"
+                          style={{ borderRadius: 0 }}
+                          title="Open Outward Exit Station"
+                        >
+                          Exit Desk →
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>

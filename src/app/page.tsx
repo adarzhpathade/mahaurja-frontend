@@ -8,8 +8,11 @@ import {
 } from "@/components/layout/industrial-nav";
 import { LiveVehicleTracker } from "@/components/gate/live-vehicle-tracker";
 import { GateHome } from "@/components/gate/gate-home";
+import { GateExit } from "@/components/gate/gate-exit";
+import { GateDocVerification } from "@/components/gate/gate-doc-verification";
 import { GateEntryModal } from "@/components/gate/gate-entry-modal";
-import { GateVehicle } from "@/lib/types/gate";
+import { GateVehicle, GateStage } from "@/lib/types/gate";
+import { INITIAL_GATE_VEHICLES } from "@/lib/data/mock-gate-vehicles";
 
 export default function Page() {
   // Default to Gate / Security Operator with active tab 'live-tracker'
@@ -17,6 +20,19 @@ export default function Page() {
   const [activeTabId, setActiveTabId] = useState<string>("home");
   const [isEntryModalOpen, setIsEntryModalOpen] = useState(false);
   const [prefillEntryData, setPrefillEntryData] = useState<Partial<GateVehicle> | null>(null);
+
+  // Shared vehicles state across Gate modules
+  const [vehicles, setVehicles] = useState<GateVehicle[]>(INITIAL_GATE_VEHICLES);
+
+  const handleUpdateStage = (vehicleId: string, newStage: GateStage) => {
+    setVehicles((prev) =>
+      prev.map((v) => (v.id === vehicleId ? { ...v, stage: newStage } : v))
+    );
+  };
+
+  const handleAddVehicle = (newVehicle: GateVehicle) => {
+    setVehicles((prev) => [newVehicle, ...prev]);
+  };
 
   const handleRoleSelect = (role: UserRoleProfile) => {
     setCurrentRole(role);
@@ -38,6 +54,7 @@ export default function Page() {
   };
 
   const handleAddVehicleFromModal = (vehicle: GateVehicle) => {
+    handleAddVehicle(vehicle);
     setIsEntryModalOpen(false);
     setPrefillEntryData(null);
     setActiveTabId("live-tracker");
@@ -69,8 +86,25 @@ export default function Page() {
               onNavigateTab={handleTabChange}
               onOpenEntryModal={handleOpenEntryWithPrefill}
             />
+          ) : activeTabId === "exit" ? (
+            <GateExit
+              vehicles={vehicles}
+              onUpdateStage={handleUpdateStage}
+              onNavigateTab={handleTabChange}
+            />
+          ) : activeTabId === "docs" ? (
+            <GateDocVerification
+              vehicles={vehicles}
+              onUpdateStage={handleUpdateStage}
+              onNavigateTab={handleTabChange}
+            />
           ) : (
-            <LiveVehicleTracker />
+            <LiveVehicleTracker
+              vehicles={vehicles}
+              onUpdateStage={handleUpdateStage}
+              onAddVehicle={handleAddVehicle}
+              onNavigateTab={handleTabChange}
+            />
           )
         ) : (
           /* Role Switch Fallback / Preview for other roles */
