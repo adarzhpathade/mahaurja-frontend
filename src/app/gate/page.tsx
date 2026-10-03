@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { GateHome } from "@/components/gate/gate-home";
 import { useGate } from "@/lib/context/gate-context";
+import { GateVehicle } from "@/lib/types/gate";
 
 export default function GateHomePage() {
   const router = useRouter();
