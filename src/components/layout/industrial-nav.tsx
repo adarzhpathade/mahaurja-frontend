@@ -32,6 +32,7 @@ import {
   GitFork,
   LineChart,
   Users,
+  User,
   Layers,
   Menu,
   X,
@@ -177,6 +178,7 @@ export function IndustrialNav({
     currentRole.navItems[1]?.id || currentRole.navItems[0]?.id || "home"
   );
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
   const selectedTab = activeTabId !== undefined ? activeTabId : internalActiveTab;
 
@@ -192,9 +194,9 @@ export function IndustrialNav({
 
   return (
     <header className="w-full bg-[#F4F5F7] border-b border-[#E2E8F0] select-none sticky top-0 z-40">
-      <div className="max-w-[1920px] mx-auto px-3 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between gap-2 sm:gap-4">
+      <div className="relative max-w-[1920px] mx-auto px-3 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between gap-4">
         {/* Left: Brand Name */}
-        <div className="flex items-center gap-2 sm:gap-6 shrink-0">
+        <div className="flex items-center gap-2 sm:gap-6 shrink-0 z-10 min-w-[120px]">
           <div className="flex items-center gap-2">
             <span className="font-bold tracking-tight text-[#0F172A] text-sm md:text-base uppercase tracking-wider">
               MAHAURJA
@@ -202,10 +204,10 @@ export function IndustrialNav({
           </div>
         </div>
 
-        {/* Center: Exact Tab Group - Sharp Rectangular Segments with clean spacing (rounded-none, shadow-none, 0 depth, no color) */}
+        {/* Center: Truly Center-Aligned Tab Group */}
         <nav
           aria-label="Plant Navigation"
-          className="hidden md:flex items-center overflow-x-auto"
+          className="hidden md:flex items-center justify-center flex-1 max-w-fit mx-auto lg:absolute lg:left-1/2 lg:-translate-x-1/2 z-0"
         >
           <div className="inline-flex items-center gap-1.5 sm:gap-2">
             {currentRole.navItems.map((item) => {
@@ -241,19 +243,71 @@ export function IndustrialNav({
           </div>
         </nav>
 
-        {/* Right: Guard Station Indicator + Mobile Menu Toggle */}
-        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-          {/* Station & On-Duty Guard Status Badge (Zero border radius, crisp industrial aesthetic) */}
-          <div
-            className="hidden sm:flex items-center gap-2.5 px-3 py-1.5 border border-neutral-300 bg-white/70 text-xs"
-            style={{ borderRadius: 0 }}
-          >
-            <span className="w-1.5 h-1.5 bg-[#059669] inline-block shrink-0" />
-            <div className="flex items-baseline gap-1.5 leading-none">
-              <span className="font-bold text-neutral-900">{currentRole.userName}</span>
-              <span className="text-neutral-400">·</span>
-              <span className="text-[11px] text-neutral-500 font-medium uppercase tracking-wider">Gate 01 Post</span>
-            </div>
+        {/* Right: User Profile Icon + Mobile Menu Toggle */}
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0 z-10 min-w-[120px] justify-end">
+          {/* User Profile Icon Button (Clean icon without direct verbose text) */}
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+              className="w-9 h-9 border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-800 hover:text-black flex items-center justify-center relative cursor-pointer transition-colors shadow-xs"
+              style={{ borderRadius: 0 }}
+              title={`On Duty: ${currentRole.userName} (Gate 01 Post)`}
+              aria-label="User Profile"
+              aria-expanded={isUserMenuOpen}
+            >
+              <User className="w-4 h-4 text-neutral-800" strokeWidth={1.8} />
+              <span className="w-1.5 h-1.5 bg-[#059669] absolute top-1.5 right-1.5" />
+            </button>
+
+            {/* Compact Industrial Guard Details Popover on Click */}
+            {isUserMenuOpen && (
+              <>
+                <div
+                  className="fixed inset-0 z-40"
+                  onClick={() => setIsUserMenuOpen(false)}
+                />
+                <div
+                  className="absolute right-0 mt-2 w-64 bg-white border border-[#D1D5DB] z-50 p-4 shadow-xl select-none"
+                  style={{ borderRadius: 0 }}
+                >
+                  <div className="flex items-center gap-3 pb-3 border-b border-neutral-200">
+                    <div className="w-9 h-9 bg-[#18181B] text-white flex items-center justify-center font-bold text-sm shrink-0">
+                      {currentRole.userName.charAt(0)}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="font-bold text-xs text-neutral-900 truncate">
+                        {currentRole.userName}
+                      </div>
+                      <div className="text-[11px] text-neutral-500 font-medium truncate">
+                        {currentRole.roleName}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="pt-2.5 space-y-1.5 text-xs">
+                    <div className="flex items-center justify-between text-neutral-600">
+                      <span>Post Station:</span>
+                      <strong className="text-neutral-900">Gate 01 Post</strong>
+                    </div>
+                    <div className="flex items-center justify-between text-neutral-600">
+                      <span>Security Badge:</span>
+                      <strong className="text-neutral-900 font-mono">#SEC-042</strong>
+                    </div>
+                    <div className="flex items-center justify-between text-neutral-600">
+                      <span>Shift Schedule:</span>
+                      <span className="font-medium text-neutral-800">Shift 1 (08:00–16:00)</span>
+                    </div>
+                    <div className="flex items-center justify-between pt-1 border-t border-neutral-100">
+                      <span className="text-neutral-600">Duty Status:</span>
+                      <span className="text-[10px] font-bold text-[#047857] px-1.5 py-0.5 border border-emerald-300 bg-emerald-50">
+                        ON DUTY
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
 
           {/* Mobile Collapsible Navigation Toggle Button */}
