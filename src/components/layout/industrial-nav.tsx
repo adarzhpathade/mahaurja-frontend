@@ -214,18 +214,12 @@ export function IndustrialNav({
   return (
     <header className="w-full bg-[#F4F5F7] border-b border-[#E2E8F0] select-none sticky top-0 z-40">
       <div className="max-w-[1920px] mx-auto px-3 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between gap-2 sm:gap-4">
-        {/* Left: Brand Name & Active Module Pill for Mobile */}
+        {/* Left: Brand Name */}
         <div className="flex items-center gap-2 sm:gap-6 shrink-0">
           <div className="flex items-center gap-2">
             <span className="font-bold tracking-tight text-[#0F172A] text-sm md:text-base uppercase tracking-wider">
               MAHAURJA
             </span>
-            {/* Mobile Active Desk Pill */}
-            {activeNavItem && (
-              <span className="md:hidden px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider bg-[#18181B] text-white truncate max-w-[120px]">
-                {activeNavItem.label}
-              </span>
-            )}
           </div>
         </div>
 
@@ -374,17 +368,19 @@ export function IndustrialNav({
             className="md:hidden flex items-center gap-1.5 px-2.5 py-1.5 border border-neutral-400 bg-white hover:bg-neutral-100 text-neutral-900 text-xs font-bold uppercase tracking-wider cursor-pointer transition-colors active:scale-95"
             style={{ borderRadius: 0 }}
             aria-expanded={isMobileMenuOpen}
-            aria-label={isMobileMenuOpen ? "Collapse Navigation" : "Expand Navigation"}
+            aria-label={isMobileMenuOpen ? "Collapse Navigation" : `Current page: ${activeNavItem?.label || "Navigation"}`}
           >
             {isMobileMenuOpen ? (
               <>
-                <X className="w-4 h-4 text-neutral-900" />
+                <X className="w-4 h-4 text-neutral-900 shrink-0" />
                 <span className="text-[11px]">CLOSE</span>
               </>
             ) : (
               <>
-                <Menu className="w-4 h-4 text-neutral-900" />
-                <span className="text-[11px]">NAV</span>
+                <Menu className="w-4 h-4 text-neutral-900 shrink-0" />
+                <span className="text-[11px] truncate max-w-[120px]">
+                  {activeNavItem ? activeNavItem.label.toUpperCase() : "PAGE"}
+                </span>
               </>
             )}
           </button>
