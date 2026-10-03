@@ -652,7 +652,7 @@ export function LiveVehicleTracker({
 
           return (
             <div
-              className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs"
+              className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-xs"
               onClick={() => setInspectVehicle(null)}
             >
               <motion.div
@@ -661,42 +661,41 @@ export function LiveVehicleTracker({
                 exit={{ opacity: 0, scale: 0.96, y: 8 }}
                 transition={{ duration: 0.18, ease: "easeOut" }}
                 onClick={(e) => e.stopPropagation()}
-                className="w-full max-w-xl bg-white border border-neutral-300 shadow-2xl p-5 sm:p-6 space-y-4"
+                className="w-full max-w-xl max-h-[92vh] overflow-y-auto bg-white border border-neutral-300 shadow-2xl p-4 sm:p-6 space-y-4"
               >
                 {/* Modal Header */}
-                <div className="flex items-start justify-between gap-3 pb-3 border-b border-neutral-200">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono font-bold text-xl sm:text-2xl text-neutral-900 tracking-tight">
-                        {v.vehicleNo}
-                      </span>
-                      <span
-                        className={`text-[10px] font-bold uppercase px-2 py-0.5 border ${
-                          v.direction === "INBOUND_RM"
-                            ? "border-emerald-300 bg-emerald-50 text-[#047857]"
-                            : "border-neutral-300 bg-[#18181B] text-white"
-                        }`}
-                      >
-                        {v.direction === "INBOUND_RM" ? "Inbound RM" : "Outbound FG"}
-                      </span>
-                    </div>
-                    <div className="text-xs text-neutral-500">
-                      Pass: <strong className="text-neutral-800 font-semibold">{v.gateEntryNo}</strong> · In: {v.arrivalTime || v.inTime || "14:15"}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-semibold text-neutral-700 bg-neutral-100 border border-neutral-200 px-2.5 py-1 tabular-nums">
-                      ⏱️ {dwell}m inside
+                <div className="pb-3 border-b border-neutral-200 space-y-2">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="font-mono font-bold text-xl sm:text-2xl text-neutral-900 tracking-tight whitespace-nowrap">
+                      {v.vehicleNo}
                     </span>
                     <button
                       type="button"
                       onClick={() => setInspectVehicle(null)}
-                      className="w-7 h-7 flex items-center justify-center border border-neutral-300 hover:bg-neutral-100 text-neutral-500 hover:text-neutral-900 cursor-pointer bg-white transition-colors"
+                      className="w-8 h-8 flex items-center justify-center border border-neutral-300 hover:bg-neutral-100 text-neutral-600 hover:text-neutral-900 cursor-pointer bg-white transition-colors shrink-0"
                       title="Close"
                     >
                       <X className="w-4 h-4" />
                     </button>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2 text-xs">
+                    <span
+                      className={`text-[10px] font-bold uppercase px-2 py-0.5 border ${
+                        v.direction === "INBOUND_RM"
+                          ? "border-emerald-300 bg-emerald-50 text-[#047857]"
+                          : "border-neutral-300 bg-[#18181B] text-white"
+                      }`}
+                    >
+                      {v.direction === "INBOUND_RM" ? "Inbound RM" : "Outbound FG"}
+                    </span>
+                    <span className="text-[11px] font-semibold text-neutral-700 bg-neutral-100 border border-neutral-200 px-2 py-0.5 tabular-nums">
+                      ⏱️ {dwell}m inside
+                    </span>
+                    <span className="text-neutral-300 hidden sm:inline">·</span>
+                    <span className="text-xs text-neutral-500">
+                      Pass: <strong className="text-neutral-800 font-semibold">{v.gateEntryNo}</strong> · In: {v.arrivalTime || v.inTime || "14:15"}
+                    </span>
                   </div>
                 </div>
 
@@ -804,7 +803,7 @@ export function LiveVehicleTracker({
                   <button
                     type="button"
                     onClick={() => setInspectVehicle(null)}
-                    className="px-5 py-2 bg-[#18181B] hover:bg-neutral-800 text-white text-xs font-semibold cursor-pointer transition-colors"
+                    className="w-full sm:w-auto px-5 py-2.5 sm:py-2 bg-[#18181B] hover:bg-neutral-800 text-white text-xs font-semibold cursor-pointer transition-colors text-center"
                   >
                     Close
                   </button>
