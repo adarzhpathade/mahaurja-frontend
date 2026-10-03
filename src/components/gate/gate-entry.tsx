@@ -250,9 +250,9 @@ export function GateEntry() {
       </AnimatePresence>
 
       {/* ========================================================================= */}
-      {/* 2. COMPACT ZERO-SCROLL REGISTRATION CONSOLE                                */}
+      {/* 2. REGISTRATION CONSOLE (TRANSPARENT BG, RESPONSIVE ZERO-SCROLL DESKTOP)   */}
       {/* ========================================================================= */}
-      <div className="w-full bg-white border border-neutral-300 p-4 sm:p-5" style={{ borderRadius: 0 }}>
+      <div className="w-full bg-transparent border-0 sm:border sm:border-neutral-300 p-0 sm:p-5" style={{ borderRadius: 0 }}>
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Error Banner */}
           {error && (
@@ -263,58 +263,60 @@ export function GateEntry() {
           )}
 
           {/* Direction Switcher & Telemetry Bar */}
-          <div className="p-2.5 bg-[#F8F9FA] border border-neutral-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div className="flex items-center gap-2.5">
-              <span className="text-xs font-bold uppercase text-neutral-700 shrink-0">
-                Direction <span className="text-red-500">*</span>:
+          <div className="p-2.5 sm:p-3 bg-neutral-200/50 border border-neutral-300 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3 w-full sm:w-auto">
+              <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-neutral-700 shrink-0">
+                Direction <span className="text-red-500">*</span>
               </span>
-              <div className="inline-flex border border-neutral-300 p-0.5 bg-neutral-200/60 gap-1">
+              <div className="grid grid-cols-2 sm:flex border border-neutral-300 p-0.5 bg-neutral-100 gap-1 w-full sm:w-auto">
                 <button
                   type="button"
                   onClick={() => handleDirectionChange("INBOUND_RM")}
-                  className={`px-3 py-1 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer flex items-center gap-1.5 ${
+                  className={`h-9 sm:h-8 px-2 sm:px-3 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-1.5 text-center ${
                     direction === "INBOUND_RM"
                       ? "bg-[#059669] text-white shadow-xs"
-                      : "text-neutral-700 hover:text-neutral-900 hover:bg-neutral-100"
+                      : "text-neutral-700 hover:text-neutral-900 hover:bg-neutral-200"
                   }`}
                   style={{ borderRadius: 0 }}
                 >
-                  <Truck className="w-3.5 h-3.5" />
-                  <span>Inbound Biomass RM</span>
+                  <Truck className="w-3.5 h-3.5 shrink-0" />
+                  <span className="truncate sm:hidden">Inbound RM</span>
+                  <span className="hidden sm:inline">Inbound Biomass RM</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => handleDirectionChange("OUTBOUND_DISPATCH")}
-                  className={`px-3 py-1 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer flex items-center gap-1.5 ${
+                  className={`h-9 sm:h-8 px-2 sm:px-3 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-1.5 text-center ${
                     direction === "OUTBOUND_DISPATCH"
                       ? "bg-[#18181B] text-white shadow-xs"
-                      : "text-neutral-700 hover:text-neutral-900 hover:bg-neutral-100"
+                      : "text-neutral-700 hover:text-neutral-900 hover:bg-neutral-200"
                   }`}
                   style={{ borderRadius: 0 }}
                 >
-                  <Truck className="w-3.5 h-3.5" />
-                  <span>Outbound Dispatch FG</span>
+                  <Truck className="w-3.5 h-3.5 shrink-0" />
+                  <span className="truncate sm:hidden">Outbound FG</span>
+                  <span className="hidden sm:inline">Outbound Dispatch FG</span>
                 </button>
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-3 text-xs text-neutral-600">
+            <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-3 text-[11px] sm:text-xs text-neutral-600 border-t sm:border-t-0 border-neutral-300 pt-1.5 sm:pt-0">
               <span className="font-mono">
-                Pass ID: <strong className="text-neutral-900 font-bold">{passId}</strong>
+                Pass: <strong className="text-neutral-900 font-bold">{passId}</strong>
               </span>
-              <span className="hidden sm:inline text-neutral-300">|</span>
-              <span className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-[#059669] animate-pulse" />
-                <span>Destination: <strong className="text-neutral-900 font-semibold">Weighbridge 01 (Gross Scale)</strong></span>
+              <span className="text-neutral-300">|</span>
+              <span className="flex items-center gap-1 font-medium text-neutral-700">
+                <span className="w-2 h-2 rounded-full bg-[#059669] animate-pulse shrink-0" />
+                <span className="truncate">Weighbridge 01 (Gross)</span>
               </span>
             </div>
           </div>
 
-          {/* 3-Column Balanced Fields Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-5">
+          {/* 3-Column Balanced Fields Grid (Stacks cleanly on Mobile, 3 Cols on Desktop) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4 lg:gap-5">
             {/* Column 1: Vehicle & Transport */}
-            <div className="space-y-2.5 bg-neutral-50/50 p-3 border border-neutral-200">
-              <div className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 border-b border-neutral-200 pb-1">
+            <div className="space-y-2.5 p-0 sm:p-3 border-0 sm:border sm:border-neutral-300 sm:bg-neutral-200/20">
+              <div className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 border-b border-neutral-300 pb-1">
                 1. Vehicle & Transport
               </div>
 
@@ -327,7 +329,7 @@ export function GateEntry() {
                   value={vehicleNo}
                   onChange={(e) => setVehicleNo(e.target.value.toUpperCase())}
                   placeholder="e.g. MH 12 RN 4821"
-                  className="w-full h-9 px-3 bg-white border border-neutral-300 text-xs font-mono font-bold text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-[#059669] focus:ring-1 focus:ring-[#059669] transition-all"
+                  className="w-full h-10 px-3 bg-white border border-neutral-300 text-xs font-mono font-bold text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-[#059669] focus:ring-1 focus:ring-[#059669] transition-all"
                   style={{ borderRadius: 0 }}
                   required
                 />
@@ -340,7 +342,7 @@ export function GateEntry() {
                 <select
                   value={vehicleType}
                   onChange={(e) => setVehicleType(e.target.value as GateVehicle["vehicleType"])}
-                  className="w-full h-9 px-2.5 bg-white border border-neutral-300 text-xs font-medium text-neutral-900 focus:outline-none focus:border-[#059669] transition-all cursor-pointer"
+                  className="w-full h-10 px-2.5 bg-white border border-neutral-300 text-xs font-medium text-neutral-900 focus:outline-none focus:border-[#059669] transition-all cursor-pointer"
                   style={{ borderRadius: 0 }}
                 >
                   <option value="10-Wheeler Tipper">10-Wheeler Tipper</option>
@@ -359,15 +361,15 @@ export function GateEntry() {
                   value={transporter}
                   onChange={(e) => setTransporter(e.target.value)}
                   placeholder="e.g. Shree Ganesh Roadways"
-                  className="w-full h-9 px-3 bg-white border border-neutral-300 text-xs text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-[#059669] transition-all"
+                  className="w-full h-10 px-3 bg-white border border-neutral-300 text-xs text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-[#059669] transition-all"
                   style={{ borderRadius: 0 }}
                 />
               </div>
             </div>
 
             {/* Column 2: Material & Load */}
-            <div className="space-y-2.5 bg-neutral-50/50 p-3 border border-neutral-200">
-              <div className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 border-b border-neutral-200 pb-1">
+            <div className="space-y-2.5 p-0 sm:p-3 border-0 sm:border sm:border-neutral-300 sm:bg-neutral-200/20">
+              <div className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 border-b border-neutral-300 pb-1">
                 2. Material & Load
               </div>
 
@@ -378,7 +380,7 @@ export function GateEntry() {
                 <select
                   value={materialName}
                   onChange={(e) => setMaterialName(e.target.value)}
-                  className="w-full h-9 px-2.5 bg-white border border-neutral-300 text-xs font-medium text-neutral-900 focus:outline-none focus:border-[#059669] transition-all cursor-pointer"
+                  className="w-full h-10 px-2.5 bg-white border border-neutral-300 text-xs font-medium text-neutral-900 focus:outline-none focus:border-[#059669] transition-all cursor-pointer"
                   style={{ borderRadius: 0 }}
                 >
                   {(direction === "INBOUND_RM" ? RAW_MATERIALS : FINISHED_GOODS).map((m) => (
@@ -399,7 +401,7 @@ export function GateEntry() {
                   value={expectedWeightMT}
                   onChange={(e) => setExpectedWeightMT(e.target.value)}
                   placeholder="24.5"
-                  className="w-full h-9 px-3 bg-white border border-neutral-300 text-xs font-mono font-bold text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-[#059669] transition-all"
+                  className="w-full h-10 px-3 bg-white border border-neutral-300 text-xs font-mono font-bold text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-[#059669] focus:ring-1 focus:ring-[#059669] transition-all"
                   style={{ borderRadius: 0 }}
                   required
                 />
@@ -414,15 +416,15 @@ export function GateEntry() {
                   value={poOrChallanRef}
                   onChange={(e) => setPoOrChallanRef(e.target.value)}
                   placeholder="e.g. PO-2026-0982"
-                  className="w-full h-9 px-3 bg-white border border-neutral-300 text-xs text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-[#059669] transition-all"
+                  className="w-full h-10 px-3 bg-white border border-neutral-300 text-xs text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-[#059669] transition-all"
                   style={{ borderRadius: 0 }}
                 />
               </div>
             </div>
 
             {/* Column 3: Party & Driver */}
-            <div className="space-y-2.5 bg-neutral-50/50 p-3 border border-neutral-200">
-              <div className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 border-b border-neutral-200 pb-1">
+            <div className="space-y-2.5 p-0 sm:p-3 border-0 sm:border sm:border-neutral-300 sm:bg-neutral-200/20">
+              <div className="text-[10px] font-bold uppercase tracking-wider text-neutral-600 border-b border-neutral-300 pb-1">
                 3. Party & Driver Details
               </div>
 
@@ -433,7 +435,7 @@ export function GateEntry() {
                 <select
                   value={partyName}
                   onChange={(e) => setPartyName(e.target.value)}
-                  className="w-full h-9 px-2.5 bg-white border border-neutral-300 text-xs font-medium text-neutral-900 focus:outline-none focus:border-[#059669] transition-all cursor-pointer"
+                  className="w-full h-10 px-2.5 bg-white border border-neutral-300 text-xs font-medium text-neutral-900 focus:outline-none focus:border-[#059669] transition-all cursor-pointer"
                   style={{ borderRadius: 0 }}
                 >
                   {(direction === "INBOUND_RM" ? COMMON_SUPPLIERS : COMMON_CUSTOMERS).map((p) => (
@@ -453,7 +455,7 @@ export function GateEntry() {
                   value={driverName}
                   onChange={(e) => setDriverName(e.target.value)}
                   placeholder="Driver full name"
-                  className="w-full h-9 px-3 bg-white border border-neutral-300 text-xs font-medium text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-[#059669] transition-all"
+                  className="w-full h-10 px-3 bg-white border border-neutral-300 text-xs font-medium text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-[#059669] transition-all"
                   style={{ borderRadius: 0 }}
                   required
                 />
@@ -468,7 +470,7 @@ export function GateEntry() {
                   value={driverMobile}
                   onChange={(e) => setDriverMobile(e.target.value)}
                   placeholder="+91 98224 81920"
-                  className="w-full h-9 px-3 bg-white border border-neutral-300 text-xs font-mono text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-[#059669] transition-all"
+                  className="w-full h-10 px-3 bg-white border border-neutral-300 text-xs font-mono text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-[#059669] transition-all"
                   style={{ borderRadius: 0 }}
                 />
               </div>
@@ -487,7 +489,7 @@ export function GateEntry() {
                     key={preset}
                     type="button"
                     onClick={() => handleAddPresetRemark(preset)}
-                    className="px-2 py-0.5 text-[10px] font-semibold border border-neutral-300 bg-neutral-50 hover:bg-neutral-100 text-neutral-600 hover:text-neutral-900 transition-colors cursor-pointer"
+                    className="px-2 py-0.5 text-[10px] font-semibold border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-700 transition-colors cursor-pointer"
                     style={{ borderRadius: 0 }}
                   >
                     + {preset}
@@ -500,35 +502,35 @@ export function GateEntry() {
               value={remarks}
               onChange={(e) => setRemarks(e.target.value)}
               placeholder="Enter gate inspection remarks..."
-              className="w-full h-9 px-3 bg-white border border-neutral-300 text-xs text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-[#059669] transition-all"
+              className="w-full h-10 px-3 bg-white border border-neutral-300 text-xs text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-[#059669] transition-all"
               style={{ borderRadius: 0 }}
             />
           </div>
 
           {/* Form Actions Footer */}
-          <div className="pt-3 border-t border-neutral-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="pt-3 border-t border-neutral-300 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="text-xs text-neutral-500 flex items-center gap-1.5">
               <Scale className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
-              <span>Pass will automatically route vehicle to <strong>Gross Scale (Weighbridge 01)</strong>.</span>
+              <span>Pass routes vehicle to <strong>Weighbridge 01 (Gross Scale)</strong>.</span>
             </div>
 
-            <div className="flex items-center gap-2 self-end sm:self-auto w-full sm:w-auto">
+            <div className="grid grid-cols-2 gap-2.5 w-full sm:w-auto sm:flex sm:items-center">
               <button
                 type="button"
                 onClick={handleReset}
-                className="w-full sm:w-auto px-4 py-2 border border-neutral-300 hover:bg-neutral-100 text-neutral-700 text-xs font-semibold uppercase tracking-wider cursor-pointer transition-colors text-center"
+                className="h-10 px-4 border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-700 text-xs font-semibold uppercase tracking-wider cursor-pointer transition-colors text-center"
                 style={{ borderRadius: 0 }}
               >
-                Clear Form
+                Clear
               </button>
 
               <button
                 type="submit"
-                className="w-full sm:w-auto px-6 py-2 bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer flex items-center justify-center gap-2 shadow-xs"
+                className="h-10 px-5 bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer flex items-center justify-center gap-2 shadow-xs"
                 style={{ borderRadius: 0 }}
               >
-                <ShieldCheck className="w-4 h-4" />
-                <span>Issue Pass & Register</span>
+                <ShieldCheck className="w-4 h-4 shrink-0" />
+                <span className="truncate">Issue Pass</span>
               </button>
             </div>
           </div>
