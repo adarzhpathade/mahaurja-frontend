@@ -113,7 +113,7 @@ const INITIAL_DOC_RECORDS: DocVerificationItem[] = [
     driverMobile: "+91 98231 44109",
     verificationStatus: "EXPIRED",
     mismatchReason: "e-Way bill expired at 12:00 PM (Overdue by 3h). Needs validity extension on GST portal.",
-    notes: "Driver in holding bay pending consignor validity renewal.",
+    notes: "Driver in holding bay pending supplier validity renewal.",
   },
   {
     id: "doc-005",
@@ -235,7 +235,7 @@ export function GateDocVerification({
     setCheckEway(doc.verificationStatus !== "EXPIRED");
     setCheckPO(true);
     setCheckVehicle(true);
-    setGuardNotes(doc.notes || "e-Way bill active. Consignor PO matched.");
+    setGuardNotes(doc.notes || "e-Way bill active. Supplier PO matched.");
   };
 
   const handleVerifyConfirm = () => {
@@ -435,7 +435,7 @@ export function GateDocVerification({
                 )}
               </div>
               <div className="text-[11px] text-neutral-500">
-                Showing <strong className="text-neutral-900">{filteredDocs.length}</strong> consignments
+                Showing <strong className="text-neutral-900">{filteredDocs.length}</strong> documents
               </div>
             </div>
           )}
@@ -473,7 +473,7 @@ export function GateDocVerification({
                           {doc.vehicleNo}
                         </div>
                         <div className="text-[10px] text-neutral-500 font-mono mt-0.5">
-                          {doc.gateEntryNo || "Pre-Advised"}
+                          {doc.gateEntryNo || "Scheduled"}
                         </div>
                       </div>
 
@@ -557,8 +557,8 @@ export function GateDocVerification({
                   <th className="py-2.5 px-3">Vehicle & Pass No</th>
                   <th className="py-2.5 px-3">e-Way Bill & Validity</th>
                   <th className="py-2.5 px-3">PO & Challan Ref</th>
-                  <th className="py-2.5 px-3">Consignor / Supplier</th>
-                  <th className="py-2.5 px-3">Commodity & Declared</th>
+                  <th className="py-2.5 px-3">Supplier</th>
+                  <th className="py-2.5 px-3">Material & Weight</th>
                   <th className="py-2.5 px-3">Driver & Contact</th>
                   <th className="py-2.5 px-3">Status</th>
                   <th className="py-2.5 px-3 text-right">Action</th>
@@ -583,7 +583,7 @@ export function GateDocVerification({
                           {doc.vehicleNo}
                         </div>
                         <div className="text-[10px] text-neutral-500 mt-0.5">
-                          {doc.gateEntryNo || "Pre-Advised Consignment"}
+                          {doc.gateEntryNo || "Scheduled Arrival"}
                         </div>
                       </td>
 
@@ -672,7 +672,7 @@ export function GateDocVerification({
         {/* Footer */}
         <div className="p-3 border-t border-neutral-300 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-neutral-500">
           <div>
-            Statutory Goods Access Verification · GST e-Way Bill Standard System
+            Vehicle Document Verification · GST e-Way Bill System
           </div>
           <div>
             Showing <strong className="text-neutral-900">{filteredDocs.length}</strong> records
@@ -741,11 +741,11 @@ export function GateDocVerification({
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2.5 border-t border-neutral-200">
                 <div>
-                  <span className="text-[10px] uppercase font-bold text-neutral-500 block">Consignor</span>
+                  <span className="text-[10px] uppercase font-bold text-neutral-500 block">Supplier</span>
                   <span className="font-semibold text-neutral-800 block text-xs">{selectedDoc.consignor}</span>
                 </div>
                 <div>
-                  <span className="text-[10px] uppercase font-bold text-neutral-500 block">Cargo & Declared MT</span>
+                  <span className="text-[10px] uppercase font-bold text-neutral-500 block">Material & Weight</span>
                   <span className="font-semibold text-neutral-900 block text-xs">
                     {selectedDoc.materialName} ({selectedDoc.declaredQtyMT} MT)
                   </span>
@@ -762,7 +762,7 @@ export function GateDocVerification({
             {/* Verification Checklist */}
             <div className="space-y-2 text-xs">
               <span className="text-xs font-bold uppercase tracking-wider text-neutral-700 block">
-                Statutory Verification Checks
+                Required Document Checks
               </span>
 
               <label className="flex items-start gap-2.5 p-2.5 bg-white border border-neutral-300 hover:border-neutral-400 cursor-pointer transition-colors">
@@ -791,10 +791,10 @@ export function GateDocVerification({
                 />
                 <div>
                   <span className="font-semibold text-neutral-900 block">
-                    Purchase Order & Challan Matched
+                    Purchase Order & Challan Match
                   </span>
                   <span className="text-[11px] text-neutral-500 leading-relaxed block mt-0.5">
-                    Declared cargo and quantity conform to active PO order quota.
+                    Material and weight match active Purchase Order.
                   </span>
                 </div>
               </label>
@@ -808,10 +808,10 @@ export function GateDocVerification({
                 />
                 <div>
                   <span className="font-semibold text-neutral-900 block">
-                    Driver & Vehicle Credentials Verified
+                    Driver & Vehicle Checked
                   </span>
                   <span className="text-[11px] text-neutral-500 leading-relaxed block mt-0.5">
-                    Physical vehicle plate matches transporter and driver mobile on pass.
+                    Vehicle number matches driver details and gate pass.
                   </span>
                 </div>
               </label>
@@ -820,7 +820,7 @@ export function GateDocVerification({
             {/* Notes */}
             <div>
               <label className="text-[11px] font-semibold text-neutral-700 block mb-1">
-                Guard Verification Notes
+                Guard Notes
               </label>
               <input
                 type="text"

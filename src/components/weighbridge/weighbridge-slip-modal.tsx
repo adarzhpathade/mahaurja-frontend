@@ -143,7 +143,7 @@ export function WeighbridgeSlipModal({
 
               <div>
                 <span className="text-neutral-500 block text-[9px] uppercase font-bold">
-                  Consignment Direction
+                  Direction
                 </span>
                 <span className="font-bold text-neutral-900 uppercase">
                   {record.direction === "INBOUND_RM"
@@ -154,7 +154,7 @@ export function WeighbridgeSlipModal({
 
               <div>
                 <span className="text-neutral-500 block text-[9px] uppercase font-bold">
-                  Material Commodity
+                  Material
                 </span>
                 <span className="font-semibold text-neutral-900">
                   {record.materialName} ({record.materialCode})

@@ -209,7 +209,7 @@ export function GateHome({ onNavigateTab, onOpenEntryModal }: GateHomeProps) {
           className="border border-neutral-300 p-4 sm:p-5 hover:border-neutral-900 transition-colors cursor-pointer group bg-white flex flex-col justify-between"
         >
           <span className="text-[11px] sm:text-xs font-bold text-neutral-500 uppercase tracking-wider group-hover:text-neutral-900 transition-colors truncate">
-            Yard & Sampling
+            Yard & Testing
           </span>
           <div className="mt-3 flex items-baseline gap-1.5 sm:gap-2">
             <span className="text-2xl sm:text-3xl font-black tracking-tight text-neutral-900 tabular-nums">
@@ -225,7 +225,7 @@ export function GateHome({ onNavigateTab, onOpenEntryModal }: GateHomeProps) {
           className="border border-neutral-300 p-4 sm:p-5 hover:border-neutral-900 transition-colors cursor-pointer group bg-white flex flex-col justify-between"
         >
           <span className="text-[11px] sm:text-xs font-bold text-neutral-500 uppercase tracking-wider group-hover:text-neutral-900 transition-colors truncate">
-            Exit Clearance
+            Ready for Exit
           </span>
           <div className="mt-3 flex items-baseline gap-1.5 sm:gap-2">
             <span className="text-2xl sm:text-3xl font-black tracking-tight text-neutral-900 tabular-nums">
@@ -469,8 +469,8 @@ export function GateHome({ onNavigateTab, onOpenEntryModal }: GateHomeProps) {
                 <tr className="border-b border-neutral-300 bg-neutral-200/50 text-neutral-600 font-bold uppercase tracking-wider text-[10px]">
                   <th className="py-2.5 px-3">Window & ETA</th>
                   <th className="py-2.5 px-3">Vehicle Plate</th>
-                  <th className="py-2.5 px-3">Supplier & Cluster</th>
-                  <th className="py-2.5 px-3">Commodity & Declared</th>
+                  <th className="py-2.5 px-3">Supplier & Location</th>
+                  <th className="py-2.5 px-3">Material & Weight</th>
                   <th className="py-2.5 px-3">Gate Status</th>
                   <th className="py-2.5 px-3 text-right">Action</th>
                 </tr>
@@ -558,7 +558,7 @@ export function GateHome({ onNavigateTab, onOpenEntryModal }: GateHomeProps) {
                             className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#059669] hover:bg-[#047857] text-white text-[11px] font-bold uppercase tracking-wider transition-colors cursor-pointer"
                           >
                             <Zap className="w-3 h-3" />
-                            <span>1-Click Check-In</span>
+                            <span>Quick Check-In</span>
                           </button>
                         )}
                       </td>
@@ -632,7 +632,7 @@ export function GateHome({ onNavigateTab, onOpenEntryModal }: GateHomeProps) {
               <div className="grid grid-cols-2 gap-2.5">
                 <div>
                   <span className="text-[10px] uppercase font-bold text-neutral-500 block">
-                    Material / Commodity
+                    Material
                   </span>
                   <span className="font-semibold text-neutral-800 text-xs block">
                     {selectedArrival.materialName}
@@ -640,7 +640,7 @@ export function GateHome({ onNavigateTab, onOpenEntryModal }: GateHomeProps) {
                 </div>
                 <div>
                   <span className="text-[10px] uppercase font-bold text-neutral-500 block">
-                    Declared Quantity
+                    Expected Weight
                   </span>
                   <span className="font-mono font-bold text-neutral-900 text-xs block">
                     {selectedArrival.expectedWeightMT.toFixed(1)} MT
@@ -651,7 +651,7 @@ export function GateHome({ onNavigateTab, onOpenEntryModal }: GateHomeProps) {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2.5 border-t border-neutral-200">
                 <div>
                   <span className="text-[10px] uppercase font-bold text-neutral-500 block">
-                    Supplier & Cluster
+                    Supplier & Location
                   </span>
                   <span className="font-semibold text-neutral-800 block text-xs">
                     {selectedArrival.supplierName}
@@ -675,7 +675,7 @@ export function GateHome({ onNavigateTab, onOpenEntryModal }: GateHomeProps) {
 
               <div className="pt-2 border-t border-neutral-200">
                 <span className="text-[10px] uppercase font-bold text-neutral-500 block">
-                  Transporter Fleet
+                  Transporter
                 </span>
                 <span className="text-neutral-800 font-medium block text-xs">
                   {selectedArrival.transporter}
@@ -703,7 +703,7 @@ export function GateHome({ onNavigateTab, onOpenEntryModal }: GateHomeProps) {
                 className="order-1 sm:order-2 w-full sm:w-auto px-5 py-2.5 sm:py-2 bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-xs"
               >
                 <Zap className="w-4 h-4" />
-                <span>Perform Gate Check-In</span>
+                <span>Check-In Vehicle</span>
               </button>
             </div>
           </div>

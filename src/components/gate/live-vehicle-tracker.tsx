@@ -507,10 +507,10 @@ export function LiveVehicleTracker({
                 <tr className="bg-neutral-200/50 border-b border-neutral-300 text-[10px] uppercase font-bold text-neutral-600 tracking-wider">
                   <th className="py-3 px-4">Vehicle & Pass No</th>
                   <th className="py-3 px-3">Direction</th>
-                  <th className="py-3 px-3">Material & Declared</th>
+                  <th className="py-3 px-3">Material & Weight</th>
                   <th className="py-3 px-3">Supplier / Customer</th>
-                  <th className="py-3 px-3">Operational Stage</th>
-                  <th className="py-3 px-3">Dwell Time</th>
+                  <th className="py-3 px-3">Stage</th>
+                  <th className="py-3 px-3">Time Inside</th>
                   <th className="py-3 px-4 text-right">Details</th>
                 </tr>
               </thead>
@@ -631,10 +631,10 @@ export function LiveVehicleTracker({
           <div className="flex items-center gap-2">
             <span>Plant Gate Operations</span>
             <span>·</span>
-            <span className="text-[#059669] font-medium">Automatic Dwell Time Tracking Active</span>
+            <span className="text-[#059669] font-medium">Automatic Visit Time Tracking Active</span>
           </div>
           <div>
-            Click any row or &quot;View Details&quot; to inspect vehicle lifecycle and specifications.
+            Click any row or &quot;View Details&quot; to inspect vehicle details and progress.
           </div>
         </div>
       </div>
@@ -750,7 +750,7 @@ export function LiveVehicleTracker({
 
                     <div>
                       <span className="text-[10px] uppercase font-bold tracking-wider text-neutral-400 block mb-0.5">
-                        {v.direction === "INBOUND_RM" ? "Supplier / Source" : "Customer / Destination"}
+                        {v.direction === "INBOUND_RM" ? "Supplier (Sender)" : "Customer (Receiver)"}
                       </span>
                       <div className="font-semibold text-neutral-900">
                         {v.supplierOrCustomer}
@@ -784,7 +784,7 @@ export function LiveVehicleTracker({
                         <span>{v.assignedLocation || "Yard Area"}</span>
                       </div>
                       <div className="text-neutral-500 text-[11px] mt-0.5 truncate">
-                        {v.ewayBillNo ? `EWB: ${v.ewayBillNo}` : (v.challanOrLrNo ? `Challan: ${v.challanOrLrNo}` : "Pass Authenticated")}
+                        {v.ewayBillNo ? `EWB: ${v.ewayBillNo}` : (v.challanOrLrNo ? `Challan: ${v.challanOrLrNo}` : "Pass Verified")}
                       </div>
                     </div>
                   </div>

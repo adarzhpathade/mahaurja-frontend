@@ -216,7 +216,7 @@ export function GateEntryModal({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block font-medium text-neutral-700 mb-1">
-                Material / Cargo Name *
+                Material Name *
               </label>
               {direction === "INBOUND_RM" ? (
                 <select
@@ -248,7 +248,7 @@ export function GateEntryModal({
 
             <div>
               <label className="block font-medium text-neutral-700 mb-1">
-                {direction === "INBOUND_RM" ? "Supplier / Farmer Name *" : "Customer Name *"}
+                {direction === "INBOUND_RM" ? "Supplier Name *" : "Customer Name *"}
               </label>
               <input
                 type="text"

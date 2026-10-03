@@ -297,10 +297,10 @@ export function GateExit({ vehicles, onUpdateStage, onNavigateTab }: GateExitPro
           </div>
         </div>
 
-        {/* KPI 3: Avg Turnaround */}
+        {/* KPI 3: Avg Visit Time */}
         <div className="border border-neutral-300 p-4 sm:p-5 hover:border-neutral-900 transition-colors cursor-pointer group bg-white flex flex-col justify-between">
           <span className="text-[11px] sm:text-xs font-bold text-neutral-500 uppercase tracking-wider group-hover:text-neutral-900 transition-colors truncate">
-            Avg Turnaround
+            Avg Visit Time
           </span>
           <div className="mt-3 flex items-baseline gap-1.5 sm:gap-2">
             <span className="text-2xl sm:text-3xl font-black tracking-tight text-neutral-900 tabular-nums">
@@ -343,7 +343,7 @@ export function GateExit({ vehicles, onUpdateStage, onNavigateTab }: GateExitPro
           className="h-11 sm:h-10 px-4 border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-800 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors cursor-pointer w-full sm:w-auto"
         >
           <Truck className="w-4 h-4 text-neutral-600 shrink-0" />
-          <span>Fleet Tracker</span>
+          <span>Vehicle Tracker</span>
         </button>
 
         <button
@@ -393,7 +393,7 @@ export function GateExit({ vehicles, onUpdateStage, onNavigateTab }: GateExitPro
         <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs text-neutral-500">
           <span className="flex items-center gap-1.5">
             <Camera className="w-3.5 h-3.5 text-neutral-600 shrink-0" />
-            <span>ANPR CAM-04: <strong className="text-neutral-800 font-semibold">ONLINE (99.4%)</strong></span>
+            <span>Camera CAM-04: <strong className="text-neutral-800 font-semibold">ONLINE (99.4%)</strong></span>
           </span>
           <span className="hidden sm:inline text-neutral-300">|</span>
           <span className="flex items-center gap-1.5">
@@ -546,7 +546,7 @@ export function GateExit({ vehicles, onUpdateStage, onNavigateTab }: GateExitPro
           <div className="p-4 border-b border-neutral-200 flex items-center justify-between bg-neutral-50">
             <div>
               <h2 className="text-xs font-bold uppercase tracking-wider text-neutral-900">
-                Departed Vehicles Audit Trail (Shift 01)
+                Departed Vehicles History (Shift 01)
               </h2>
             </div>
             <div className="text-xs font-semibold text-neutral-600">
@@ -561,12 +561,12 @@ export function GateExit({ vehicles, onUpdateStage, onNavigateTab }: GateExitPro
                   <th className="py-2.5 px-3">Exit Pass #</th>
                   <th className="py-2.5 px-3">Vehicle No</th>
                   <th className="py-2.5 px-3">Direction</th>
-                  <th className="py-2.5 px-3">Material & Consignor/Consignee</th>
+                  <th className="py-2.5 px-3">Material & Supplier / Customer</th>
                   <th className="py-2.5 px-3">Driver / Transporter</th>
                   <th className="py-2.5 px-3 text-right">Tare MT</th>
                   <th className="py-2.5 px-3 text-right">Net MT</th>
                   <th className="py-2.5 px-3">Time In / Out</th>
-                  <th className="py-2.5 px-3">Turnaround</th>
+                  <th className="py-2.5 px-3">Time Inside</th>
                   <th className="py-2.5 px-3">Cleared By</th>
                   <th className="py-2.5 px-3 text-right">Action</th>
                 </tr>
@@ -797,7 +797,7 @@ export function GateExit({ vehicles, onUpdateStage, onNavigateTab }: GateExitPro
                         <div className="flex items-center justify-between text-[10px] text-neutral-500 border-b border-neutral-200 pb-1">
                           <span className="font-bold uppercase tracking-wider text-neutral-700 flex items-center gap-1">
                             <Scale className="w-3 h-3 text-neutral-600" />
-                            Weighment Reconciliation
+                            Weight Record
                           </span>
                           <span className="tabular-nums font-semibold text-neutral-700">
                             {vehicle.weighbridgeSlipNo || "WB-SLIP-PENDING"}
@@ -909,7 +909,7 @@ export function GateExit({ vehicles, onUpdateStage, onNavigateTab }: GateExitPro
                   </div>
                   <div className="min-w-0">
                     <h3 className="text-xs sm:text-sm font-bold tracking-tight uppercase truncate">
-                      Security Exit Clearance
+                      Security Exit Check
                     </h3>
                     <div className="text-[11px] text-neutral-300 flex flex-wrap items-center gap-1.5 mt-0.5">
                       <span className="font-mono font-bold text-white text-xs">{selectedVehicleForExit.vehicleNo}</span>
@@ -955,7 +955,7 @@ export function GateExit({ vehicles, onUpdateStage, onNavigateTab }: GateExitPro
                     </span>
                   </div>
                   <div>
-                    <span className="text-[10px] text-neutral-500 uppercase block font-semibold">Net Cargo Weight</span>
+                    <span className="text-[10px] text-neutral-500 uppercase block font-semibold">Net Weight</span>
                     <span className="font-extrabold text-[#059669] text-xs sm:text-sm tabular-nums">
                       {selectedVehicleForExit.netWeightMT ||
                         Math.abs(
@@ -1013,7 +1013,7 @@ export function GateExit({ vehicles, onUpdateStage, onNavigateTab }: GateExitPro
                           1. Weighbridge Tare Slip Verified
                         </div>
                         <div className="text-[11px] text-neutral-600 mt-0.5">
-                          Tare weight slip #{selectedVehicleForExit.weighbridgeSlipNo || "WB-261003-018"} stamped by scale operator. Net weight verified against declared manifest.
+                          Tare weight slip #{selectedVehicleForExit.weighbridgeSlipNo || "WB-261003-018"} stamped by scale operator. Net weight verified against declared weight.
                         </div>
                       </div>
                     </label>
@@ -1044,17 +1044,17 @@ export function GateExit({ vehicles, onUpdateStage, onNavigateTab }: GateExitPro
                       </div>
                       <div>
                         <div className="font-bold text-neutral-900">
-                          2. Physical Cargo Bed / Seal Checked
+                          2. Cargo Bed & Seal Checked
                         </div>
                         <div className="text-[11px] text-neutral-600 mt-0.5">
                           {selectedVehicleForExit.direction === "INBOUND_RM"
-                            ? "Tipper/bed 100% empty, swept clean, zero residual raw material remaining."
-                            : `Tarpaulin lashed securely. Security seal #${selectedVehicleForExit.sealNo || "BIR-9821"} intact.`}
+                            ? "Tipper bed completely empty and clean, no raw material left inside."
+                            : `Tarpaulin tied securely. Security seal #${selectedVehicleForExit.sealNo || "BIR-9821"} intact.`}
                         </div>
                       </div>
                     </label>
 
-                    {/* Check 3: Breathalyzer Zero BAC */}
+                    {/* Check 3: Driver Alcohol Check */}
                     <label
                       onClick={() =>
                         setChecklist((p) => ({
@@ -1080,10 +1080,10 @@ export function GateExit({ vehicles, onUpdateStage, onNavigateTab }: GateExitPro
                       </div>
                       <div>
                         <div className="font-bold text-neutral-900">
-                          3. Driver Breathalyzer: 0.00% BAC
+                          3. Driver Alcohol Check (Passed)
                         </div>
                         <div className="text-[11px] text-neutral-600 mt-0.5">
-                          Zero blood alcohol confirmed on station breathalyzer. Safety helmet and visitor badge collected back.
+                          Passed alcohol check test. Safety helmet and visitor badge returned.
                         </div>
                       </div>
                     </label>
@@ -1114,10 +1114,10 @@ export function GateExit({ vehicles, onUpdateStage, onNavigateTab }: GateExitPro
                       </div>
                       <div>
                         <div className="font-bold text-neutral-900">
-                          4. Gate Pass Security Copy Retained
+                          4. Security Copy Retained
                         </div>
                         <div className="text-[11px] text-neutral-600 mt-0.5">
-                          Duplicate paper copy archived. Driver signed physical plant outward exit register.
+                          Paper copy kept for records. Driver signed exit register.
                         </div>
                       </div>
                     </label>
@@ -1127,13 +1127,13 @@ export function GateExit({ vehicles, onUpdateStage, onNavigateTab }: GateExitPro
                 {/* Guard Remarks Input */}
                 <div>
                   <label className="text-[10px] text-neutral-500 uppercase block font-semibold mb-1">
-                    Security Officer Remarks / Dispatch Notes
+                    Security Remarks / Notes
                   </label>
                   <input
                     type="text"
                     value={guardNotes}
                     onChange={(e) => setGuardNotes(e.target.value)}
-                    placeholder="Enter security clearance remarks or inspection findings..."
+                    placeholder="Enter security remarks or notes..."
                     className="w-full px-3 py-2 border border-neutral-300 bg-neutral-50 text-xs focus:outline-none focus:border-neutral-700"
                     style={{ borderRadius: 0 }}
                   />
@@ -1154,7 +1154,7 @@ export function GateExit({ vehicles, onUpdateStage, onNavigateTab }: GateExitPro
                 <div className="order-1 sm:order-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
                   {!isInspectionComplete && (
                     <span className="text-[11px] text-neutral-500 text-center sm:text-right hidden sm:inline">
-                      Complete all 4 checklist points to unlock barrier
+                      Complete all 4 checks to open barrier
                     </span>
                   )}
                   <button
@@ -1169,7 +1169,7 @@ export function GateExit({ vehicles, onUpdateStage, onNavigateTab }: GateExitPro
                     style={{ borderRadius: 0 }}
                   >
                     <Unlock className="w-4 h-4" />
-                    <span>Authorize & Raise Barrier</span>
+                    <span>Approve & Open Barrier</span>
                   </button>
                 </div>
               </div>
@@ -1197,7 +1197,7 @@ export function GateExit({ vehicles, onUpdateStage, onNavigateTab }: GateExitPro
               <div className="p-3 bg-[#18181B] text-white flex items-center justify-between">
                 <div className="flex items-center gap-2 text-xs font-semibold">
                   <CheckCircle2 className="w-4 h-4 text-[#10B981]" />
-                  <span>Outward Gate Pass Issued · Barrier 02 Raised</span>
+                  <span>Exit Pass Issued · Barrier 02 Open</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <button
@@ -1270,13 +1270,13 @@ export function GateExit({ vehicles, onUpdateStage, onNavigateTab }: GateExitPro
                 {/* Material & Weighment Reconciliation Table */}
                 <div>
                   <div className="text-[11px] font-bold uppercase tracking-wider text-neutral-800 mb-1">
-                    Cargo & Scale Reconciliation
+                    Cargo & Weight Summary
                   </div>
                   <table className="w-full text-xs border border-neutral-300">
                     <thead className="bg-neutral-100 border-b border-neutral-300 text-neutral-700 text-[10px] uppercase">
                       <tr>
                         <th className="p-2 text-left">Material Description</th>
-                        <th className="p-2 text-left">Party (Consignor/Consignee)</th>
+                        <th className="p-2 text-left">Supplier / Customer</th>
                         <th className="p-2 text-right">Gross MT</th>
                         <th className="p-2 text-right">Tare MT</th>
                         <th className="p-2 text-right">Net Cargo MT</th>
@@ -1306,7 +1306,7 @@ export function GateExit({ vehicles, onUpdateStage, onNavigateTab }: GateExitPro
                       <strong>Exit Time:</strong> {activeExitPass.timeOut} IST
                     </div>
                     <div className="text-[11px] text-neutral-600">
-                      <strong>Total Plant Turnaround:</strong> {activeExitPass.turnaroundMinutes} Minutes
+                      <strong>Total Time Inside Plant:</strong> {activeExitPass.turnaroundMinutes} Minutes
                     </div>
                     {activeExitPass.sealNo && (
                       <div className="text-[11px] text-neutral-600">

@@ -336,7 +336,7 @@ export function GateEntry() {
             {/* 3. Supplier / Customer */}
             <div>
               <label className="text-[11px] font-semibold text-neutral-700 block mb-1.5">
-                {direction === "INBOUND_RM" ? "Supplier / Farmer" : "Customer / Consignee"} <span className="text-red-500">*</span>
+                {direction === "INBOUND_RM" ? "Supplier" : "Customer"} <span className="text-red-500">*</span>
               </label>
               <select
                 value={partyName}
@@ -354,7 +354,7 @@ export function GateEntry() {
             {/* 4. Commodity / Material */}
             <div>
               <label className="text-[11px] font-semibold text-neutral-700 block mb-1.5">
-                Commodity / Material <span className="text-red-500">*</span>
+                Material <span className="text-red-500">*</span>
               </label>
               <select
                 value={materialName}

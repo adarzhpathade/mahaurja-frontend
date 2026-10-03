@@ -150,7 +150,7 @@ export function VehicleDetailsDrawer({
             <div className="p-3 grid grid-cols-2 gap-4">
               <div>
                 <span className="text-[10px] uppercase font-semibold text-neutral-500 block">
-                  Material / Commodity
+                  Material
                 </span>
                 <span className="font-semibold text-neutral-900 text-xs mt-0.5 block">
                   {vehicle.materialName}
@@ -169,7 +169,7 @@ export function VehicleDetailsDrawer({
             <div className="p-3 grid grid-cols-2 gap-4">
               <div>
                 <span className="text-[10px] uppercase font-semibold text-neutral-500 block">
-                  {vehicle.direction === "INBOUND_RM" ? "Supplier / Farmer" : "Customer Unit"}
+                  {vehicle.direction === "INBOUND_RM" ? "Supplier" : "Customer"}
                 </span>
                 <span className="font-medium text-neutral-800 text-xs mt-0.5 block">
                   {vehicle.supplierOrCustomer}
@@ -177,7 +177,7 @@ export function VehicleDetailsDrawer({
               </div>
               <div>
                 <span className="text-[10px] uppercase font-semibold text-neutral-500 block">
-                  Transporter & LR
+                  Transporter & Challan
                 </span>
                 <span className="font-medium text-neutral-800 text-xs mt-0.5 block">
                   {vehicle.transporter} · <span className="text-[11px] font-medium">{vehicle.challanOrLrNo}</span>
