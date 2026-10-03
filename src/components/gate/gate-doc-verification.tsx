@@ -684,28 +684,40 @@ export function GateDocVerification({
       {/* 3. VERIFICATION POPUP MODAL                                               */}
       {/* ========================================================================= */}
       {selectedDoc && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-lg border border-neutral-300 bg-[#F4F5F7] shadow-xl p-5 space-y-4">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-3 sm:p-4"
+          onClick={() => setSelectedDoc(null)}
+        >
+          <div
+            className="w-full max-w-lg max-h-[92vh] overflow-y-auto border border-neutral-300 bg-[#F4F5F7] shadow-2xl p-4 sm:p-5 space-y-3.5 sm:space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
             {/* Modal Header */}
-            <div className="flex items-center justify-between border-b border-neutral-300 pb-3">
-              <div className="flex items-center gap-2">
-                <FileCheck className="w-5 h-5 text-[#059669]" />
-                <h3 className="text-sm font-bold text-neutral-900 uppercase tracking-wide">
-                  Verify Documents · {selectedDoc.vehicleNo}
-                </h3>
+            <div className="flex items-center justify-between gap-3 border-b border-neutral-300 pb-3">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <FileCheck className="w-5 h-5 text-[#059669] shrink-0" />
+                <div className="min-w-0">
+                  <h3 className="text-xs sm:text-sm font-bold text-neutral-900 uppercase tracking-wide truncate">
+                    Verify Documents
+                  </h3>
+                  <div className="font-mono font-bold text-xs text-neutral-800">
+                    {selectedDoc.vehicleNo}
+                  </div>
+                </div>
               </div>
               <button
                 type="button"
                 onClick={() => setSelectedDoc(null)}
-                className="text-neutral-400 hover:text-neutral-700 cursor-pointer font-bold px-1"
+                className="w-8 h-8 flex items-center justify-center border border-neutral-300 hover:bg-neutral-200/60 text-neutral-600 hover:text-neutral-900 cursor-pointer bg-white transition-colors shrink-0"
+                title="Close"
               >
-                ✕
+                <X className="w-4 h-4" />
               </button>
             </div>
 
             {/* Document Details Card */}
-            <div className="p-3 bg-white border border-neutral-300 space-y-2 text-xs">
-              <div className="grid grid-cols-2 gap-2 pb-2 border-b border-neutral-200">
+            <div className="p-3.5 bg-white border border-neutral-300 space-y-2.5 text-xs">
+              <div className="grid grid-cols-2 gap-2 pb-2.5 border-b border-neutral-200">
                 <div>
                   <span className="text-[10px] uppercase font-bold text-neutral-500 block">e-Way Bill No</span>
                   <span className="font-mono font-bold text-neutral-900">{selectedDoc.ewayBillNo}</span>
@@ -727,19 +739,21 @@ export function GateDocVerification({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-2 pt-2 border-t border-neutral-200">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2.5 border-t border-neutral-200">
                 <div>
                   <span className="text-[10px] uppercase font-bold text-neutral-500 block">Consignor</span>
-                  <span className="font-semibold text-neutral-800 truncate block">{selectedDoc.consignor}</span>
+                  <span className="font-semibold text-neutral-800 block text-xs">{selectedDoc.consignor}</span>
                 </div>
                 <div>
                   <span className="text-[10px] uppercase font-bold text-neutral-500 block">Cargo & Declared MT</span>
-                  <span className="font-semibold text-neutral-900">{selectedDoc.materialName} ({selectedDoc.declaredQtyMT} MT)</span>
+                  <span className="font-semibold text-neutral-900 block text-xs">
+                    {selectedDoc.materialName} ({selectedDoc.declaredQtyMT} MT)
+                  </span>
                 </div>
               </div>
 
               {selectedDoc.mismatchReason && (
-                <div className="p-2 bg-red-50 border border-red-200 text-red-700 text-xs">
+                <div className="p-2.5 bg-red-50 border border-red-200 text-red-700 text-xs">
                   <strong>Mismatch Reason:</strong> {selectedDoc.mismatchReason}
                 </div>
               )}
@@ -751,52 +765,52 @@ export function GateDocVerification({
                 Statutory Verification Checks
               </span>
 
-              <label className="flex items-start gap-2.5 p-2 bg-white border border-neutral-300 cursor-pointer">
+              <label className="flex items-start gap-2.5 p-2.5 bg-white border border-neutral-300 hover:border-neutral-400 cursor-pointer transition-colors">
                 <input
                   type="checkbox"
                   checked={checkEway}
                   onChange={(e) => setCheckEway(e.target.checked)}
-                  className="mt-0.5 w-4 h-4 accent-[#059669] cursor-pointer"
+                  className="mt-0.5 w-4 h-4 accent-[#059669] cursor-pointer shrink-0"
                 />
                 <div>
                   <span className="font-semibold text-neutral-900 block">
                     e-Way Bill Active & Unexpired
                   </span>
-                  <span className="text-[11px] text-neutral-500">
+                  <span className="text-[11px] text-neutral-500 leading-relaxed block mt-0.5">
                     Validity verified on government portal. Vehicle number matches.
                   </span>
                 </div>
               </label>
 
-              <label className="flex items-start gap-2.5 p-2 bg-white border border-neutral-300 cursor-pointer">
+              <label className="flex items-start gap-2.5 p-2.5 bg-white border border-neutral-300 hover:border-neutral-400 cursor-pointer transition-colors">
                 <input
                   type="checkbox"
                   checked={checkPO}
                   onChange={(e) => setCheckPO(e.target.checked)}
-                  className="mt-0.5 w-4 h-4 accent-[#059669] cursor-pointer"
+                  className="mt-0.5 w-4 h-4 accent-[#059669] cursor-pointer shrink-0"
                 />
                 <div>
                   <span className="font-semibold text-neutral-900 block">
                     Purchase Order & Challan Matched
                   </span>
-                  <span className="text-[11px] text-neutral-500">
+                  <span className="text-[11px] text-neutral-500 leading-relaxed block mt-0.5">
                     Declared cargo and quantity conform to active PO order quota.
                   </span>
                 </div>
               </label>
 
-              <label className="flex items-start gap-2.5 p-2 bg-white border border-neutral-300 cursor-pointer">
+              <label className="flex items-start gap-2.5 p-2.5 bg-white border border-neutral-300 hover:border-neutral-400 cursor-pointer transition-colors">
                 <input
                   type="checkbox"
                   checked={checkVehicle}
                   onChange={(e) => setCheckVehicle(e.target.checked)}
-                  className="mt-0.5 w-4 h-4 accent-[#059669] cursor-pointer"
+                  className="mt-0.5 w-4 h-4 accent-[#059669] cursor-pointer shrink-0"
                 />
                 <div>
                   <span className="font-semibold text-neutral-900 block">
                     Driver & Vehicle Credentials Verified
                   </span>
-                  <span className="text-[11px] text-neutral-500">
+                  <span className="text-[11px] text-neutral-500 leading-relaxed block mt-0.5">
                     Physical vehicle plate matches transporter and driver mobile on pass.
                   </span>
                 </div>
@@ -818,20 +832,20 @@ export function GateDocVerification({
             </div>
 
             {/* Modal Actions */}
-            <div className="pt-3 border-t border-neutral-300 flex items-center justify-between gap-2">
+            <div className="pt-3 border-t border-neutral-300 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
               <button
                 type="button"
                 onClick={handleFlagMismatch}
-                className="px-3.5 py-1.5 border border-red-300 bg-red-50 hover:bg-red-100 text-red-700 text-xs font-semibold cursor-pointer transition-colors"
+                className="order-3 sm:order-1 w-full sm:w-auto px-4 py-2 border border-red-300 bg-red-50 hover:bg-red-100 text-red-700 text-xs font-semibold cursor-pointer transition-colors text-center"
               >
                 Flag Mismatch
               </button>
 
-              <div className="flex items-center gap-2">
+              <div className="order-1 sm:order-2 flex flex-col-reverse sm:flex-row items-stretch sm:items-center gap-2">
                 <button
                   type="button"
                   onClick={() => setSelectedDoc(null)}
-                  className="px-3.5 py-1.5 border border-neutral-300 hover:bg-neutral-200/60 text-neutral-700 text-xs font-semibold cursor-pointer transition-colors"
+                  className="w-full sm:w-auto px-4 py-2 border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-700 text-xs font-semibold cursor-pointer transition-colors text-center"
                 >
                   Cancel
                 </button>
@@ -840,7 +854,7 @@ export function GateDocVerification({
                   type="button"
                   disabled={!checkEway || !checkPO || !checkVehicle}
                   onClick={handleVerifyConfirm}
-                  className="px-5 py-2 bg-[#059669] hover:bg-[#047857] disabled:bg-neutral-300 disabled:text-neutral-500 disabled:cursor-not-allowed text-white text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer flex items-center gap-1.5 shadow-xs"
+                  className="w-full sm:w-auto px-5 py-2.5 sm:py-2 bg-[#059669] hover:bg-[#047857] disabled:bg-neutral-300 disabled:text-neutral-500 disabled:cursor-not-allowed text-white text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-xs"
                 >
                   <CheckCircle2 className="w-4 h-4" />
                   <span>Mark Verified</span>
