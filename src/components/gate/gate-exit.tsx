@@ -268,67 +268,55 @@ export function GateExit({ vehicles, onUpdateStage, onNavigateTab }: GateExitPro
         {/* KPI 1: Ready for Exit */}
         <div
           onClick={() => setActiveTab("QUEUE")}
-          className="border border-neutral-300 p-4 sm:p-5 hover:border-neutral-900 transition-colors cursor-pointer group bg-white"
+          className="border border-neutral-300 p-4 sm:p-5 hover:border-neutral-900 transition-colors cursor-pointer group bg-white flex flex-col justify-between"
         >
-          <div className="flex items-center justify-between gap-1">
-            <span className="text-[11px] sm:text-xs font-bold text-neutral-600 uppercase tracking-wider group-hover:text-neutral-900 transition-colors">
-              Ready for Exit
-            </span>
-            <span className="w-2.5 h-2.5 rounded-full bg-[#059669] animate-pulse shrink-0" />
-          </div>
-          <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900 tabular-nums">
+          <span className="text-[11px] sm:text-xs font-bold text-neutral-500 uppercase tracking-wider group-hover:text-neutral-900 transition-colors truncate">
+            Ready for Exit
+          </span>
+          <div className="mt-3 flex items-baseline gap-1.5 sm:gap-2">
+            <span className="text-2xl sm:text-3xl font-black tracking-tight text-neutral-900 tabular-nums">
               {exitQueueVehicles.length}
             </span>
-            <span className="text-xs sm:text-sm text-neutral-500 font-medium">Vehicles</span>
+            <span className="text-xs sm:text-sm text-neutral-400 font-medium">Vehicles</span>
           </div>
         </div>
 
         {/* KPI 2: Departed Today */}
         <div
           onClick={() => setActiveTab("DEPARTED")}
-          className="border border-neutral-300 p-4 sm:p-5 hover:border-neutral-900 transition-colors cursor-pointer group bg-white"
+          className="border border-neutral-300 p-4 sm:p-5 hover:border-neutral-900 transition-colors cursor-pointer group bg-white flex flex-col justify-between"
         >
-          <div className="flex items-center justify-between gap-1">
-            <span className="text-[11px] sm:text-xs font-bold text-neutral-600 uppercase tracking-wider group-hover:text-neutral-900 transition-colors">
-              Departed Today
-            </span>
-            <CheckCircle2 className="w-4 h-4 text-[#059669] shrink-0" />
-          </div>
-          <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900 tabular-nums">
+          <span className="text-[11px] sm:text-xs font-bold text-neutral-500 uppercase tracking-wider group-hover:text-neutral-900 transition-colors truncate">
+            Departed Today
+          </span>
+          <div className="mt-3 flex items-baseline gap-1.5 sm:gap-2">
+            <span className="text-2xl sm:text-3xl font-black tracking-tight text-neutral-900 tabular-nums">
               {departedLog.length}
             </span>
-            <span className="text-xs sm:text-sm text-neutral-500 font-medium">Completed</span>
+            <span className="text-xs sm:text-sm text-neutral-400 font-medium">Completed</span>
           </div>
         </div>
 
         {/* KPI 3: Avg Turnaround */}
-        <div className="border border-neutral-300 p-4 sm:p-5 hover:border-neutral-900 transition-colors cursor-pointer group bg-white">
-          <div className="flex items-center justify-between gap-1">
-            <span className="text-[11px] sm:text-xs font-bold text-neutral-600 uppercase tracking-wider group-hover:text-neutral-900 transition-colors">
-              Avg Turnaround
-            </span>
-            <Clock className="w-4 h-4 text-neutral-500 shrink-0" />
-          </div>
-          <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900 tabular-nums">
+        <div className="border border-neutral-300 p-4 sm:p-5 hover:border-neutral-900 transition-colors cursor-pointer group bg-white flex flex-col justify-between">
+          <span className="text-[11px] sm:text-xs font-bold text-neutral-500 uppercase tracking-wider group-hover:text-neutral-900 transition-colors truncate">
+            Avg Turnaround
+          </span>
+          <div className="mt-3 flex items-baseline gap-1.5 sm:gap-2">
+            <span className="text-2xl sm:text-3xl font-black tracking-tight text-neutral-900 tabular-nums">
               36
             </span>
-            <span className="text-xs sm:text-sm text-neutral-500 font-medium">Mins</span>
+            <span className="text-xs sm:text-sm text-neutral-400 font-medium">Mins</span>
           </div>
         </div>
 
         {/* KPI 4: Security Compliance */}
-        <div className="border border-neutral-300 p-4 sm:p-5 hover:border-neutral-900 transition-colors cursor-pointer group bg-white">
-          <div className="flex items-center justify-between gap-1">
-            <span className="text-[11px] sm:text-xs font-bold text-neutral-600 uppercase tracking-wider group-hover:text-neutral-900 transition-colors">
-              Compliance
-            </span>
-            <ShieldCheck className="w-4 h-4 text-[#059669] shrink-0" />
-          </div>
-          <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900 tabular-nums">
+        <div className="border border-neutral-300 p-4 sm:p-5 hover:border-neutral-900 transition-colors cursor-pointer group bg-white flex flex-col justify-between">
+          <span className="text-[11px] sm:text-xs font-bold text-neutral-500 uppercase tracking-wider group-hover:text-neutral-900 transition-colors truncate">
+            Compliance
+          </span>
+          <div className="mt-3 flex items-baseline gap-1.5 sm:gap-2">
+            <span className="text-2xl sm:text-3xl font-black tracking-tight text-neutral-900 tabular-nums">
               100%
             </span>
             <span className="text-xs sm:text-sm text-[#059669] font-medium">Zero breach</span>

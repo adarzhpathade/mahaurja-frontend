@@ -173,82 +173,64 @@ export function GateHome({ onNavigateTab, onOpenEntryModal }: GateHomeProps) {
         {/* Metric 1: Total Inside -> Goes to Tracker */}
         <div
           onClick={() => onNavigateTab("live-tracker")}
-          className="border border-neutral-300 p-4 sm:p-5 hover:border-neutral-900 transition-colors cursor-pointer group bg-white"
+          className="border border-neutral-300 p-4 sm:p-5 hover:border-neutral-900 transition-colors cursor-pointer group bg-white flex flex-col justify-between"
         >
-          <div className="flex items-center justify-between gap-1">
-            <span className="text-[11px] sm:text-xs font-bold text-neutral-600 uppercase tracking-wider group-hover:text-neutral-900 transition-colors">
-              Inside Plant
-            </span>
-            <span className="w-2.5 h-2.5 rounded-full bg-[#059669] animate-pulse shrink-0" />
-          </div>
-          <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900 tabular-nums">
+          <span className="text-[11px] sm:text-xs font-bold text-neutral-500 uppercase tracking-wider group-hover:text-neutral-900 transition-colors truncate">
+            Inside Plant
+          </span>
+          <div className="mt-3 flex items-baseline gap-1.5 sm:gap-2">
+            <span className="text-2xl sm:text-3xl font-black tracking-tight text-neutral-900 tabular-nums">
               {totalInside}
             </span>
-            <span className="text-xs sm:text-sm text-neutral-500 font-medium">Vehicles</span>
+            <span className="text-xs sm:text-sm text-neutral-400 font-medium">Vehicles</span>
           </div>
         </div>
 
         {/* Metric 2: Awaiting Weighment -> Goes to Tracker */}
         <div
           onClick={() => onNavigateTab("live-tracker")}
-          className="border border-neutral-300 p-4 sm:p-5 hover:border-neutral-900 transition-colors cursor-pointer group bg-white"
+          className="border border-neutral-300 p-4 sm:p-5 hover:border-neutral-900 transition-colors cursor-pointer group bg-white flex flex-col justify-between"
         >
-          <div className="flex items-center justify-between gap-1">
-            <span className="text-[11px] sm:text-xs font-bold text-neutral-600 uppercase tracking-wider group-hover:text-neutral-900 transition-colors">
-              At Weighbridge
-            </span>
-            <span className="text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.5 shrink-0">
-              QUEUED
-            </span>
-          </div>
-          <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900 tabular-nums">
+          <span className="text-[11px] sm:text-xs font-bold text-neutral-500 uppercase tracking-wider group-hover:text-neutral-900 transition-colors truncate">
+            At Weighbridge
+          </span>
+          <div className="mt-3 flex items-baseline gap-1.5 sm:gap-2">
+            <span className="text-2xl sm:text-3xl font-black tracking-tight text-neutral-900 tabular-nums">
               {awaitingWB}
             </span>
-            <span className="text-xs sm:text-sm text-neutral-500 font-medium">Vehicles</span>
+            <span className="text-xs sm:text-sm text-neutral-400 font-medium">Vehicles</span>
           </div>
         </div>
 
         {/* Metric 3: In Yard Unload / QC -> Goes to Tracker */}
         <div
           onClick={() => onNavigateTab("live-tracker")}
-          className="border border-neutral-300 p-4 sm:p-5 hover:border-neutral-900 transition-colors cursor-pointer group bg-white"
+          className="border border-neutral-300 p-4 sm:p-5 hover:border-neutral-900 transition-colors cursor-pointer group bg-white flex flex-col justify-between"
         >
-          <div className="flex items-center justify-between gap-1">
-            <span className="text-[11px] sm:text-xs font-bold text-neutral-600 uppercase tracking-wider group-hover:text-neutral-900 transition-colors">
-              Yard & Sampling
-            </span>
-            <span className="text-[10px] font-bold text-sky-700 bg-sky-50 border border-sky-200 px-1.5 py-0.5 shrink-0">
-              ACTIVE
-            </span>
-          </div>
-          <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900 tabular-nums">
+          <span className="text-[11px] sm:text-xs font-bold text-neutral-500 uppercase tracking-wider group-hover:text-neutral-900 transition-colors truncate">
+            Yard & Sampling
+          </span>
+          <div className="mt-3 flex items-baseline gap-1.5 sm:gap-2">
+            <span className="text-2xl sm:text-3xl font-black tracking-tight text-neutral-900 tabular-nums">
               {inYard}
             </span>
-            <span className="text-xs sm:text-sm text-neutral-500 font-medium">Vehicles</span>
+            <span className="text-xs sm:text-sm text-neutral-400 font-medium">Vehicles</span>
           </div>
         </div>
 
         {/* Metric 4: Ready for Exit -> Goes to Exit Desk */}
         <div
           onClick={() => onNavigateTab("exit")}
-          className="border border-neutral-300 p-4 sm:p-5 hover:border-neutral-900 transition-colors cursor-pointer group bg-white"
+          className="border border-neutral-300 p-4 sm:p-5 hover:border-neutral-900 transition-colors cursor-pointer group bg-white flex flex-col justify-between"
         >
-          <div className="flex items-center justify-between gap-1">
-            <span className="text-[11px] sm:text-xs font-bold text-neutral-600 uppercase tracking-wider group-hover:text-neutral-900 transition-colors">
-              Exit Clearance
-            </span>
-            <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 shrink-0">
-              READY
-            </span>
-          </div>
-          <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900 tabular-nums">
+          <span className="text-[11px] sm:text-xs font-bold text-neutral-500 uppercase tracking-wider group-hover:text-neutral-900 transition-colors truncate">
+            Exit Clearance
+          </span>
+          <div className="mt-3 flex items-baseline gap-1.5 sm:gap-2">
+            <span className="text-2xl sm:text-3xl font-black tracking-tight text-neutral-900 tabular-nums">
               {readyExit}
             </span>
-            <span className="text-xs sm:text-sm text-neutral-500 font-medium">Vehicles</span>
+            <span className="text-xs sm:text-sm text-neutral-400 font-medium">Vehicles</span>
           </div>
         </div>
       </div>
