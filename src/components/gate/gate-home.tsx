@@ -11,6 +11,7 @@ import {
   Check,
   Calendar,
   Plus,
+  X,
 } from "lucide-react";
 import { GateVehicle } from "@/lib/types/gate";
 import { useGate } from "@/lib/context/gate-context";
@@ -576,28 +577,40 @@ export function GateHome({ onNavigateTab, onOpenEntryModal }: GateHomeProps) {
       {/* 5. ARRIVAL DETAILS POPUP MODAL (TAP-TO-INSPECT)                            */}
       {/* ========================================================================= */}
       {selectedArrival && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-lg border border-neutral-300 bg-[#F4F5F7] shadow-xl p-5 space-y-4">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-3 sm:p-4"
+          onClick={() => setSelectedArrival(null)}
+        >
+          <div
+            className="w-full max-w-lg max-h-[92vh] overflow-y-auto border border-neutral-300 bg-[#F4F5F7] shadow-2xl p-4 sm:p-5 space-y-3.5 sm:space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
             {/* Modal Header */}
-            <div className="flex items-center justify-between border-b border-neutral-300 pb-3">
-              <div className="flex items-center gap-2">
-                <Truck className="w-5 h-5 text-[#059669]" />
-                <h3 className="text-sm font-bold text-neutral-900 uppercase tracking-wide">
-                  Scheduled Arrival · {selectedArrival.vehicleNo}
-                </h3>
+            <div className="flex items-center justify-between gap-3 border-b border-neutral-300 pb-3">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <Truck className="w-5 h-5 text-[#059669] shrink-0" />
+                <div className="min-w-0">
+                  <h3 className="text-xs sm:text-sm font-bold text-neutral-900 uppercase tracking-wide truncate">
+                    Scheduled Arrival
+                  </h3>
+                  <div className="font-mono font-bold text-xs text-neutral-800">
+                    {selectedArrival.vehicleNo}
+                  </div>
+                </div>
               </div>
               <button
                 type="button"
                 onClick={() => setSelectedArrival(null)}
-                className="text-neutral-400 hover:text-neutral-700 cursor-pointer font-bold px-1"
+                className="w-8 h-8 flex items-center justify-center border border-neutral-300 hover:bg-neutral-200/60 text-neutral-600 hover:text-neutral-900 cursor-pointer bg-white transition-colors shrink-0"
+                title="Close"
               >
-                ✕
+                <X className="w-4 h-4" />
               </button>
             </div>
 
             {/* Arrival Info Card */}
             <div className="p-3.5 bg-white border border-neutral-300 space-y-2.5 text-xs">
-              <div className="grid grid-cols-2 gap-3 pb-2.5 border-b border-neutral-200">
+              <div className="grid grid-cols-2 gap-2.5 pb-2.5 border-b border-neutral-200">
                 <div>
                   <span className="text-[10px] uppercase font-bold text-neutral-500 block">
                     PO Reference
@@ -610,18 +623,18 @@ export function GateHome({ onNavigateTab, onOpenEntryModal }: GateHomeProps) {
                   <span className="text-[10px] uppercase font-bold text-neutral-500 block">
                     Scheduled Window & ETA
                   </span>
-                  <span className="font-bold text-neutral-800">
+                  <span className="font-bold text-neutral-800 block text-xs">
                     {selectedArrival.timeWindow} ({selectedArrival.etaMinutes}m ETA)
                   </span>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-2.5">
                 <div>
                   <span className="text-[10px] uppercase font-bold text-neutral-500 block">
                     Material / Commodity
                   </span>
-                  <span className="font-semibold text-neutral-800 text-xs">
+                  <span className="font-semibold text-neutral-800 text-xs block">
                     {selectedArrival.materialName}
                   </span>
                 </div>
@@ -629,21 +642,21 @@ export function GateHome({ onNavigateTab, onOpenEntryModal }: GateHomeProps) {
                   <span className="text-[10px] uppercase font-bold text-neutral-500 block">
                     Declared Quantity
                   </span>
-                  <span className="font-mono font-bold text-neutral-900">
+                  <span className="font-mono font-bold text-neutral-900 text-xs block">
                     {selectedArrival.expectedWeightMT.toFixed(1)} MT
                   </span>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 pt-2.5 border-t border-neutral-200">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2.5 border-t border-neutral-200">
                 <div>
                   <span className="text-[10px] uppercase font-bold text-neutral-500 block">
                     Supplier & Cluster
                   </span>
-                  <span className="font-semibold text-neutral-800 block">
+                  <span className="font-semibold text-neutral-800 block text-xs">
                     {selectedArrival.supplierName}
                   </span>
-                  <span className="text-[10px] text-neutral-500">
+                  <span className="text-[10px] text-neutral-500 block">
                     {selectedArrival.farmCluster}
                   </span>
                 </div>
@@ -651,10 +664,10 @@ export function GateHome({ onNavigateTab, onOpenEntryModal }: GateHomeProps) {
                   <span className="text-[10px] uppercase font-bold text-neutral-500 block">
                     Driver & Contact
                   </span>
-                  <span className="font-semibold text-neutral-800 block">
+                  <span className="font-semibold text-neutral-800 block text-xs">
                     {selectedArrival.driverName}
                   </span>
-                  <span className="text-[11px] font-mono text-neutral-600">
+                  <span className="text-[11px] font-mono text-neutral-600 block">
                     {selectedArrival.driverPhone}
                   </span>
                 </div>
@@ -664,18 +677,18 @@ export function GateHome({ onNavigateTab, onOpenEntryModal }: GateHomeProps) {
                 <span className="text-[10px] uppercase font-bold text-neutral-500 block">
                   Transporter Fleet
                 </span>
-                <span className="text-neutral-800 font-medium">
+                <span className="text-neutral-800 font-medium block text-xs">
                   {selectedArrival.transporter}
                 </span>
               </div>
             </div>
 
             {/* Modal Actions */}
-            <div className="pt-2 border-t border-neutral-300 flex items-center justify-between gap-2">
+            <div className="pt-2 border-t border-neutral-300 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
               <button
                 type="button"
                 onClick={() => setSelectedArrival(null)}
-                className="px-4 py-2 border border-neutral-300 hover:bg-neutral-200/60 text-neutral-700 text-xs font-semibold cursor-pointer transition-colors"
+                className="order-2 sm:order-1 w-full sm:w-auto px-4 py-2 border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-700 text-xs font-semibold cursor-pointer transition-colors text-center"
               >
                 Close
               </button>
@@ -687,7 +700,7 @@ export function GateHome({ onNavigateTab, onOpenEntryModal }: GateHomeProps) {
                   setSelectedArrival(null);
                   handleFastCheckIn(item);
                 }}
-                className="px-5 py-2 bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer flex items-center gap-1.5 shadow-xs"
+                className="order-1 sm:order-2 w-full sm:w-auto px-5 py-2.5 sm:py-2 bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-xs"
               >
                 <Zap className="w-4 h-4" />
                 <span>Perform Gate Check-In</span>
