@@ -7,9 +7,6 @@ import {
   Route,
   Map as MapIcon,
   Truck,
-  Search,
-  Bell,
-  User,
   Scale,
   FlaskConical,
   Factory,
@@ -36,8 +33,6 @@ import {
   LineChart,
   Users,
   Layers,
-  ChevronDown,
-  Check,
   Menu,
   X,
 } from "lucide-react";
@@ -181,8 +176,6 @@ export function IndustrialNav({
   const [internalActiveTab, setInternalActiveTab] = useState<string>(
     currentRole.navItems[1]?.id || currentRole.navItems[0]?.id || "home"
   );
-  const [searchQuery, setSearchQuery] = useState("");
-  const [roleMenuOpen, setRoleMenuOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const selectedTab = activeTabId !== undefined ? activeTabId : internalActiveTab;
@@ -192,20 +185,6 @@ export function IndustrialNav({
       onTabChange(tabId);
     } else {
       setInternalActiveTab(tabId);
-    }
-  };
-
-  const handleSelectRole = (role: UserRoleProfile) => {
-    setRoleMenuOpen(false);
-    if (onRoleChange) {
-      onRoleChange(role);
-    }
-    // Set default active tab to second item if available or first
-    const defaultTab = role.navItems[1]?.id || role.navItems[0]?.id || "home";
-    if (onTabChange) {
-      onTabChange(defaultTab);
-    } else {
-      setInternalActiveTab(defaultTab);
     }
   };
 
@@ -262,103 +241,19 @@ export function IndustrialNav({
           </div>
         </nav>
 
-        {/* Right: Search + Notification + User Profile Menu + Mobile Menu Toggle */}
-        <div className="flex items-center gap-2 sm:gap-6 shrink-0">
-          {/* Search by ID or location (Dark, crisp opacity) */}
-          <div className="hidden sm:flex items-center gap-2">
-            <Search className="w-4 h-4 text-neutral-800 shrink-0" strokeWidth={2} />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by ID or location"
-              className="bg-transparent border-none text-xs md:text-[13px] text-neutral-900 placeholder:text-neutral-500 focus:outline-none w-36 lg:w-48 py-1"
-            />
-          </div>
-
-          {/* Notification Bell */}
-          <button
-            type="button"
-            className="text-neutral-800 hover:text-black transition-colors p-1 cursor-pointer focus:outline-none"
-            title="Notifications"
+        {/* Right: Guard Station Indicator + Mobile Menu Toggle */}
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          {/* Station & On-Duty Guard Status Badge (Zero border radius, crisp industrial aesthetic) */}
+          <div
+            className="hidden sm:flex items-center gap-2.5 px-3 py-1.5 border border-neutral-300 bg-white/70 text-xs"
+            style={{ borderRadius: 0 }}
           >
-            <Bell className="w-[18px] h-[18px]" strokeWidth={2} />
-          </button>
-
-          {/* User Profile & Role Switcher */}
-          <div className="relative">
-            <button
-              type="button"
-              onClick={() => setRoleMenuOpen(!roleMenuOpen)}
-              className="flex items-center gap-1 text-neutral-800 hover:text-black transition-colors p-1 cursor-pointer focus:outline-none"
-              title={`Switch Role (Current: ${currentRole.roleName})`}
-            >
-              <User className="w-[18px] h-[18px]" strokeWidth={2} />
-              <ChevronDown
-                className={`w-3.5 h-3.5 text-neutral-700 transition-transform ${
-                  roleMenuOpen ? "rotate-180" : ""
-                }`}
-              />
-            </button>
-
-            {/* Dropdown for role selection (Zero corner rounding, flat industrial border) */}
-            {roleMenuOpen && (
-              <>
-                <div
-                  className="fixed inset-0 z-40"
-                  onClick={() => setRoleMenuOpen(false)}
-                />
-                <div
-                  className="absolute right-0 mt-2 w-72 bg-white border border-[#D1D5DB] z-50 py-1 shadow-lg"
-                  style={{ borderRadius: 0 }}
-                >
-                  <div className="px-3 py-2 border-b border-[#E2E8F0] bg-[#F8F9FA]">
-                    <p className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wider">
-                      Switch User Role
-                    </p>
-                    <p className="text-xs font-medium text-neutral-900 truncate">
-                      {currentRole.userName}
-                    </p>
-                    <p className="text-[11px] text-neutral-600 font-medium">
-                      {currentRole.roleName}
-                    </p>
-                  </div>
-                  <div className="max-h-80 overflow-y-auto">
-                    {USER_ROLES.map((r) => {
-                      const isSelected = r.id === currentRole.id;
-                      return (
-                        <button
-                          key={r.id}
-                          onClick={() => handleSelectRole(r)}
-                          type="button"
-                          className={`
-                            w-full text-left px-3 py-2 text-xs flex items-center justify-between transition-colors cursor-pointer
-                            ${
-                              isSelected
-                                ? "bg-[#18181B] text-white"
-                                : "text-neutral-800 hover:bg-neutral-100"
-                            }
-                          `}
-                          style={{ borderRadius: 0 }}
-                        >
-                          <div>
-                            <div className="font-medium">{r.roleName}</div>
-                            <div
-                              className={`text-[11px] ${
-                                isSelected ? "text-neutral-300" : "text-neutral-500"
-                              }`}
-                            >
-                              {r.userName} · {r.department}
-                            </div>
-                          </div>
-                          {isSelected && <Check className="w-4 h-4 text-white shrink-0 ml-2" />}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              </>
-            )}
+            <span className="w-1.5 h-1.5 bg-[#059669] inline-block shrink-0" />
+            <div className="flex items-baseline gap-1.5 leading-none">
+              <span className="font-bold text-neutral-900">{currentRole.userName}</span>
+              <span className="text-neutral-400">·</span>
+              <span className="text-[11px] text-neutral-500 font-medium uppercase tracking-wider">Gate 01 Post</span>
+            </div>
           </div>
 
           {/* Mobile Collapsible Navigation Toggle Button */}
@@ -397,8 +292,8 @@ export function IndustrialNav({
             transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
             className="md:hidden border-t border-neutral-300 bg-white divide-y divide-neutral-200 overflow-hidden shadow-xl"
           >
-            {/* Active Guard Info & Role Switch Strip */}
-            <div className="p-3 bg-[#F8F9FA] flex items-center justify-between gap-2">
+            {/* Active Guard Info Strip (Pure station identity, no role switcher) */}
+            <div className="p-3 bg-[#F8F9FA] flex items-center justify-between gap-2 border-b border-neutral-200">
               <div className="flex items-center gap-2.5">
                 <div className="w-7 h-7 bg-[#18181B] text-white flex items-center justify-center text-xs font-bold shrink-0">
                   {currentRole.userName.charAt(0)}
@@ -408,34 +303,13 @@ export function IndustrialNav({
                     {currentRole.userName}
                   </div>
                   <div className="text-[10px] text-neutral-500 font-medium truncate">
-                    {currentRole.roleName}
+                    {currentRole.roleName} · Post 01
                   </div>
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={() => setRoleMenuOpen(!roleMenuOpen)}
-                className="px-2.5 py-1 border border-neutral-300 bg-white text-[11px] font-semibold text-neutral-800 hover:bg-neutral-100 flex items-center gap-1 shrink-0 cursor-pointer"
-                style={{ borderRadius: 0 }}
-              >
-                <span>Change Role</span>
-                <ChevronDown className="w-3 h-3" />
-              </button>
-            </div>
-
-            {/* Mobile Search Input */}
-            <div className="p-3 bg-white">
-              <div className="relative">
-                <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-neutral-400" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search vehicle plate, PO, ID..."
-                  className="w-full pl-8 pr-3 py-2 text-xs border border-neutral-300 bg-neutral-50 text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:bg-white focus:border-neutral-900"
-                  style={{ borderRadius: 0 }}
-                />
-              </div>
+              <span className="text-[10px] font-bold text-[#047857] px-2 py-0.5 border border-emerald-300 bg-emerald-50">
+                ON POST
+              </span>
             </div>
 
             {/* Role Navigation Items (Full-width Touch-Friendly Buttons) */}
