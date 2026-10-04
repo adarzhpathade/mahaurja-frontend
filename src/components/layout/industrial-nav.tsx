@@ -55,29 +55,15 @@ export interface UserRoleProfile {
 
 export const USER_ROLES: UserRoleProfile[] = [
   {
-    id: "sales-dispatch",
-    roleName: "Sales / Dispatch Manager",
-    userName: "Vikram Malhotra",
-    department: "Logistics & Outbound",
-    navItems: [
-      { id: "home", label: "Home", icon: Home },
-      { id: "transportations", label: "Transportations", icon: Globe },
-      { id: "delivery", label: "Delivery", icon: Route },
-      { id: "load-planning", label: "Load Planning", icon: MapIcon },
-      { id: "shipping", label: "Shipping", icon: Truck },
-    ],
-  },
-  {
     id: "gate-security",
     roleName: "Gate / Security Operator",
     userName: "Ramesh Pawar",
     department: "Inbound / Outbound Gate",
     navItems: [
-      { id: "home", label: "Home", icon: Home },
+      { id: "home", label: "Gate Dashboard", icon: Home },
       { id: "live-tracker", label: "Vehicle Tracker", icon: Truck },
       { id: "entry", label: "Gate Entry", icon: LogIn },
       { id: "exit", label: "Vehicle Exit", icon: LogOut },
-      { id: "docs", label: "Doc Verification", icon: FileCheck },
     ],
   },
   {
@@ -86,11 +72,21 @@ export const USER_ROLES: UserRoleProfile[] = [
     userName: "Sunil Shinde",
     department: "Weighment Station",
     navItems: [
-      { id: "home", label: "Home", icon: Home },
-      { id: "weighments", label: "Weighments", icon: Scale },
-      { id: "gross-weight", label: "Gross Weighment", icon: ArrowDownToLine },
-      { id: "tare-weight", label: "Tare Weighment", icon: ArrowUpFromLine },
-      { id: "slips", label: "Print Slips", icon: Receipt },
+      { id: "home", label: "Scale Terminal", icon: Scale },
+      { id: "weighments", label: "Weight Records", icon: Receipt },
+    ],
+  },
+  {
+    id: "sales-dispatch",
+    roleName: "Sales / Dispatch Manager",
+    userName: "Vikram Malhotra",
+    department: "Logistics & Outbound",
+    navItems: [
+      { id: "orders", label: "Sales Orders", icon: ShoppingBag },
+      { id: "dispatch-planning", label: "Dispatch Planning", icon: Route },
+      { id: "invoices", label: "Invoices & Docs", icon: FileText },
+      { id: "delivery", label: "Delivery & POD", icon: Truck },
+      { id: "payments", label: "Payments", icon: Receipt },
     ],
   },
   {
@@ -99,10 +95,9 @@ export const USER_ROLES: UserRoleProfile[] = [
     userName: "Dr. Ananya Deshmukh",
     department: "Quality Assurance Lab",
     navItems: [
-      { id: "home", label: "Home", icon: Home },
-      { id: "rm-testing", label: "RM Testing", icon: FlaskConical },
-      { id: "fg-testing", label: "FG Testing", icon: CheckCircle2 },
-      { id: "approvals", label: "Approvals & Hold", icon: ShieldAlert },
+      { id: "home", label: "Lab Overview", icon: Home },
+      { id: "rm-testing", label: "RM Quality Testing", icon: FlaskConical },
+      { id: "fg-testing", label: "FG Quality Testing", icon: CheckCircle2 },
       { id: "coa-reports", label: "COA Reports", icon: FileText },
     ],
   },
@@ -112,11 +107,10 @@ export const USER_ROLES: UserRoleProfile[] = [
     userName: "Mahesh Kadam",
     department: "Pelletising Plant Line 1 & 2",
     navItems: [
-      { id: "home", label: "Home", icon: Home },
       { id: "plans", label: "Production Plans", icon: CalendarRange },
       { id: "issue", label: "Material Issue", icon: PackageMinus },
       { id: "processing", label: "7-Stage Processing", icon: Factory },
-      { id: "downtime", label: "Downtime Log", icon: AlertTriangle },
+      { id: "batch-history", label: "Batch History", icon: Layers },
     ],
   },
   {
@@ -125,11 +119,10 @@ export const USER_ROLES: UserRoleProfile[] = [
     userName: "Nitin Joshi",
     department: "Raw Yards & Finished Sheds",
     navItems: [
-      { id: "home", label: "Home", icon: Home },
-      { id: "rm-inventory", label: "RM Inventory", icon: Warehouse },
-      { id: "fg-stock", label: "FG Stock", icon: PackageCheck },
+      { id: "rm-inventory", label: "Raw Material Yards", icon: Warehouse },
+      { id: "fg-stock", label: "Finished Goods Stock", icon: PackageCheck },
+      { id: "packaging", label: "Packaging & Bagging", icon: ShoppingBag },
       { id: "lots", label: "Lot Traceability", icon: Layers },
-      { id: "packaging", label: "Bagging & Packaging", icon: ShoppingBag },
     ],
   },
   {
@@ -138,10 +131,10 @@ export const USER_ROLES: UserRoleProfile[] = [
     userName: "Adarsh Sharma",
     department: "System Operations",
     navItems: [
-      { id: "home", label: "Home", icon: Home },
       { id: "suppliers", label: "Suppliers Master", icon: Users },
-      { id: "materials", label: "Materials Master", icon: Layers },
-      { id: "locations", label: "Storage Locations", icon: Warehouse },
+      { id: "customers", label: "Customer Master", icon: User },
+      { id: "materials", label: "Materials & Storage", icon: Warehouse },
+      { id: "formulas", label: "Blend Formulas", icon: Layers },
       { id: "users-access", label: "User Access & Roles", icon: ShieldCheck },
     ],
   },
@@ -151,7 +144,6 @@ export const USER_ROLES: UserRoleProfile[] = [
     userName: "Pravin Singhania",
     department: "Executive Directorate",
     navItems: [
-      { id: "home", label: "Home", icon: Home },
       { id: "live-kpis", label: "Live Plant KPIs", icon: Activity },
       { id: "traceability", label: "Bi-Directional Trace", icon: GitFork },
       { id: "cost-yield", label: "Cost & Yield", icon: LineChart },
@@ -159,6 +151,19 @@ export const USER_ROLES: UserRoleProfile[] = [
     ],
   },
 ];
+
+export const ROLE_GATE_SECURITY = USER_ROLES.find((r) => r.id === "gate-security") || USER_ROLES[0];
+export const ROLE_WEIGHBRIDGE = USER_ROLES.find((r) => r.id === "weighbridge") || USER_ROLES[1];
+export const ROLE_SALES_DISPATCH = USER_ROLES.find((r) => r.id === "sales-dispatch") || USER_ROLES[2];
+export const ROLE_QC_LAB = USER_ROLES.find((r) => r.id === "qc-lab") || USER_ROLES[3];
+export const ROLE_PRODUCTION = USER_ROLES.find((r) => r.id === "production") || USER_ROLES[4];
+export const ROLE_WAREHOUSE = USER_ROLES.find((r) => r.id === "warehouse") || USER_ROLES[5];
+export const ROLE_ADMIN = USER_ROLES.find((r) => r.id === "admin") || USER_ROLES[6];
+export const ROLE_MANAGEMENT = USER_ROLES.find((r) => r.id === "management") || USER_ROLES[7];
+
+export function getRoleById(roleId: string): UserRoleProfile {
+  return USER_ROLES.find((r) => r.id === roleId) || USER_ROLES[0];
+}
 
 interface IndustrialNavProps {
   currentRole?: UserRoleProfile;
@@ -173,9 +178,8 @@ export function IndustrialNav({
   activeTabId,
   onTabChange,
 }: IndustrialNavProps) {
-  // Default to 2nd item ("transportations" in Sales role) to exactly match user's screenshot
   const [internalActiveTab, setInternalActiveTab] = useState<string>(
-    currentRole.navItems[1]?.id || currentRole.navItems[0]?.id || "home"
+    currentRole.navItems[0]?.id || "home"
   );
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);

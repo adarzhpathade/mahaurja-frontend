@@ -13,8 +13,6 @@ export default function GateTrackerPage() {
       router.push("/gate/entry");
     } else if (tabId === "exit") {
       router.push("/gate/exit");
-    } else if (tabId === "docs") {
-      router.push("/gate/verification");
     } else {
       router.push("/gate");
     }

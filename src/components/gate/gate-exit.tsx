@@ -65,6 +65,7 @@ export function GateExit({ vehicles, onUpdateStage, onNavigateTab }: GateExitPro
   const [activeTab, setActiveTab] = useState<"QUEUE" | "ALL_INSIDE" | "DEPARTED">("QUEUE");
   const [directionFilter, setDirectionFilter] = useState<"ALL" | VehicleDirection>("ALL");
   const [searchQuery, setSearchQuery] = useState("");
+  const [viewMode, setViewMode] = useState<"CARDS" | "TABLE">("CARDS");
 
   // Barrier Status State
   const [barrierState, setBarrierState] = useState<"LOWERED" | "RAISED" | "AUTO_CYCLE">("LOWERED");
@@ -412,10 +413,38 @@ export function GateExit({ vehicles, onUpdateStage, onNavigateTab }: GateExitPro
           <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-neutral-900">
             Exit Queue & Registry
           </h2>
-          <div className="text-xs font-semibold text-neutral-500">
-            {activeTab === "DEPARTED"
-              ? `${filteredDepartedLog.length} departures logged`
-              : `${displayedVehicles.length} in view`}
+          <div className="flex items-center gap-3">
+            <div className="text-xs font-semibold text-neutral-500">
+              {activeTab === "DEPARTED"
+                ? `${filteredDepartedLog.length} departures logged`
+                : `${displayedVehicles.length} in view`}
+            </div>
+
+            {/* View Mode Switcher (PC Only) */}
+            <div className="hidden sm:inline-flex border border-neutral-300 divide-x divide-neutral-300 text-xs shrink-0 h-9">
+              <button
+                type="button"
+                onClick={() => setViewMode("CARDS")}
+                className={`px-3 py-1.5 transition-colors cursor-pointer flex items-center ${
+                  viewMode === "CARDS"
+                    ? "bg-[#18181B] text-white font-semibold"
+                    : "bg-neutral-200/50 text-neutral-700 hover:bg-neutral-200"
+                }`}
+              >
+                Cards
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode("TABLE")}
+                className={`px-3 py-1.5 transition-colors cursor-pointer flex items-center ${
+                  viewMode === "TABLE"
+                    ? "bg-[#18181B] text-white font-semibold"
+                    : "bg-neutral-200/50 text-neutral-700 hover:bg-neutral-200"
+                }`}
+              >
+                Table
+              </button>
+            </div>
           </div>
         </div>
 
@@ -517,17 +546,45 @@ export function GateExit({ vehicles, onUpdateStage, onNavigateTab }: GateExitPro
           </div>
         </div>
 
-        {/* Search Bar - Full Width on Mobile */}
-        <div className="relative w-full">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search by Vehicle Plate (e.g. MH 20), Gate Pass #, Driver Name, Transporter, or Material..."
-            className="w-full h-11 sm:h-10 pl-9.5 pr-4 border border-neutral-300 bg-white text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-[#059669] transition-colors"
-            style={{ borderRadius: 0 }}
-          />
+        {/* Search Bar & View Mode Toggle (Gate Reference Standard) */}
+        <div className="flex items-center gap-2">
+          <div className="relative w-full flex-1">
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search by Vehicle Plate (e.g. MH 20), Gate Pass #, Driver Name, Transporter, or Material..."
+              className="w-full h-11 sm:h-10 pl-9.5 pr-4 border border-neutral-300 bg-white text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-[#059669] transition-colors"
+              style={{ borderRadius: 0 }}
+            />
+          </div>
+
+          {/* View Toggle (PC Only - Standard Gate Pattern) */}
+          <div className="hidden sm:inline-flex border border-neutral-300 divide-x divide-neutral-300 text-xs shrink-0 h-10">
+            <button
+              type="button"
+              onClick={() => setViewMode("CARDS")}
+              className={`px-3 py-1.5 transition-colors cursor-pointer flex items-center ${
+                viewMode === "CARDS"
+                  ? "bg-[#18181B] text-white font-semibold"
+                  : "bg-neutral-200/50 text-neutral-700 hover:bg-neutral-200"
+              }`}
+            >
+              Cards
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode("TABLE")}
+              className={`px-3 py-1.5 transition-colors cursor-pointer flex items-center ${
+                viewMode === "TABLE"
+                  ? "bg-[#18181B] text-white font-semibold"
+                  : "bg-neutral-200/50 text-neutral-700 hover:bg-neutral-200"
+              }`}
+            >
+              Table
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -540,10 +597,10 @@ export function GateExit({ vehicles, onUpdateStage, onNavigateTab }: GateExitPro
       {activeTab === "DEPARTED" ? (
         /* Departed Vehicles Audit History */
         <section
-          className="bg-white border-0 sm:border border-neutral-300 overflow-hidden"
+          className="border-0 sm:border border-neutral-300 overflow-hidden bg-transparent"
           style={{ borderRadius: 0 }}
         >
-          <div className="p-4 border-b border-neutral-200 flex items-center justify-between bg-neutral-50">
+          <div className="p-4 border-b border-neutral-200 flex items-center justify-between bg-neutral-200/50">
             <div>
               <h2 className="text-xs font-bold uppercase tracking-wider text-neutral-900">
                 Departed Vehicles History (Shift 01)
@@ -554,10 +611,81 @@ export function GateExit({ vehicles, onUpdateStage, onNavigateTab }: GateExitPro
             </div>
           </div>
 
-          <div className="overflow-x-auto">
+          {/* Departed Cards View: Always on Mobile, respects viewMode on Desktop */}
+          <div
+            className={
+              viewMode === "CARDS"
+                ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 p-0 sm:p-4"
+                : "grid grid-cols-1 sm:hidden gap-3 p-0"
+            }
+          >
+            {filteredDepartedLog.map((record) => (
+              <div
+                key={record.id}
+                className="border border-neutral-300 hover:border-neutral-900 bg-white/40 p-3.5 flex flex-col justify-between space-y-3 transition-all group"
+              >
+                <div className="flex items-start justify-between gap-1 pb-2 border-b border-neutral-200">
+                  <div>
+                    <span className="font-mono font-bold text-xs text-neutral-900 block">
+                      {record.exitPassNo}
+                    </span>
+                    <span className="text-[10px] text-neutral-400 font-mono">
+                      Pass: {record.gateEntryNo}
+                    </span>
+                  </div>
+                  <span
+                    className={`text-[10px] font-bold px-2 py-0.5 border uppercase ${
+                      record.direction === "INBOUND_RM"
+                        ? "border-emerald-300 bg-emerald-50 text-[#047857]"
+                        : "border-neutral-300 bg-[#18181B] text-white"
+                    }`}
+                  >
+                    {record.direction === "INBOUND_RM" ? "Inbound RM" : "Outbound FG"}
+                  </span>
+                </div>
+
+                <div className="space-y-1 text-xs">
+                  <div className="flex items-baseline justify-between gap-2">
+                    <span className="font-mono font-bold text-neutral-900 text-sm group-hover:text-[#059669] transition-colors">
+                      {record.vehicleNo}
+                    </span>
+                    <span className="font-bold text-[#059669] tabular-nums font-mono text-xs">
+                      {record.netWeightMT.toFixed(2)} MT Net
+                    </span>
+                  </div>
+                  <div className="font-semibold text-neutral-800 truncate">
+                    {record.materialName}
+                  </div>
+                  <div className="text-[11px] text-neutral-600 truncate">
+                    {record.supplierOrCustomer}
+                  </div>
+                  <div className="text-[10px] text-neutral-400 truncate">
+                    {record.transporter} · {record.driverName}
+                  </div>
+                </div>
+
+                <div className="pt-2 border-t border-neutral-200 flex items-center justify-between text-[11px] text-neutral-600">
+                  <span className="tabular-nums">
+                    {record.timeIn} → {record.timeOut} ({record.turnaroundMinutes}m)
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setActiveExitPass(record)}
+                    className="h-7 px-2.5 text-[11px] font-semibold border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-800 cursor-pointer transition-colors inline-flex items-center gap-1 shadow-2xs"
+                  >
+                    <Printer className="w-3 h-3 text-neutral-600" />
+                    <span>Pass</span>
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Departed Table View (PC Only - NO white bg) */}
+          <div className={viewMode === "TABLE" ? "hidden sm:block overflow-x-auto" : "hidden"}>
             <table className="w-full text-left text-xs border-collapse">
               <thead>
-                <tr className="bg-neutral-100 border-b border-neutral-300 text-neutral-700 font-bold uppercase tracking-wider text-[10px]">
+                <tr className="border-b border-neutral-300 bg-neutral-200/50 text-neutral-600 font-bold uppercase tracking-wider text-[10px]">
                   <th className="py-2.5 px-3">Exit Pass #</th>
                   <th className="py-2.5 px-3">Vehicle No</th>
                   <th className="py-2.5 px-3">Direction</th>
@@ -571,27 +699,27 @@ export function GateExit({ vehicles, onUpdateStage, onNavigateTab }: GateExitPro
                   <th className="py-2.5 px-3 text-right">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-neutral-200">
+              <tbody className="divide-y divide-neutral-300">
                 {filteredDepartedLog.map((record) => (
-                  <tr key={record.id} className="hover:bg-neutral-50 transition-colors">
+                  <tr key={record.id} className="hover:bg-neutral-200/40 transition-colors cursor-pointer">
                     <td className="py-3 px-3 font-bold text-neutral-900 tabular-nums">
                       {record.exitPassNo}
                       <div className="text-[10px] text-neutral-500 font-normal">{record.gateEntryNo}</div>
                     </td>
                     <td className="py-3 px-3">
-                      <span className="font-bold text-neutral-900 text-xs px-2 py-0.5 border border-neutral-300 bg-neutral-50">
+                      <span className="font-bold text-neutral-900 text-xs px-2 py-0.5 border border-neutral-300 bg-neutral-50 font-mono">
                         {record.vehicleNo}
                       </span>
                     </td>
                     <td className="py-3 px-3">
                       <span
-                        className={`text-[10px] font-bold px-1.5 py-0.5 border ${
+                        className={`text-[10px] font-bold px-2 py-0.5 border uppercase ${
                           record.direction === "INBOUND_RM"
-                            ? "bg-neutral-50 text-neutral-800 border-neutral-300"
-                            : "bg-[#ECFDF5] text-[#059669] border-[#A7F3D0]"
+                            ? "border-emerald-300 bg-emerald-50 text-[#047857]"
+                            : "border-neutral-300 bg-[#18181B] text-white"
                         }`}
                       >
-                        {record.direction === "INBOUND_RM" ? "INBOUND RM" : "OUTBOUND FG"}
+                        {record.direction === "INBOUND_RM" ? "Inbound RM" : "Outbound FG"}
                       </span>
                     </td>
                     <td className="py-3 px-3">
@@ -621,7 +749,7 @@ export function GateExit({ vehicles, onUpdateStage, onNavigateTab }: GateExitPro
                       <button
                         type="button"
                         onClick={() => setActiveExitPass(record)}
-                        className="px-2.5 py-1 text-[11px] font-semibold border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-800 cursor-pointer transition-colors inline-flex items-center gap-1"
+                        className="px-2.5 py-1 text-[11px] font-semibold border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-800 cursor-pointer transition-colors inline-flex items-center gap-1 shadow-2xs"
                         style={{ borderRadius: 0 }}
                       >
                         <Printer className="w-3 h-3 text-neutral-600" />
@@ -632,7 +760,7 @@ export function GateExit({ vehicles, onUpdateStage, onNavigateTab }: GateExitPro
                 ))}
                 {filteredDepartedLog.length === 0 && (
                   <tr>
-                    <td colSpan={11} className="py-8 text-center text-xs text-neutral-500">
+                    <td colSpan={11} className="py-8 text-center text-xs text-neutral-500 font-mono">
                       No departed vehicle records match your filter criteria.
                     </td>
                   </tr>
@@ -666,7 +794,7 @@ export function GateExit({ vehicles, onUpdateStage, onNavigateTab }: GateExitPro
 
           {displayedVehicles.length === 0 ? (
             <div
-              className="bg-white border border-neutral-300 p-12 text-center space-y-3"
+              className="bg-white/40 border border-neutral-300 p-12 text-center space-y-3"
               style={{ borderRadius: 0 }}
             >
               <div className="w-12 h-12 mx-auto bg-neutral-100 border border-neutral-300 flex items-center justify-center text-neutral-500">
@@ -686,7 +814,7 @@ export function GateExit({ vehicles, onUpdateStage, onNavigateTab }: GateExitPro
                 <button
                   type="button"
                   onClick={() => setActiveTab("ALL_INSIDE")}
-                  className="px-4 py-2 border border-neutral-300 text-xs font-semibold text-neutral-800 hover:bg-neutral-50 cursor-pointer"
+                  className="px-4 py-2 border border-neutral-300 text-xs font-semibold text-neutral-800 hover:bg-neutral-100 bg-white cursor-pointer shadow-2xs"
                   style={{ borderRadius: 0 }}
                 >
                   View All Active In-Plant Vehicles
@@ -694,190 +822,304 @@ export function GateExit({ vehicles, onUpdateStage, onNavigateTab }: GateExitPro
               )}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-              {displayedVehicles.map((vehicle) => {
-                const isReady =
-                  vehicle.stage === "CLEARED_EXIT" || vehicle.stage === "TARE_WEIGHED";
-                const isRM = vehicle.direction === "INBOUND_RM";
-                const grossWeight = vehicle.grossWeightMT || (vehicle.declaredWeightMT + 12.0);
-                const tareWeight = vehicle.tareWeightMT || 11.5;
-                const netWeight = Math.abs(grossWeight - tareWeight);
+            <>
+              {/* Cards View: Always on Mobile, respects viewMode on Desktop */}
+              <div
+                className={
+                  viewMode === "CARDS"
+                    ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"
+                    : "grid grid-cols-1 sm:hidden gap-4"
+                }
+              >
+                {displayedVehicles.map((vehicle) => {
+                  const isReady =
+                    vehicle.stage === "CLEARED_EXIT" || vehicle.stage === "TARE_WEIGHED";
+                  const isRM = vehicle.direction === "INBOUND_RM";
+                  const grossWeight = vehicle.grossWeightMT || (vehicle.declaredWeightMT + 12.0);
+                  const tareWeight = vehicle.tareWeightMT || 11.5;
+                  const netWeight = Math.abs(grossWeight - tareWeight);
 
-                return (
-                  <div
-                    key={vehicle.id}
-                    className={`bg-white border transition-all flex flex-col justify-between ${
-                      isReady
-                        ? "border-neutral-400 hover:border-neutral-800"
-                        : "border-neutral-300 opacity-90"
-                    }`}
-                    style={{ borderRadius: 0 }}
-                  >
-                    {/* Card Header */}
-                    <div className="p-4 border-b border-neutral-200">
-                      <div className="flex items-start justify-between gap-2 mb-2">
-                        {/* Vehicle Number Badge */}
-                        <div className="flex items-center gap-2">
+                  return (
+                    <div
+                      key={vehicle.id}
+                      className={`border transition-all flex flex-col justify-between ${
+                        isReady
+                          ? "border-neutral-400 hover:border-neutral-800 bg-white/40"
+                          : "border-neutral-300 opacity-90 bg-white/30"
+                      }`}
+                      style={{ borderRadius: 0 }}
+                    >
+                      {/* Card Header */}
+                      <div className="p-4 border-b border-neutral-200">
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          {/* Vehicle Number Badge */}
+                          <div className="flex items-center gap-2">
+                            <span
+                              className="font-bold text-sm tracking-tight text-neutral-900 px-2 py-0.5 border border-neutral-400 bg-neutral-50 font-mono"
+                              style={{ borderRadius: 0 }}
+                            >
+                              {vehicle.vehicleNo}
+                            </span>
+                            <span className="text-[10px] text-neutral-600 font-medium">
+                              {vehicle.vehicleType}
+                            </span>
+                          </div>
+
+                          {/* Direction Badge */}
                           <span
-                            className="font-bold text-sm tracking-tight text-neutral-900 px-2 py-0.5 border border-neutral-400 bg-neutral-50"
+                            className={`text-[10px] font-bold px-2 py-0.5 border uppercase ${
+                              isRM
+                                ? "border-emerald-300 bg-emerald-50 text-[#047857]"
+                                : "border-neutral-300 bg-[#18181B] text-white"
+                            }`}
                             style={{ borderRadius: 0 }}
                           >
-                            {vehicle.vehicleNo}
-                          </span>
-                          <span className="text-[10px] text-neutral-600 font-medium">
-                            {vehicle.vehicleType}
+                            {isRM ? "Inbound RM" : "Outbound FG"}
                           </span>
                         </div>
 
-                        {/* Direction Badge */}
-                        <span
-                          className={`text-[10px] font-bold px-2 py-0.5 border ${
-                            isRM
-                              ? "bg-neutral-100 text-neutral-800 border-neutral-300"
-                              : "bg-[#ECFDF5] text-[#059669] border-[#A7F3D0]"
-                          }`}
-                          style={{ borderRadius: 0 }}
-                        >
-                          {isRM ? "INBOUND RM" : "OUTBOUND FG"}
-                        </span>
-                      </div>
-
-                      {/* Material & Consignor / Consignee */}
-                      <div className="space-y-0.5">
-                        <div className="text-xs font-bold text-neutral-900">
-                          {vehicle.materialName}
-                        </div>
-                        <div className="text-[11px] text-neutral-500 truncate">
-                          {vehicle.supplierOrCustomer}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Card Body: Driver & Logistics Data */}
-                    <div className="p-4 space-y-3 bg-neutral-50/50 flex-1">
-                      {/* Driver & Pass Numbers */}
-                      <div className="grid grid-cols-2 gap-2 text-[11px]">
-                        <div>
-                          <span className="text-neutral-500 block text-[10px] uppercase font-semibold">
-                            Gate Pass ID
-                          </span>
-                          <span className="font-bold text-neutral-800 tabular-nums">
-                            {vehicle.gateEntryNo}
-                          </span>
-                        </div>
-                        <div>
-                          <span className="text-neutral-500 block text-[10px] uppercase font-semibold">
-                            Transporter
-                          </span>
-                          <span className="text-neutral-800 truncate block">
-                            {vehicle.transporter}
-                          </span>
-                        </div>
-                        <div>
-                          <span className="text-neutral-500 block text-[10px] uppercase font-semibold">
-                            Driver
-                          </span>
-                          <span className="text-neutral-800">
-                            {vehicle.driverName}
-                          </span>
-                        </div>
-                        <div>
-                          <span className="text-neutral-500 block text-[10px] uppercase font-semibold">
-                            Time Inside
-                          </span>
-                          <span className="font-semibold text-neutral-900 tabular-nums flex items-center gap-1">
-                            <Clock className="w-3 h-3 text-neutral-500" />
-                            {vehicle.elapsedMinutes} mins
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Weighbridge Tare / Gross Block */}
-                      <div className="p-2.5 bg-white border border-neutral-300 space-y-1.5">
-                        <div className="flex items-center justify-between text-[10px] text-neutral-500 border-b border-neutral-200 pb-1">
-                          <span className="font-bold uppercase tracking-wider text-neutral-700 flex items-center gap-1">
-                            <Scale className="w-3 h-3 text-neutral-600" />
-                            Weight Record
-                          </span>
-                          <span className="tabular-nums font-semibold text-neutral-700">
-                            {vehicle.weighbridgeSlipNo || "WB-SLIP-PENDING"}
-                          </span>
-                        </div>
-
-                        <div className="grid grid-cols-3 gap-1 text-center pt-0.5">
-                          <div className="bg-neutral-50 p-1 border border-neutral-200">
-                            <div className="text-[9px] uppercase text-neutral-500">Gross</div>
-                            <div className="text-xs font-bold text-neutral-800 tabular-nums">
-                              {grossWeight.toFixed(2)} MT
-                            </div>
+                        {/* Material & Consignor / Consignee */}
+                        <div className="space-y-0.5">
+                          <div className="text-xs font-bold text-neutral-900">
+                            {vehicle.materialName}
                           </div>
-                          <div className="bg-neutral-50 p-1 border border-neutral-200">
-                            <div className="text-[9px] uppercase text-neutral-500">Tare</div>
-                            <div className="text-xs font-bold text-neutral-800 tabular-nums">
-                              {tareWeight.toFixed(2)} MT
-                            </div>
-                          </div>
-                          <div className="bg-[#ECFDF5] p-1 border border-[#A7F3D0]">
-                            <div className="text-[9px] uppercase text-[#059669] font-bold">Net</div>
-                            <div className="text-xs font-extrabold text-[#059669] tabular-nums">
-                              {netWeight.toFixed(2)} MT
-                            </div>
+                          <div className="text-[11px] text-neutral-500 truncate">
+                            {vehicle.supplierOrCustomer}
                           </div>
                         </div>
                       </div>
 
-                      {/* Current Stage Indicator */}
-                      <div className="flex items-center justify-between text-[11px] pt-1">
-                        <span className="text-neutral-500">Plant Status:</span>
-                        <span
-                          className={`font-semibold px-2 py-0.5 text-[10px] border ${
-                            isReady
-                              ? "bg-[#ECFDF5] text-[#059669] border-[#A7F3D0]"
-                              : "bg-neutral-100 text-neutral-700 border-neutral-300"
-                          }`}
-                        >
-                          {vehicle.stage === "CLEARED_EXIT"
-                            ? "CLEARED FOR EXIT"
-                            : vehicle.stage === "TARE_WEIGHED"
-                            ? "TARE WEIGHED (WB-01)"
-                            : vehicle.stage.replace(/_/g, " ")}
-                        </span>
-                      </div>
-                    </div>
+                      {/* Card Body: Driver & Logistics Data */}
+                      <div className="p-4 space-y-3 bg-neutral-50/50 flex-1">
+                        {/* Driver & Pass Numbers */}
+                        <div className="grid grid-cols-2 gap-2 text-[11px]">
+                          <div>
+                            <span className="text-neutral-500 block text-[10px] uppercase font-semibold">
+                              Gate Pass ID
+                            </span>
+                            <span className="font-bold text-neutral-800 tabular-nums font-mono">
+                              {vehicle.gateEntryNo}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-neutral-500 block text-[10px] uppercase font-semibold">
+                              Transporter
+                            </span>
+                            <span className="text-neutral-800 truncate block">
+                              {vehicle.transporter}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-neutral-500 block text-[10px] uppercase font-semibold">
+                              Driver
+                            </span>
+                            <span className="text-neutral-800">
+                              {vehicle.driverName}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-neutral-500 block text-[10px] uppercase font-semibold">
+                              Time Inside
+                            </span>
+                            <span className="font-semibold text-neutral-900 tabular-nums flex items-center gap-1 font-mono">
+                              <Clock className="w-3 h-3 text-neutral-500" />
+                              {vehicle.elapsedMinutes} mins
+                            </span>
+                          </div>
+                        </div>
 
-                    {/* Card Footer: Action Buttons */}
-                    <div className="p-3 border-t border-neutral-200 bg-white">
-                      {isReady ? (
-                        <button
-                          type="button"
-                          onClick={() => handleOpenInspection(vehicle)}
-                          className="w-full py-2.5 px-3 bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-colors shadow-sm"
-                          style={{ borderRadius: 0 }}
-                        >
-                          <ShieldCheck className="w-4 h-4" />
-                          <span>Verify & Authorize Exit</span>
-                          <ArrowRight className="w-3.5 h-3.5" />
-                        </button>
-                      ) : (
-                        <div className="flex items-center justify-between gap-2">
-                          <span className="text-[11px] text-neutral-500">
-                            Vehicle in processing ({vehicle.assignedLocation})
+                        {/* Weighbridge Tare / Gross Block */}
+                        <div className="p-2.5 bg-white/70 border border-neutral-300 space-y-1.5">
+                          <div className="flex items-center justify-between text-[10px] text-neutral-500 border-b border-neutral-200 pb-1">
+                            <span className="font-bold uppercase tracking-wider text-neutral-700 flex items-center gap-1">
+                              <Scale className="w-3 h-3 text-neutral-600" />
+                              Weight Record
+                            </span>
+                            <span className="tabular-nums font-semibold text-neutral-700 font-mono">
+                              {vehicle.weighbridgeSlipNo || "WB-SLIP-PENDING"}
+                            </span>
+                          </div>
+
+                          <div className="grid grid-cols-3 gap-1 text-center pt-0.5">
+                            <div className="bg-neutral-50 p-1 border border-neutral-200">
+                              <div className="text-[9px] uppercase text-neutral-500">Gross</div>
+                              <div className="text-xs font-bold text-neutral-800 tabular-nums font-mono">
+                                {grossWeight.toFixed(2)} MT
+                              </div>
+                            </div>
+                            <div className="bg-neutral-50 p-1 border border-neutral-200">
+                              <div className="text-[9px] uppercase text-neutral-500">Tare</div>
+                              <div className="text-xs font-bold text-neutral-800 tabular-nums font-mono">
+                                {tareWeight.toFixed(2)} MT
+                              </div>
+                            </div>
+                            <div className="bg-[#ECFDF5] p-1 border border-[#A7F3D0]">
+                              <div className="text-[9px] uppercase text-[#059669] font-bold">Net</div>
+                              <div className="text-xs font-extrabold text-[#059669] tabular-nums font-mono">
+                                {netWeight.toFixed(2)} MT
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Current Stage Indicator */}
+                        <div className="flex items-center justify-between text-[11px] pt-1">
+                          <span className="text-neutral-500">Plant Status:</span>
+                          <span
+                            className={`font-semibold px-2 py-0.5 text-[10px] border uppercase ${
+                              isReady
+                                ? "bg-[#ECFDF5] text-[#059669] border-[#A7F3D0]"
+                                : "bg-neutral-100 text-neutral-700 border-neutral-300"
+                            }`}
+                          >
+                            {vehicle.stage === "CLEARED_EXIT"
+                              ? "CLEARED FOR EXIT"
+                              : vehicle.stage === "TARE_WEIGHED"
+                              ? "TARE WEIGHED (WB-01)"
+                              : vehicle.stage.replace(/_/g, " ")}
                           </span>
+                        </div>
+                      </div>
+
+                      {/* Card Footer: Action Buttons */}
+                      <div className="p-3 border-t border-neutral-200 bg-white/70">
+                        {isReady ? (
                           <button
                             type="button"
                             onClick={() => handleOpenInspection(vehicle)}
-                            className="px-2.5 py-1.5 border border-neutral-300 hover:bg-neutral-50 text-[11px] font-semibold text-neutral-800 cursor-pointer"
+                            className="w-full py-2.5 px-3 bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer transition-colors shadow-xs"
                             style={{ borderRadius: 0 }}
                           >
-                            Fast-Track Exit
+                            <ShieldCheck className="w-4 h-4" />
+                            <span>Verify & Authorize Exit</span>
+                            <ArrowRight className="w-3.5 h-3.5" />
                           </button>
-                        </div>
-                      )}
+                        ) : (
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="text-[11px] text-neutral-500">
+                              Vehicle in processing ({vehicle.assignedLocation})
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => handleOpenInspection(vehicle)}
+                              className="px-2.5 py-1.5 border border-neutral-300 hover:bg-neutral-100 bg-white text-[11px] font-semibold text-neutral-800 cursor-pointer shadow-2xs"
+                              style={{ borderRadius: 0 }}
+                            >
+                              Fast-Track Exit
+                            </button>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+
+              {/* Table View: PC Only when viewMode === "TABLE" (NO white bg) */}
+              <div className={viewMode === "TABLE" ? "hidden sm:block overflow-x-auto border border-neutral-300" : "hidden"}>
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead>
+                    <tr className="border-b border-neutral-300 bg-neutral-200/50 text-neutral-600 font-bold uppercase tracking-wider text-[10px]">
+                      <th className="py-2.5 px-3">Vehicle Plate</th>
+                      <th className="py-2.5 px-3">Direction</th>
+                      <th className="py-2.5 px-3">Gate Pass #</th>
+                      <th className="py-2.5 px-3">Material & Partner</th>
+                      <th className="py-2.5 px-3">Driver / Transporter</th>
+                      <th className="py-2.5 px-3 font-mono text-right">Gross MT</th>
+                      <th className="py-2.5 px-3 font-mono text-right">Tare MT</th>
+                      <th className="py-2.5 px-3 font-mono text-right text-emerald-800">Net MT</th>
+                      <th className="py-2.5 px-3">Time Inside</th>
+                      <th className="py-2.5 px-3">Status</th>
+                      <th className="py-2.5 px-3 text-right">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-neutral-300">
+                    {displayedVehicles.map((vehicle) => {
+                      const isReady =
+                        vehicle.stage === "CLEARED_EXIT" || vehicle.stage === "TARE_WEIGHED";
+                      const isRM = vehicle.direction === "INBOUND_RM";
+                      const grossWeight = vehicle.grossWeightMT || (vehicle.declaredWeightMT + 12.0);
+                      const tareWeight = vehicle.tareWeightMT || 11.5;
+                      const netWeight = Math.abs(grossWeight - tareWeight);
+
+                      return (
+                        <tr
+                          key={vehicle.id}
+                          onClick={() => handleOpenInspection(vehicle)}
+                          className="hover:bg-neutral-200/40 transition-colors cursor-pointer"
+                        >
+                          <td className="py-3 px-3 font-mono font-bold text-neutral-900 text-xs">
+                            <span className="px-2 py-0.5 font-mono font-bold text-xs bg-neutral-50 border border-neutral-300 text-neutral-900 inline-block">
+                              {vehicle.vehicleNo}
+                            </span>
+                          </td>
+                          <td className="py-3 px-3">
+                            <span
+                              className={`text-[10px] font-bold px-2 py-0.5 border uppercase ${
+                                isRM
+                                  ? "border-emerald-300 bg-emerald-50 text-[#047857]"
+                                  : "border-neutral-300 bg-[#18181B] text-white"
+                              }`}
+                            >
+                              {isRM ? "Inbound RM" : "Outbound FG"}
+                            </span>
+                          </td>
+                          <td className="py-3 px-3 font-mono text-neutral-700">
+                            {vehicle.gateEntryNo}
+                          </td>
+                          <td className="py-3 px-3">
+                            <div className="font-semibold text-neutral-900">{vehicle.materialName}</div>
+                            <div className="text-[11px] text-neutral-500 truncate max-w-[180px]">
+                              {vehicle.supplierOrCustomer}
+                            </div>
+                          </td>
+                          <td className="py-3 px-3">
+                            <div className="text-neutral-800">{vehicle.driverName}</div>
+                            <div className="text-[10px] text-neutral-500">{vehicle.transporter}</div>
+                          </td>
+                          <td className="py-3 px-3 font-mono text-right text-neutral-700">
+                            {grossWeight.toFixed(2)}
+                          </td>
+                          <td className="py-3 px-3 font-mono text-right text-neutral-700">
+                            {tareWeight.toFixed(2)}
+                          </td>
+                          <td className="py-3 px-3 font-mono text-right font-bold text-[#059669]">
+                            {netWeight.toFixed(2)}
+                          </td>
+                          <td className="py-3 px-3 font-mono text-neutral-700">
+                            {vehicle.elapsedMinutes}m
+                          </td>
+                          <td className="py-3 px-3">
+                            <span
+                              className={`text-[10px] font-bold px-2 py-0.5 border uppercase ${
+                                isReady
+                                  ? "bg-emerald-50 text-[#047857] border-emerald-300"
+                                  : "bg-neutral-100 text-neutral-700 border-neutral-300"
+                              }`}
+                            >
+                              {isReady ? "Ready for Exit" : vehicle.stage.replace(/_/g, " ")}
+                            </span>
+                          </td>
+                          <td className="py-3 px-3 text-right">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleOpenInspection(vehicle);
+                              }}
+                              className="h-8 px-3 text-xs font-bold uppercase tracking-wider bg-[#059669] hover:bg-[#047857] text-white inline-flex items-center gap-1.5 cursor-pointer shadow-xs transition-colors"
+                            >
+                              <ShieldCheck className="w-3.5 h-3.5" />
+                              <span>{isReady ? "Clear" : "Inspect"}</span>
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </>
           )}
         </section>
       )}

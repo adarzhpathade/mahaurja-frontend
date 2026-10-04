@@ -35,21 +35,22 @@ const navSections: { section: string; items: NavItem[] }[] = [
     items: [
       {
         title: "Gate & Security",
-        href: "/gate/dashboard",
+        href: "/gate",
         icon: Truck,
         children: [
-          { title: "Live Gate Dashboard", href: "/gate/dashboard" },
-          { title: "Gate Entries", href: "/gate/entries" },
-          { title: "Vehicle Exits", href: "/gate/exits" },
+          { title: "Gate Dashboard", href: "/gate" },
+          { title: "Vehicle Tracker", href: "/gate/tracker" },
+          { title: "Gate Entry", href: "/gate/entry" },
+          { title: "Vehicle Exit", href: "/gate/exit" },
         ],
       },
       {
         title: "Weighbridge",
-        href: "/weighbridge/weighments",
+        href: "/weighbridge",
         icon: Scale,
         children: [
-          { title: "Weighment Entry", href: "/weighbridge/weighments" },
-          { title: "Weighbridge Slips", href: "/weighbridge/slips" },
+          { title: "Scale Terminal", href: "/weighbridge" },
+          { title: "Weight Records", href: "/weighbridge/weighments" },
         ],
       },
       {

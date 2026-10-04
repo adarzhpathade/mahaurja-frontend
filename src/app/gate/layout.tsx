@@ -2,7 +2,7 @@
 
 import React from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { IndustrialNav, USER_ROLES } from "@/components/layout/industrial-nav";
+import { IndustrialNav, ROLE_GATE_SECURITY } from "@/components/layout/industrial-nav";
 import { GateProvider, useGate } from "@/lib/context/gate-context";
 import { GateEntryModal } from "@/components/gate/gate-entry-modal";
 import { GateVehicle } from "@/lib/types/gate";
@@ -23,7 +23,6 @@ function GateNavShell({ children }: { children: React.ReactNode }) {
     if (pathname === "/gate/entry") return "entry";
     if (pathname === "/gate/tracker") return "live-tracker";
     if (pathname === "/gate/exit") return "exit";
-    if (pathname === "/gate/verification") return "docs";
     return "home"; // default /gate
   };
 
@@ -34,8 +33,6 @@ function GateNavShell({ children }: { children: React.ReactNode }) {
       router.push("/gate/tracker");
     } else if (tabId === "exit") {
       router.push("/gate/exit");
-    } else if (tabId === "docs") {
-      router.push("/gate/verification");
     } else {
       router.push("/gate");
     }
@@ -51,7 +48,7 @@ function GateNavShell({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen bg-[#F4F5F7] text-neutral-900 flex flex-col select-none">
       {/* Precision Industrial Top Navigation */}
       <IndustrialNav
-        currentRole={USER_ROLES[1]} // Gate / Security Operator
+        currentRole={ROLE_GATE_SECURITY}
         activeTabId={getActiveTab()}
         onTabChange={handleTabChange}
       />

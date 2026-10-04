@@ -124,12 +124,21 @@ export function WeighbridgeProvider({ children }: { children: ReactNode }) {
     vehicle: Partial<GateVehicle>,
     weightMT?: number
   ) => {
-    const defaultWeight =
-      weightMT !== undefined
-        ? weightMT
-        : vehicle.declaredWeightMT
-        ? Number((vehicle.declaredWeightMT + 13.5).toFixed(2))
-        : 38.4;
+    let defaultWeight: number;
+    if (weightMT !== undefined) {
+      defaultWeight = weightMT;
+    } else if (vehicle.tareWeightMT) {
+      defaultWeight = vehicle.tareWeightMT;
+    } else if (vehicle.grossWeightMT && vehicle.direction === "INBOUND_RM") {
+      // Inbound RM returning empty for 2nd tare weighment
+      const netEstimate = vehicle.declaredWeightMT || 28.5;
+      defaultWeight = Number(Math.max(12.0, vehicle.grossWeightMT - netEstimate).toFixed(2));
+    } else if (vehicle.declaredWeightMT) {
+      // Inbound RM loaded gross truck
+      defaultWeight = Number((vehicle.declaredWeightMT + 13.8).toFixed(2));
+    } else {
+      defaultWeight = 38.64;
+    }
 
     setPlatforms((prev) =>
       prev.map((p) =>

@@ -122,6 +122,27 @@ Always replace complex or bureaucratic jargon with direct, easy-to-read terms:
 | Tare Quantification | **Empty Weight (Tare)** | Weighbridge tare capture |
 | Gross Metrology | **Loaded Weight (Gross)** | Weighbridge gross capture |
 
+### 5. Mandatory Desktop Dual View (Cards & Table)
+Every operational queue, fleet roster, or history ledger must provide a desktop segmented view switcher (`[ Cards ] [ Table ]`):
+- **Switcher Container:** `<div className="hidden sm:inline-flex border border-neutral-300 divide-x divide-neutral-300 text-xs shrink-0 h-10">`
+- **Active Pill:** `bg-[#18181B] text-white font-semibold`
+- **Inactive Pill:** `bg-neutral-200/50 text-neutral-700 hover:bg-neutral-200`
+- **Mobile Rule:** On mobile devices (≤ 640px), the view MUST always render responsive cards (`grid-cols-1 sm:hidden gap-3`), never forcing horizontal table scrolling on small touchscreens.
+
+### 6. Strict Ban on Table White Backgrounds (Transparent Industrial Tables)
+Tables must NEVER have `bg-white` on the wrapper, table, or body:
+- **Container:** `border border-neutral-300 overflow-x-auto bg-transparent`
+- **Thead:** `border-b border-neutral-300 bg-neutral-200/50 text-neutral-600 font-bold uppercase tracking-wider text-[10px]`
+- **Tbody:** `divide-y divide-neutral-300`
+- **Rows (Tr):** `hover:bg-neutral-200/40 cursor-pointer transition-colors`
+- **Numeric & Plates:** Monospace tabular numbers `font-mono tabular-nums` and bordered plate chips `px-2 py-0.5 font-mono font-bold text-xs bg-neutral-50 border border-neutral-300 text-neutral-900`.
+
+### 7. Translucent Queue Cards & Direction Indicators
+- **Translucent Card Surface:** Cards in queues and workbenches must use `bg-white/40 border border-neutral-300 hover:border-neutral-900 transition-all` rather than stark opaque white, blending harmoniously with the `#F4F5F7` mist canvas.
+- **Direction Badging Standard:**
+  - **Inbound Biomass RM:** `border border-emerald-300 bg-emerald-50 text-[#047857] text-[10px] font-bold uppercase px-2 py-0.5`
+  - **Outbound Dispatch FG:** `border border-neutral-300 bg-[#18181B] text-white text-[10px] font-bold uppercase px-2 py-0.5`
+
 ---
 
 ## 🎨 CRITICAL DESIGN RULE
@@ -155,6 +176,7 @@ If something is ambiguous in the design image, ask for clarification rather than
 
 ### DON'T:
 - ❌ Do NOT run lint checks, build checks, or type checks after every step. Only run checks when explicitly asked or at the end of a complete feature.
+- ❌ Do NOT commit or push to Git after every step. Only commit and push when a full feature or milestone is completed, or when explicitly requested by the user.
 - ❌ Do NOT use placeholder images — generate real assets using the image generation tool when needed
 - ❌ Do NOT create basic/minimal UIs or dumbed-down kiosk tile grids — every screen and component must look premium and operational
 - ❌ Do NOT clutter primary data entry forms with decorative KPI cards that cause unnecessary vertical scrolling

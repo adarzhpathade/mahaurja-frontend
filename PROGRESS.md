@@ -1,7 +1,7 @@
 # 📊 MAHAURJA – Project Progress Tracker
 
-> **Last Updated:** 03 Oct 2026, 17:30 IST
-> **Status:** 🟡 In Progress (Gate Complete, Weighbridge Next)
+> **Last Updated:** 04 Oct 2026, 01:05 IST
+> **Status:** 🟢 Gate & Weighbridge Modules Complete · UI Standards & Registry Codified · QC Lab Next
 
 ---
 
@@ -10,18 +10,18 @@
 | Phase | Status | Progress |
 |---|---|---|
 | Project Setup (Next.js, Tailwind v4, Motion, Lenis) | 🟢 Complete | 100% |
-| Design System & Shared Components | 🟡 In Progress | 60% |
+| Design System & Shared Components (Registry & Standards) | 🟢 Complete | 85% |
 | Auth (Login / Forgot Password) | 🔴 Not Started | 0% |
 | Role 1 — Admin / Super Admin | 🔴 Not Started | 0% |
 | Role 2 — Gate / Security Operator | 🟢 Complete | 100% |
-| Role 3 — Weighbridge Operator | 🔴 Not Started | 0% |
-| Role 4 — QC / Lab Technician | 🔴 Not Started | 0% |
+| Role 3 — Weighbridge Operator | 🟢 Complete | 100% |
+| Role 4 — QC / Lab Technician | 🟡 Next Up | 0% |
 | Role 5 — Production Supervisor | 🔴 Not Started | 0% |
 | Role 6 — Warehouse / Inventory Manager | 🔴 Not Started | 0% |
 | Role 7 — Sales / Dispatch Manager | 🔴 Not Started | 0% |
 | Role 8 — Management / Plant Director | 🔴 Not Started | 0% |
 
-**Legend:** 🔴 Not Started · 🟡 In Progress · 🟢 Complete · 🔵 Under Review
+**Legend:** 🔴 Not Started · 🟡 In Progress / Next Up · 🟢 Complete · 🔵 Under Review
 
 ---
 
@@ -149,12 +149,17 @@
 - [x] Switzer typography with tabular numbers
 - [x] Direct navigation link to Outward Exit Desk for ready-to-clear vehicles
 
-### Gate Entries (`gate/entries/` & `gate/gate-entry-modal.tsx`)
+### Gate Entries (`gate/entries/`, `/gate/entry` & `gate/gate-entry.tsx`)
+- [x] Dedicated Vehicle Gate Entry Console (`/gate/entry`) with bold industrial typography
+- [x] Zero-scroll desktop experience (< 650px total height, 3-column field grid)
+- [x] Native transparent background on mobile viewports (≤ 640px)
+- [x] Responsive direction switcher (`Inbound RM` vs `Outbound FG`)
 - [x] RM Gate Entry form (vehicle, driver, supplier, material, PO, expected weight)
 - [x] Dispatch Gate Entry form (vehicle, driver, customer, SO)
 - [x] Fast-track prefill support from expected arrivals queue
 - [x] Auto-generated Gate Entry No (`RM-GATE-261003-XXX`) following spec pattern
-- [x] Direction toggling (Inbound RM / Outbound FG) with contextual material & party selectors
+- [x] Tactile Security Inspection & Remarks preset chips with generous touch padding
+- [x] Plain English UI vocabulary (replaced jargon across forms)
 - [x] Reactive state integration: newly created passes automatically enter live fleet queue
 
 ### Vehicle Exit Desk (`gate/exits/` & `gate/gate-exit.tsx`)
@@ -198,16 +203,33 @@
 
 ## Phase 5 — Role 3: Weighbridge Operator
 
-### Weighments (`weighbridge/weighments/`)
-- [ ] Gross weighment entry (vehicle, weight, photo upload)
-- [ ] Tare weighment entry
-- [ ] Auto net-weight calculation display
-- [ ] Weighment list (today's records)
-- [ ] Weighment detail view
+### Weighbridge Home & Operations Console (`weighbridge/weighbridge-home.tsx`)
+- [x] Dual-platform live monitoring console: WB-01 (Inbound RM Gross/Tare) and WB-02 (Outbound FG Tare/Gross)
+- [x] Live digital scale indicator telemetry with Rice Lake / Avery high-contrast CRT styling
+- [x] Real-time stability beacon (`STABLE` in bio-emerald vs `IN_MOTION` in amber pulsing)
+- [x] Dynamic axle load distribution graphic with individual load cell readouts
+- [x] Tare zeroing and calibration override controls
+- [x] Platform occupancy cards with live vehicle assignment and pass tracking
+- [x] Quick-action hotbar: Capture Gross, Capture Tare, Manual Calibration, Print Slip
 
-### Slips (`weighbridge/slips/`)
-- [ ] Weighbridge slip generation (printable)
-- [ ] Slip history & reprint
+### Weighment Capture Modal (`weighbridge/weighment-capture-modal.tsx`)
+- [x] Gross weighment entry with digital scale sync and camera snapshot
+- [x] Tare weighment entry with automated gross-tare reconciliation
+- [x] Strictly automated non-editable Net Weight calculation (`Net = |Gross - Tare|`)
+- [x] Tolerance limit check against expected PO/SO quantity (warning on > 5% variance)
+- [x] Automatic vehicle state progression (Inbound: Gate -> Gross Weighed -> QC Pending; Outbound: Tare Weighed -> Loading -> Gross Weighed -> Cleared)
+
+### Official Weighbridge Slips (`weighbridge/weighbridge-slip-modal.tsx`)
+- [x] Printable legal metrology weight certificate with Bharat Industrial & Renewables LLP header
+- [x] Dual-stage weighment audit matrix (Gross, Tare, Net weights with exact operator timestamps)
+- [x] Barcode identifier strip and QR tracking tag
+- [x] Metrology legal declaration and weighbridge operator digital signature block
+- [x] Clean print stylesheets (`@media print`) for thermal receipt and laser A4 printers
+
+### Weighment Records & History
+- [x] Real-time searchable and filterable weighment log
+- [x] Filter by Direction (Inbound RM / Outbound FG), Platform (WB-01 / WB-02), and Status
+- [x] 1-Click slip reprint and vehicle inspection drawer linkage
 
 ---
 
@@ -360,15 +382,15 @@
 
 | Milestone | Target Date | Status |
 |---|---|---|
-| Project setup & design system complete | TBD | 🔴 |
-| Auth + Admin panel complete | TBD | 🔴 |
-| Gate + Weighbridge complete | TBD | 🔴 |
-| QC + Inventory complete | TBD | 🔴 |
-| Production module complete | TBD | 🔴 |
-| Sales & Dispatch complete | TBD | 🔴 |
-| Management Dashboard complete | TBD | 🔴 |
-| Full integration & polish | TBD | 🔴 |
-| **🚀 Launch Ready** | TBD | 🔴 |
+| Project setup & design system complete | 03 Oct 2026 | 🟢 Complete |
+| Gate + Weighbridge complete | 04 Oct 2026 | 🟢 Complete |
+| QC + Inventory complete | TBD | 🟡 Next Up |
+| Production module complete | TBD | 🔴 Planned |
+| Sales & Dispatch complete | TBD | 🔴 Planned |
+| Management Dashboard complete | TBD | 🔴 Planned |
+| Auth + Admin panel complete | TBD | 🔴 Planned |
+| Full integration & polish | TBD | 🔴 Planned |
+| **🚀 Launch Ready** | TBD | 🔴 Planned |
 
 ---
 

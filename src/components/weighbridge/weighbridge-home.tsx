@@ -3,34 +3,22 @@
 import React, { useState } from "react";
 import {
   Scale,
-  Activity,
+  Search,
+  Plus,
+  Printer,
   Truck,
   ArrowRight,
-  Printer,
-  Search,
-  CheckCircle2,
-  Clock,
-  RotateCcw,
-  Zap,
-  Filter,
-  FileText,
-  FileCheck,
-  Eye,
-  Plus,
-  TrendingUp,
 } from "lucide-react";
-import { motion, AnimatePresence } from "motion/react";
 import { useWeighbridge } from "@/lib/context/weighbridge-context";
 import { ScaleIndicator } from "./scale-indicator";
-import { PlatformCard } from "./platform-card";
 import { WeighmentCaptureModal } from "./weighment-capture-modal";
 import { WeighbridgeSlipModal } from "./weighbridge-slip-modal";
-import { WeighbridgeRecord, WeighmentType } from "@/lib/types/weighbridge";
+import { WeighmentType, PlatformId } from "@/lib/types/weighbridge";
 import { INITIAL_GATE_VEHICLES } from "@/lib/data/mock-gate-vehicles";
+import { GateVehicle } from "@/lib/types/gate";
 
 export function WeighbridgeHome() {
   const {
-    platforms,
     activePlatformId,
     setActivePlatformId,
     records,
@@ -46,610 +34,553 @@ export function WeighbridgeHome() {
     loadVehicleOnScale,
   } = useWeighbridge();
 
-  const [activeQueueTab, setActiveQueueTab] = useState<
-    "FIRST_QUEUE" | "SECOND_QUEUE" | "COMPLETED_SLIPS"
-  >("FIRST_QUEUE");
+  const [filterType, setFilterType] = useState<"ALL" | "FIRST" | "SECOND">("ALL");
+  const [deckFilter, setDeckFilter] = useState<"ALL" | "INBOUND_RM" | "OUTBOUND_DISPATCH">("ALL");
   const [searchQuery, setSearchQuery] = useState("");
+  const [viewMode, setViewMode] = useState<"CARDS" | "TABLE">("CARDS");
 
-  // Inbound & Outbound vehicles waiting for 1st weighment
+  // Inbound & Outbound vehicles waiting for 1st weighment (Gross for RM, Tare for FG)
   const firstWeighmentQueue = INITIAL_GATE_VEHICLES.filter(
     (v) =>
-      v.stage === "WAITING_WEIGHMENT" ||
-      (v.direction === "OUTBOUND_DISPATCH" && !v.grossWeightMT)
+      (v.direction === "INBOUND_RM" && (!v.grossWeightMT || v.stage === "WAITING_WEIGHMENT")) ||
+      (v.direction === "OUTBOUND_DISPATCH" && !v.tareWeightMT)
   );
 
-  // Inbound vehicles that have Gross and are now ready for Tare
+  // Vehicles waiting for 2nd weighment (Tare for unloaded RM, Gross for loaded FG)
   const secondWeighmentQueue = INITIAL_GATE_VEHICLES.filter(
-    (v) => v.stage === "UNLOADING" || v.stage === "TARE_WEIGHED" || v.grossWeightMT
+    (v) =>
+      (v.direction === "INBOUND_RM" &&
+        v.grossWeightMT &&
+        (!v.tareWeightMT || v.stage === "UNLOADING" || v.stage === "TARE_WEIGHED")) ||
+      (v.direction === "OUTBOUND_DISPATCH" && v.tareWeightMT && !v.grossWeightMT)
   );
 
-  // Filter completed slips
-  const completedRecords = records.filter((r) => {
-    if (!searchQuery) return true;
-    const q = searchQuery.toLowerCase();
-    return (
-      r.slipNo.toLowerCase().includes(q) ||
-      r.vehicleNo.toLowerCase().includes(q) ||
-      r.materialName.toLowerCase().includes(q) ||
-      r.supplierOrCustomer.toLowerCase().includes(q)
-    );
-  });
+  // Filtered queue based on selected stage tab, deck filter, and search query
+  const displayedQueue = (
+    filterType === "FIRST"
+      ? firstWeighmentQueue
+      : filterType === "SECOND"
+      ? secondWeighmentQueue
+      : [...firstWeighmentQueue, ...secondWeighmentQueue]
+  )
+    .filter((v) => (deckFilter === "ALL" ? true : v.direction === deckFilter))
+    .filter((v) => {
+      if (!searchQuery) return true;
+      const q = searchQuery.toLowerCase();
+      return (
+        v.vehicleNo.toLowerCase().includes(q) ||
+        v.gateEntryNo.toLowerCase().includes(q) ||
+        v.materialName.toLowerCase().includes(q) ||
+        v.supplierOrCustomer.toLowerCase().includes(q) ||
+        v.driverName.toLowerCase().includes(q)
+      );
+    });
 
-  const handlePositionOnScale = (vehicle: any, type: WeighmentType) => {
-    const targetPlatform = type.startsWith("INBOUND") ? "WB-01" : "WB-02";
+  // Handler to position vehicle on scale and prompt capture in 1 click
+  const handlePositionAndWeigh = (v: GateVehicle) => {
+    const isFirstWeighment = !v.grossWeightMT;
+    let targetType: WeighmentType;
+    let targetPlatform: PlatformId;
+
+    if (v.direction === "INBOUND_RM") {
+      targetPlatform = "WB-01";
+      targetType = isFirstWeighment ? "INBOUND_GROSS" : "INBOUND_TARE";
+    } else {
+      targetPlatform = "WB-02";
+      targetType = isFirstWeighment ? "OUTBOUND_TARE" : "OUTBOUND_GROSS";
+    }
+
     setActivePlatformId(targetPlatform);
-    loadVehicleOnScale(targetPlatform, vehicle);
+    loadVehicleOnScale(targetPlatform, v);
     openCaptureModal({
-      vehicle,
-      weighmentType: type,
+      vehicle: v,
+      weighmentType: targetType,
       platformId: targetPlatform,
     });
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6 select-none">
-      {/* Station Title & Operations Hotbar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white border border-neutral-300 p-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 bg-[#059669]" />
-            <span className="text-[11px] font-mono uppercase font-bold tracking-wider text-neutral-500">
-              Weighment Station 01 & 02 · Operational Post
-            </span>
-          </div>
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-neutral-900 mt-1">
-            Dual-Platform Weighbridge Terminal
-          </h1>
-          <p className="text-xs text-neutral-600 mt-0.5">
-            Real-time computerized weight capture, automatic Net computation, and legal metrology slip generation.
-          </p>
-        </div>
-
-        {/* Action Controls */}
-        <div className="flex items-center gap-2 flex-wrap">
-          <button
-            type="button"
-            onClick={() =>
-              openCaptureModal({
-                weighmentType: "INBOUND_GROSS",
-                platformId: activePlatformId,
-              })
-            }
-            className="px-3.5 py-2 text-xs font-bold uppercase tracking-wider bg-[#059669] hover:bg-[#047857] text-white border border-[#10B981] flex items-center gap-1.5 cursor-pointer shadow-xs transition-colors active:scale-95"
-            style={{ borderRadius: 0 }}
-          >
-            <Plus className="w-3.5 h-3.5" />
-            <span>Manual Weight Entry</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              if (records.length > 0) openSlipModal(records[0]);
-            }}
-            className="px-3.5 py-2 text-xs font-bold uppercase tracking-wider bg-white hover:bg-neutral-50 text-neutral-800 border border-neutral-300 flex items-center gap-1.5 cursor-pointer transition-colors"
-            style={{ borderRadius: 0 }}
-          >
-            <Printer className="w-3.5 h-3.5 text-neutral-600" />
-            <span>Reprint Last Slip</span>
-          </button>
-        </div>
+    <div className="w-full space-y-8 sm:space-y-10 select-none">
+      {/* ========================================================================= */}
+      {/* 1. COMPACT COMMAND HEADER (EXACT GATE DASHBOARD STYLE)                    */}
+      {/* ========================================================================= */}
+      <div className="border-b border-neutral-300 pb-4 sm:pb-5">
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-neutral-900">
+          Weighbridge Operations
+        </h1>
       </div>
 
-      {/* KPI Metric Strip (80% grays, 15% white, 5% bio-emerald) */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {/* Metric 1 */}
+      {/* ========================================================================= */}
+      {/* 2. REAL-TIME OPERATIONAL METRICS (4 CLICKABLE CARDS - GATE STYLE)         */}
+      {/* ========================================================================= */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-5">
+        {/* Metric 1: At Weighbridge */}
         <div
-          className="bg-white border border-neutral-300 p-4 space-y-1"
-          style={{ borderRadius: 0 }}
+          onClick={() => setFilterType("ALL")}
+          className="border border-neutral-300 p-4 sm:p-5 hover:border-neutral-900 transition-colors cursor-pointer group bg-white flex flex-col justify-between"
         >
-          <div className="flex items-center justify-between text-neutral-500">
-            <span className="text-[10px] uppercase font-bold tracking-wider">
-              Today's Net Tonnage
+          <span className="text-[11px] sm:text-xs font-bold text-neutral-500 uppercase tracking-wider group-hover:text-neutral-900 transition-colors truncate">
+            At Weighbridge
+          </span>
+          <div className="mt-3 flex items-baseline gap-1.5 sm:gap-2">
+            <span className="text-2xl sm:text-3xl font-black tracking-tight text-neutral-900 tabular-nums">
+              {firstWeighmentQueue.length + secondWeighmentQueue.length}
             </span>
-            <TrendingUp className="w-3.5 h-3.5 text-[#059669]" />
-          </div>
-          <div className="flex items-baseline gap-1.5">
-            <span className="font-mono text-2xl sm:text-3xl font-black text-neutral-900">
-              {stats.todayNetTonnageMT.toFixed(1)}
-            </span>
-            <span className="font-mono text-xs font-bold text-neutral-500">MT</span>
-          </div>
-          <div className="text-[11px] text-neutral-500">
-            Reconciled across {stats.todayTotalSlips} completed dispatches
+            <span className="text-xs sm:text-sm text-neutral-400 font-medium">Vehicles</span>
           </div>
         </div>
 
-        {/* Metric 2 */}
+        {/* Metric 2: 1st Gross Weight */}
         <div
-          className="bg-white border border-neutral-300 p-4 space-y-1"
-          style={{ borderRadius: 0 }}
+          onClick={() => setFilterType("FIRST")}
+          className="border border-neutral-300 p-4 sm:p-5 hover:border-neutral-900 transition-colors cursor-pointer group bg-white flex flex-col justify-between"
         >
-          <div className="flex items-center justify-between text-neutral-500">
-            <span className="text-[10px] uppercase font-bold tracking-wider">
-              1st Weighments Completed
+          <span className="text-[11px] sm:text-xs font-bold text-neutral-500 uppercase tracking-wider group-hover:text-neutral-900 transition-colors truncate">
+            1st Gross Weight
+          </span>
+          <div className="mt-3 flex items-baseline gap-1.5 sm:gap-2">
+            <span className="text-2xl sm:text-3xl font-black tracking-tight text-neutral-900 tabular-nums">
+              {firstWeighmentQueue.length}
             </span>
-            <CheckCircle2 className="w-3.5 h-3.5 text-neutral-700" />
-          </div>
-          <div className="flex items-baseline gap-1.5">
-            <span className="font-mono text-2xl sm:text-3xl font-black text-neutral-900">
-              {stats.inboundGrossWeighed + stats.outboundTareWeighed}
-            </span>
-            <span className="font-mono text-xs font-bold text-neutral-500">Vehicles</span>
-          </div>
-          <div className="text-[11px] text-neutral-500">
-            {stats.inboundGrossWeighed} Gross RM · {stats.outboundTareWeighed} Tare FG
+            <span className="text-xs sm:text-sm text-neutral-400 font-medium">Vehicles</span>
           </div>
         </div>
 
-        {/* Metric 3 */}
+        {/* Metric 3: 2nd Tare & Net */}
         <div
-          className="bg-white border border-neutral-300 p-4 space-y-1"
-          style={{ borderRadius: 0 }}
+          onClick={() => setFilterType("SECOND")}
+          className="border border-neutral-300 p-4 sm:p-5 hover:border-neutral-900 transition-colors cursor-pointer group bg-white flex flex-col justify-between"
         >
-          <div className="flex items-center justify-between text-neutral-500">
-            <span className="text-[10px] uppercase font-bold tracking-wider">
-              Pending 2nd Tare Weighment
+          <span className="text-[11px] sm:text-xs font-bold text-neutral-500 uppercase tracking-wider group-hover:text-neutral-900 transition-colors truncate">
+            2nd Tare & Net
+          </span>
+          <div className="mt-3 flex items-baseline gap-1.5 sm:gap-2">
+            <span className="text-2xl sm:text-3xl font-black tracking-tight text-neutral-900 tabular-nums">
+              {secondWeighmentQueue.length}
             </span>
-            <Clock className="w-3.5 h-3.5 text-amber-600" />
-          </div>
-          <div className="flex items-baseline gap-1.5">
-            <span className="font-mono text-2xl sm:text-3xl font-black text-amber-700">
-              {stats.pendingSecondWeighment}
-            </span>
-            <span className="font-mono text-xs font-bold text-neutral-500">Unloading</span>
-          </div>
-          <div className="text-[11px] text-neutral-500">
-            Trucks currently emptying at bays
+            <span className="text-xs sm:text-sm text-neutral-400 font-medium">Vehicles</span>
           </div>
         </div>
 
-        {/* Metric 4 */}
+        {/* Metric 4: Completed Today */}
         <div
-          className="bg-white border border-neutral-300 p-4 space-y-1"
-          style={{ borderRadius: 0 }}
+          onClick={() => {
+            if (records.length > 0) openSlipModal(records[0]);
+          }}
+          className="border border-neutral-300 p-4 sm:p-5 hover:border-neutral-900 transition-colors cursor-pointer group bg-white flex flex-col justify-between"
         >
-          <div className="flex items-center justify-between text-neutral-500">
-            <span className="text-[10px] uppercase font-bold tracking-wider">
-              Scale Calibration Proof
+          <span className="text-[11px] sm:text-xs font-bold text-neutral-500 uppercase tracking-wider group-hover:text-neutral-900 transition-colors truncate">
+            Completed Today
+          </span>
+          <div className="mt-3 flex items-baseline gap-1.5 sm:gap-2">
+            <span className="text-2xl sm:text-3xl font-black tracking-tight text-neutral-900 tabular-nums">
+              {stats.todayTotalSlips}
             </span>
-            <span className="w-2 h-2 rounded-full bg-emerald-500" />
-          </div>
-          <div className="font-mono text-xl sm:text-2xl font-black text-[#047857]">
-            LEGAL OK
-          </div>
-          <div className="text-[11px] text-neutral-500">
-            Certified to 60.00 MT · Next due 15 Oct
+            <span className="text-xs sm:text-sm text-neutral-400 font-medium">
+              Slips ({stats.todayNetTonnageMT.toFixed(0)} MT)
+            </span>
           </div>
         </div>
       </div>
 
-      {/* Main Dual-Deck Operations: Indicator & Platform Cards */}
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
-        {/* Digital Scale Indicator (Left 8 cols) */}
-        <div className="xl:col-span-8">
-          <ScaleIndicator
-            onCaptureClick={() =>
-              openCaptureModal({
-                weighmentType:
-                  activePlatformId === "WB-01" ? "INBOUND_GROSS" : "OUTBOUND_GROSS",
-                platformId: activePlatformId,
-              })
-            }
-          />
-        </div>
+      {/* ========================================================================= */}
+      {/* 3. QUICK ACTION BUTTONS (EXACT GATE DASHBOARD STYLE)                      */}
+      {/* ========================================================================= */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 w-full">
+        <button
+          type="button"
+          onClick={() => {
+            if (records.length > 0) openSlipModal(records[0]);
+          }}
+          className="h-11 sm:h-10 px-4 border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-800 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors cursor-pointer w-full sm:w-auto"
+        >
+          <Printer className="w-4 h-4 text-neutral-600" />
+          <span>Reprint Last Slip</span>
+        </button>
 
-        {/* Side-by-side Dual Platforms Overview (Right 4 cols) */}
-        <div className="xl:col-span-4 flex flex-col gap-3">
-          <div className="text-[11px] font-bold uppercase tracking-wider text-neutral-500 px-1 flex items-center justify-between">
-            <span>Physical Platforms (60 MT Decks)</span>
-            <span className="font-mono text-[10px]">2 ONLINE</span>
-          </div>
-
-          {platforms.map((platform) => (
-            <PlatformCard
-              key={platform.id}
-              platform={platform}
-              isActive={platform.id === activePlatformId}
-              onSelect={(id) => setActivePlatformId(id)}
-            />
-          ))}
-        </div>
+        <button
+          type="button"
+          onClick={() =>
+            openCaptureModal({
+              weighmentType:
+                activePlatformId === "WB-01" ? "INBOUND_GROSS" : "OUTBOUND_GROSS",
+              platformId: activePlatformId,
+            })
+          }
+          className="h-11 sm:h-10 px-5 bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs w-full sm:w-auto"
+        >
+          <Plus className="w-4 h-4" strokeWidth={2.5} />
+          <span>Manual Weight Entry</span>
+        </button>
       </div>
 
-      {/* Operations Queues & Slips Registry Section */}
-      <div
-        className="bg-white border border-neutral-300 p-4 space-y-4"
-        style={{ borderRadius: 0 }}
-      >
-        {/* Navigation Tabs for Queue */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-neutral-200 pb-3">
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 max-w-full">
-            <button
-              type="button"
-              onClick={() => setActiveQueueTab("FIRST_QUEUE")}
-              className={`px-3 py-2 text-xs font-bold uppercase tracking-wider border cursor-pointer transition-colors flex items-center gap-2 shrink-0 whitespace-nowrap ${
-                activeQueueTab === "FIRST_QUEUE"
-                  ? "bg-[#18181B] text-white border-[#18181B]"
-                  : "bg-white text-neutral-700 border-neutral-300 hover:bg-neutral-50"
-              }`}
-              style={{ borderRadius: 0 }}
-            >
-              <span>1st Weighment Queue</span>
-              <span
-                className={`px-1.5 py-0.2 text-[10px] font-bold ${
-                  activeQueueTab === "FIRST_QUEUE"
-                    ? "bg-[#059669] text-white"
-                    : "bg-neutral-200 text-neutral-800"
-                }`}
-              >
-                {firstWeighmentQueue.length}
-              </span>
-            </button>
+      {/* ========================================================================= */}
+      {/* 4. LIVE SCALE COCKPIT (CLEAN INDUSTRIAL DESIGN)                           */}
+      {/* ========================================================================= */}
+      <ScaleIndicator
+        onCaptureClick={() =>
+          openCaptureModal({
+            weighmentType:
+              activePlatformId === "WB-01" ? "INBOUND_GROSS" : "OUTBOUND_GROSS",
+            platformId: activePlatformId,
+          })
+        }
+      />
 
-            <button
-              type="button"
-              onClick={() => setActiveQueueTab("SECOND_QUEUE")}
-              className={`px-3 py-2 text-xs font-bold uppercase tracking-wider border cursor-pointer transition-colors flex items-center gap-2 shrink-0 whitespace-nowrap ${
-                activeQueueTab === "SECOND_QUEUE"
-                  ? "bg-[#18181B] text-white border-[#18181B]"
-                  : "bg-white text-neutral-700 border-neutral-300 hover:bg-neutral-50"
-              }`}
-              style={{ borderRadius: 0 }}
-            >
-              <span>2nd Tare Weighment (Exit)</span>
-              <span
-                className={`px-1.5 py-0.2 text-[10px] font-bold ${
-                  activeQueueTab === "SECOND_QUEUE"
-                    ? "bg-[#059669] text-white"
-                    : "bg-neutral-200 text-neutral-800"
-                }`}
-              >
-                {secondWeighmentQueue.length}
-              </span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveQueueTab("COMPLETED_SLIPS")}
-              className={`px-3 py-2 text-xs font-bold uppercase tracking-wider border cursor-pointer transition-colors flex items-center gap-2 shrink-0 whitespace-nowrap ${
-                activeQueueTab === "COMPLETED_SLIPS"
-                  ? "bg-[#18181B] text-white border-[#18181B]"
-                  : "bg-white text-neutral-700 border-neutral-300 hover:bg-neutral-50"
-              }`}
-              style={{ borderRadius: 0 }}
-            >
-              <span>Official Slips Archive</span>
-              <span
-                className={`px-1.5 py-0.2 text-[10px] font-bold ${
-                  activeQueueTab === "COMPLETED_SLIPS"
-                    ? "bg-[#059669] text-white"
-                    : "bg-neutral-200 text-neutral-800"
-                }`}
-              >
-                {records.length}
-              </span>
-            </button>
+      {/* ========================================================================= */}
+      {/* 5. WAITING VEHICLES WORKBENCH (EXACT GATE UI PATTERN)                     */}
+      {/* ========================================================================= */}
+      <div className="space-y-4 pt-2">
+        {/* Section Heading (Matching Gate Expected Arrivals) */}
+        <div className="flex items-center justify-between border-b border-neutral-300 pb-3">
+          <div className="flex items-center gap-2.5">
+            <Truck className="w-5 h-5 text-neutral-800 shrink-0" />
+            <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-neutral-900">
+              Waiting Vehicles
+            </h2>
+            <span className="text-[11px] sm:text-xs font-bold font-mono px-2 py-0.5 bg-neutral-200 border border-neutral-300 text-neutral-800">
+              {displayedQueue.length}
+            </span>
           </div>
 
-          {/* Quick Search */}
-          <div className="relative flex-1 sm:max-w-xs">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
-            <input
-              type="text"
-              placeholder="Search vehicle, slip, supplier..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-11 sm:h-10 pl-9.5 pr-3 text-sm bg-white border border-neutral-300 text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-[#059669] transition-colors"
-              style={{ borderRadius: 0 }}
-            />
+          {/* View Mode Toggle (PC Only) */}
+          <div className="hidden sm:inline-flex border border-neutral-300 divide-x divide-neutral-300 text-xs shrink-0 h-10">
+            <button
+              type="button"
+              onClick={() => setViewMode("CARDS")}
+              className={`px-3 py-1.5 transition-colors cursor-pointer flex items-center ${
+                viewMode === "CARDS"
+                  ? "bg-[#18181B] text-white font-semibold"
+                  : "bg-neutral-200/50 text-neutral-700 hover:bg-neutral-200"
+              }`}
+            >
+              Cards
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode("TABLE")}
+              className={`px-3 py-1.5 transition-colors cursor-pointer flex items-center ${
+                viewMode === "TABLE"
+                  ? "bg-[#18181B] text-white font-semibold"
+                  : "bg-neutral-200/50 text-neutral-700 hover:bg-neutral-200"
+              }`}
+            >
+              Table
+            </button>
           </div>
         </div>
 
-        {/* TAB 1: 1st Weighment Queue */}
-        {activeQueueTab === "FIRST_QUEUE" && (
-          <div className="space-y-3">
-            {/* Desktop Table View */}
-            <div className="hidden md:block overflow-x-auto border border-neutral-300">
-              <table className="w-full text-left text-xs border-collapse">
-                <thead>
-                  <tr className="bg-[#F8F9FA] text-neutral-700 font-semibold border-b border-neutral-300">
-                    <th className="p-3">Gate Pass / Entry</th>
-                    <th className="p-3">Vehicle Details</th>
-                    <th className="p-3">Commodity & Supplier</th>
-                    <th className="p-3">Challan MT</th>
-                    <th className="p-3">Target Platform</th>
-                    <th className="p-3">Stage Status</th>
-                    <th className="p-3 text-right">Scale Action</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-neutral-200">
-                  {firstWeighmentQueue.map((v) => (
-                    <tr key={v.id} className="hover:bg-neutral-50 transition-colors">
-                      <td className="p-3 font-mono">
-                        <div className="font-bold text-neutral-900">{v.gateEntryNo}</div>
-                        <div className="text-[11px] text-neutral-500">In: {v.arrivalTime}</div>
-                      </td>
-                      <td className="p-3">
-                        <div className="font-mono font-bold text-sm text-neutral-900">
-                          {v.vehicleNo}
-                        </div>
-                        <div className="text-[11px] text-neutral-500">
-                          {v.driverName} · {v.transporter}
-                        </div>
-                      </td>
-                      <td className="p-3">
-                        <div className="font-semibold text-neutral-900">{v.materialName}</div>
-                        <div className="text-[11px] text-neutral-500 truncate max-w-[200px]">
-                          {v.supplierOrCustomer}
-                        </div>
-                      </td>
-                      <td className="p-3 font-mono font-bold text-neutral-800">
-                        {v.declaredWeightMT ? `${v.declaredWeightMT.toFixed(2)} MT` : "—"}
-                      </td>
-                      <td className="p-3">
-                        <span className="px-2 py-0.5 text-[10px] font-bold font-mono uppercase bg-neutral-100 border border-neutral-300 text-neutral-800">
-                          {v.direction === "INBOUND_RM" ? "WB-01 (IN)" : "WB-02 (OUT)"}
-                        </span>
-                      </td>
-                      <td className="p-3">
-                        <span className="px-2 py-0.5 text-[10px] font-bold uppercase bg-amber-50 text-amber-800 border border-amber-200">
-                          Awaiting Weighment
-                        </span>
-                      </td>
-                      <td className="p-3 text-right">
-                        <button
-                          type="button"
-                          onClick={() =>
-                            handlePositionOnScale(
-                              v,
-                              v.direction === "INBOUND_RM"
-                                ? "INBOUND_GROSS"
-                                : "OUTBOUND_TARE"
-                            )
-                          }
-                          className="px-3 py-1.5 text-xs font-bold uppercase tracking-wider bg-[#18181B] hover:bg-neutral-800 text-white flex items-center gap-1.5 ml-auto cursor-pointer transition-colors active:scale-95"
-                          style={{ borderRadius: 0 }}
-                        >
-                          <Scale className="w-3.5 h-3.5 text-emerald-400" />
-                          <span>Weigh Now</span>
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+        {/* Content container - borderless on mobile, bordered on PC (Gate rule) */}
+        <div className="border-0 p-0 bg-transparent sm:border sm:border-neutral-300 sm:p-6 sm:bg-white/30 space-y-4 sm:space-y-5">
+          {/* Subheader & Search / Filter Controls */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pb-3 border-b border-neutral-300">
+            {/* Search Input */}
+            <div className="relative w-full flex-1 sm:max-w-md">
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
+              <input
+                type="text"
+                placeholder="Search plate, supplier, pass, material..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full h-11 sm:h-10 pl-9.5 pr-3 text-sm bg-white border border-neutral-300 text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-[#059669] transition-colors"
+              />
             </div>
 
-            {/* Mobile Touch Cards View */}
-            <div className="md:hidden space-y-2.5">
-              {firstWeighmentQueue.map((v) => (
-                <div
-                  key={v.id}
-                  className="bg-neutral-50 border border-neutral-300 p-3.5 space-y-2.5"
-                  style={{ borderRadius: 0 }}
+            {/* Filter Tabs */}
+            <div className="flex items-center border border-neutral-300 divide-x divide-neutral-300 text-xs overflow-x-auto no-scrollbar shrink-0 h-10 bg-white">
+              <button
+                type="button"
+                onClick={() => setFilterType("ALL")}
+                className={`h-full px-3.5 cursor-pointer transition-colors whitespace-nowrap flex items-center gap-1.5 ${
+                  filterType === "ALL"
+                    ? "bg-[#18181B] text-white font-semibold"
+                    : "bg-white text-neutral-700 hover:bg-neutral-100"
+                }`}
+              >
+                <span>All</span>
+                <span
+                  className={`px-1.5 py-0.2 text-[10px] font-bold ${
+                    filterType === "ALL"
+                      ? "bg-[#059669] text-white"
+                      : "bg-neutral-200 text-neutral-700"
+                  }`}
                 >
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono font-bold text-sm text-neutral-900">
-                      {v.vehicleNo}
-                    </span>
-                    <span className="px-2 py-0.5 text-[10px] font-bold font-mono uppercase bg-neutral-200 text-neutral-800">
-                      {v.direction === "INBOUND_RM" ? "WB-01" : "WB-02"}
-                    </span>
-                  </div>
-
-                  <div className="text-xs space-y-1">
-                    <div className="font-semibold text-neutral-800">{v.materialName}</div>
-                    <div className="text-[11px] text-neutral-600 truncate">
-                      {v.supplierOrCustomer} · {v.driverName}
-                    </div>
-                    <div className="flex items-center justify-between pt-1 text-[11px] font-mono text-neutral-500">
-                      <span>Pass: {v.gateEntryNo}</span>
-                      <span>Challan: {v.declaredWeightMT} MT</span>
-                    </div>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() =>
-                      handlePositionOnScale(
-                        v,
-                        v.direction === "INBOUND_RM"
-                          ? "INBOUND_GROSS"
-                          : "OUTBOUND_TARE"
-                      )
-                    }
-                    className="w-full py-2.5 text-xs font-bold uppercase tracking-wider bg-[#18181B] text-white flex items-center justify-center gap-2 cursor-pointer"
-                    style={{ borderRadius: 0 }}
-                  >
-                    <Scale className="w-3.5 h-3.5 text-emerald-400" />
-                    <span>Weigh on {v.direction === "INBOUND_RM" ? "WB-01" : "WB-02"}</span>
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* TAB 2: 2nd Tare Weighment Queue */}
-        {activeQueueTab === "SECOND_QUEUE" && (
-          <div className="space-y-3">
-            {/* Desktop Table View */}
-            <div className="hidden md:block overflow-x-auto border border-neutral-300">
-              <table className="w-full text-left text-xs border-collapse">
-                <thead>
-                  <tr className="bg-[#F8F9FA] text-neutral-700 font-semibold border-b border-neutral-300">
-                    <th className="p-3">Gate Pass</th>
-                    <th className="p-3">Vehicle Details</th>
-                    <th className="p-3">Material Unloaded</th>
-                    <th className="p-3 font-mono">1st Gross (MT)</th>
-                    <th className="p-3">Unload Bay</th>
-                    <th className="p-3 text-right">Tare Action</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-neutral-200">
-                  {secondWeighmentQueue.map((v) => (
-                    <tr key={v.id} className="hover:bg-neutral-50 transition-colors">
-                      <td className="p-3 font-mono font-bold text-neutral-900">
-                        {v.gateEntryNo}
-                      </td>
-                      <td className="p-3">
-                        <div className="font-mono font-bold text-sm text-neutral-900">
-                          {v.vehicleNo}
-                        </div>
-                        <div className="text-[11px] text-neutral-500">{v.driverName}</div>
-                      </td>
-                      <td className="p-3">
-                        <div className="font-semibold text-neutral-900">{v.materialName}</div>
-                        <div className="text-[11px] text-neutral-500">
-                          {v.supplierOrCustomer}
-                        </div>
-                      </td>
-                      <td className="p-3 font-mono font-bold text-emerald-700 text-sm">
-                        {v.grossWeightMT ? `${v.grossWeightMT.toFixed(2)} MT` : "42.80 MT"}
-                      </td>
-                      <td className="p-3 text-neutral-600">
-                        {v.assignedLocation || "Yard B - Bay 04"}
-                      </td>
-                      <td className="p-3 text-right">
-                        <button
-                          type="button"
-                          onClick={() =>
-                            handlePositionOnScale(v, "INBOUND_TARE")
-                          }
-                          className="px-3 py-1.5 text-xs font-bold uppercase tracking-wider bg-[#059669] hover:bg-[#047857] text-white flex items-center gap-1.5 ml-auto cursor-pointer transition-colors active:scale-95"
-                          style={{ borderRadius: 0 }}
-                        >
-                          <Scale className="w-3.5 h-3.5" />
-                          <span>Weigh Tare & Compute Net</span>
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Mobile Touch Cards View */}
-            <div className="md:hidden space-y-2.5">
-              {secondWeighmentQueue.map((v) => (
-                <div
-                  key={v.id}
-                  className="bg-neutral-50 border border-neutral-300 p-3.5 space-y-2.5"
-                  style={{ borderRadius: 0 }}
+                  {firstWeighmentQueue.length + secondWeighmentQueue.length}
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setFilterType("FIRST")}
+                className={`h-full px-3.5 cursor-pointer transition-colors whitespace-nowrap flex items-center gap-1.5 ${
+                  filterType === "FIRST"
+                    ? "bg-[#18181B] text-white font-semibold"
+                    : "bg-white text-neutral-700 hover:bg-neutral-100"
+                }`}
+              >
+                <span>1st Gross</span>
+                <span
+                  className={`px-1.5 py-0.2 text-[10px] font-bold ${
+                    filterType === "FIRST"
+                      ? "bg-[#059669] text-white"
+                      : "bg-neutral-200 text-neutral-700"
+                  }`}
                 >
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono font-bold text-sm text-neutral-900">
-                      {v.vehicleNo}
-                    </span>
-                    <span className="font-mono font-bold text-xs text-emerald-700">
-                      Gross: {v.grossWeightMT || 42.8} MT
-                    </span>
-                  </div>
-
-                  <div className="text-xs space-y-1">
-                    <div className="font-semibold text-neutral-800">{v.materialName}</div>
-                    <div className="text-[11px] text-neutral-600 truncate">
-                      {v.supplierOrCustomer} · {v.assignedLocation}
-                    </div>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => handlePositionOnScale(v, "INBOUND_TARE")}
-                    className="w-full py-2.5 text-xs font-bold uppercase tracking-wider bg-[#059669] text-white flex items-center justify-center gap-2 cursor-pointer"
-                    style={{ borderRadius: 0 }}
-                  >
-                    <Scale className="w-3.5 h-3.5" />
-                    <span>Record Tare & Auto-Compute Net</span>
-                  </button>
-                </div>
-              ))}
+                  {firstWeighmentQueue.length}
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setFilterType("SECOND")}
+                className={`h-full px-3.5 cursor-pointer transition-colors whitespace-nowrap flex items-center gap-1.5 ${
+                  filterType === "SECOND"
+                    ? "bg-[#18181B] text-white font-semibold"
+                    : "bg-white text-neutral-700 hover:bg-neutral-100"
+                }`}
+              >
+                <span>2nd Tare</span>
+                <span
+                  className={`px-1.5 py-0.2 text-[10px] font-bold ${
+                    filterType === "SECOND"
+                      ? "bg-[#059669] text-white"
+                      : "bg-neutral-200 text-neutral-700"
+                  }`}
+                >
+                  {secondWeighmentQueue.length}
+                </span>
+              </button>
             </div>
           </div>
-        )}
 
-        {/* TAB 3: Official Slips Archive */}
-        {activeQueueTab === "COMPLETED_SLIPS" && (
-          <div className="space-y-3">
-            <div className="overflow-x-auto border border-neutral-300">
-              <table className="w-full text-left text-xs border-collapse">
-                <thead>
-                  <tr className="bg-[#F8F9FA] text-neutral-700 font-semibold border-b border-neutral-300">
-                    <th className="p-3">Slip Number</th>
-                    <th className="p-3">Vehicle / Gate Pass</th>
-                    <th className="p-3">Commodity & Partner</th>
-                    <th className="p-3 font-mono text-right">Gross (MT)</th>
-                    <th className="p-3 font-mono text-right">Tare (MT)</th>
-                    <th className="p-3 font-mono text-right text-emerald-800">Net Weight (MT)</th>
-                    <th className="p-3 font-mono text-right">Variance</th>
-                    <th className="p-3 text-center">Status</th>
-                    <th className="p-3 text-right">View / Print</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-neutral-200">
-                  {completedRecords.map((r) => (
-                    <tr key={r.id} className="hover:bg-neutral-50 transition-colors">
-                      <td className="p-3 font-mono font-bold text-neutral-900">
-                        {r.slipNo}
-                      </td>
-                      <td className="p-3">
-                        <div className="font-mono font-bold text-neutral-900">
-                          {r.vehicleNo}
+          {/* Content: Cards Grid (Always on Mobile, or PC when Cards selected) or Table (PC only) */}
+          {displayedQueue.length === 0 ? (
+            <div className="py-8 text-center text-neutral-500 font-mono text-xs">
+              No matching vehicles waiting for weighment.
+            </div>
+          ) : (
+            <>
+              {/* Cards View: Always on Mobile, respects viewMode on Desktop */}
+              <div
+                className={
+                  viewMode === "CARDS"
+                    ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3"
+                    : "grid grid-cols-1 sm:hidden gap-3"
+                }
+              >
+                {displayedQueue.map((v) => {
+                  const isFirst = !v.grossWeightMT;
+                  const isRM = v.direction === "INBOUND_RM";
+                  const targetDeck = isRM ? "WB-01" : "WB-02";
+                  const weighmentLabel = isRM
+                    ? isFirst
+                      ? "1st Gross (RM)"
+                      : "2nd Tare (RM)"
+                    : isFirst
+                    ? "1st Tare (FG)"
+                    : "2nd Gross (FG)";
+
+                  return (
+                    <div
+                      key={v.id}
+                      className="border border-neutral-300 hover:border-neutral-900 bg-white/40 p-3 flex flex-col justify-between space-y-2.5 transition-all group"
+                    >
+                      {/* Top: Pass + Stage Status */}
+                      <div className="flex items-start justify-between gap-1 pb-1.5 border-b border-neutral-200">
+                        <div>
+                          <span className="font-semibold text-neutral-900 tabular-nums text-xs block font-mono">
+                            {v.gateEntryNo}
+                          </span>
+                          <span className="text-[10px] text-neutral-400 font-mono">
+                            In: {v.arrivalTime}
+                          </span>
                         </div>
-                        <div className="text-[10px] text-neutral-500 font-mono">
-                          {r.gateEntryNo}
-                        </div>
-                      </td>
-                      <td className="p-3">
-                        <div className="font-semibold text-neutral-900">{r.materialName}</div>
-                        <div className="text-[11px] text-neutral-500 truncate max-w-[180px]">
-                          {r.supplierOrCustomer}
-                        </div>
-                      </td>
-                      <td className="p-3 font-mono text-right text-neutral-800">
-                        {r.grossWeightMT.toFixed(2)}
-                      </td>
-                      <td className="p-3 font-mono text-right text-neutral-800">
-                        {r.tareWeightMT !== undefined ? r.tareWeightMT.toFixed(2) : "—"}
-                      </td>
-                      <td className="p-3 font-mono text-right font-black text-emerald-700 text-sm">
-                        {r.netWeightMT !== undefined ? `${r.netWeightMT.toFixed(2)} MT` : "PENDING"}
-                      </td>
-                      <td className="p-3 font-mono text-right text-neutral-600">
-                        {r.varianceMT !== undefined
-                          ? `${r.varianceMT >= 0 ? "+" : ""}${r.varianceMT.toFixed(2)}`
-                          : "—"}
-                      </td>
-                      <td className="p-3 text-center">
+
                         <span
-                          className={`px-2 py-0.5 text-[10px] font-bold uppercase border ${
-                            r.status === "COMPLETED"
-                              ? "bg-emerald-50 text-emerald-800 border-emerald-300"
-                              : "bg-amber-50 text-amber-800 border-amber-300"
+                          className={`inline-flex items-center gap-1 px-1.5 py-0.5 border text-[10px] font-bold uppercase tracking-wider shrink-0 ${
+                            isFirst
+                              ? "bg-amber-50 text-amber-800 border-amber-300"
+                              : "bg-emerald-50 text-emerald-800 border-emerald-300"
                           }`}
                         >
-                          {r.status === "COMPLETED" ? "SLIP ISSUED" : "WAITING TARE"}
+                          <span
+                            className={`w-1.5 h-1.5 inline-block ${
+                              isFirst ? "bg-amber-600 animate-pulse" : "bg-emerald-600"
+                            }`}
+                          />
+                          <span>{weighmentLabel}</span>
                         </span>
-                      </td>
-                      <td className="p-3 text-right">
+                      </div>
+
+                      {/* Vehicle & Material Details */}
+                      <div className="space-y-1 text-xs">
+                        <div className="font-mono font-bold text-neutral-900 text-sm group-hover:text-[#059669] transition-colors">
+                          {v.vehicleNo}
+                        </div>
+
+                        <div className="flex items-baseline justify-between gap-1">
+                          <span className="font-semibold text-neutral-800 truncate">
+                            {v.materialName}
+                          </span>
+                          <span className="font-bold text-neutral-900 tabular-nums text-[11px] shrink-0">
+                            {isFirst
+                              ? v.declaredWeightMT
+                                ? `${v.declaredWeightMT.toFixed(1)} MT`
+                                : "—"
+                              : `${(v.grossWeightMT || 42.8).toFixed(1)} MT`}
+                          </span>
+                        </div>
+
+                        <div className="text-[11px] text-neutral-600 truncate">
+                          {v.supplierOrCustomer}
+                        </div>
+
+                        <div className="text-[10px] text-neutral-400 truncate">
+                          {v.transporter} · {v.driverName}
+                        </div>
+                      </div>
+
+                      {/* Bottom: Action & Deck prompt */}
+                      <div className="pt-2 border-t border-neutral-200 flex items-center justify-between gap-2">
+                        <span className="text-[10px] text-neutral-400 group-hover:text-neutral-700 transition-colors font-mono">
+                          Deck: <strong className="text-neutral-800">{targetDeck}</strong>
+                        </span>
+
                         <button
                           type="button"
-                          onClick={() => openSlipModal(r)}
-                          className="px-2.5 py-1 text-xs font-semibold bg-neutral-100 hover:bg-neutral-200 text-neutral-800 border border-neutral-300 inline-flex items-center gap-1 cursor-pointer transition-colors"
-                          style={{ borderRadius: 0 }}
+                          onClick={() => handlePositionAndWeigh(v)}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#059669] hover:bg-[#047857] text-white text-[10px] font-bold uppercase tracking-wider transition-colors cursor-pointer shadow-xs"
                         >
-                          <Eye className="w-3.5 h-3.5 text-neutral-600" />
-                          <span>Slip</span>
+                          <Scale className="w-3 h-3" />
+                          <span>Weigh on {targetDeck}</span>
                         </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Table View: PC Only when viewMode === "TABLE" */}
+              {viewMode === "TABLE" && (
+                <div className="hidden sm:block overflow-x-auto border border-neutral-300">
+                  <table className="w-full text-left text-xs border-collapse">
+                    <thead>
+                      <tr className="border-b border-neutral-300 bg-neutral-200/50 text-neutral-600 font-bold uppercase tracking-wider text-[10px]">
+                        <th className="py-2.5 px-3">Gate Pass #</th>
+                        <th className="py-2.5 px-3">Vehicle No</th>
+                        <th className="py-2.5 px-3">Direction</th>
+                        <th className="py-2.5 px-3">Material & Partner</th>
+                        <th className="py-2.5 px-3">Driver / Transporter</th>
+                        <th className="py-2.5 px-3">Stage</th>
+                        <th className="py-2.5 px-3 text-right">Weight</th>
+                        <th className="py-2.5 px-3 text-center">Deck</th>
+                        <th className="py-2.5 px-3 text-right">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-neutral-300">
+                      {displayedQueue.map((v) => {
+                        const isFirst = !v.grossWeightMT;
+                        const isRM = v.direction === "INBOUND_RM";
+                        const weighmentLabel = isRM
+                          ? isFirst
+                            ? "1st Gross (RM)"
+                            : "2nd Tare (RM)"
+                          : isFirst
+                          ? "1st Tare (FG)"
+                          : "2nd Gross (FG)";
+                        const targetDeck = isRM ? "WB-01" : "WB-02";
+
+                        return (
+                          <tr key={v.id} className="hover:bg-neutral-200/40 transition-colors">
+                            <td className="py-3 px-3 font-bold text-neutral-900 tabular-nums">
+                              {v.gateEntryNo}
+                              <div className="text-[10px] text-neutral-500 font-normal">
+                                In: {v.arrivalTime}
+                              </div>
+                            </td>
+
+                            <td className="py-3 px-3">
+                              <span className="font-bold text-neutral-900 text-xs px-2 py-0.5 border border-neutral-300 bg-neutral-50 font-mono">
+                                {v.vehicleNo}
+                              </span>
+                            </td>
+
+                            <td className="py-3 px-3">
+                              <span
+                                className={`text-[10px] font-bold px-2 py-0.5 border uppercase ${
+                                  v.direction === "INBOUND_RM"
+                                    ? "border-emerald-300 bg-emerald-50 text-[#047857]"
+                                    : "border-neutral-300 bg-[#18181B] text-white"
+                                }`}
+                              >
+                                {v.direction === "INBOUND_RM" ? "Inbound RM" : "Outbound FG"}
+                              </span>
+                            </td>
+
+                            <td className="py-3 px-3">
+                              <div className="font-semibold text-neutral-900">{v.materialName}</div>
+                              <div className="text-[11px] text-neutral-500 truncate max-w-[200px]">
+                                {v.supplierOrCustomer}
+                              </div>
+                            </td>
+
+                            <td className="py-3 px-3">
+                              <div className="text-neutral-800">{v.driverName}</div>
+                              <div className="text-[10px] text-neutral-500">{v.transporter}</div>
+                            </td>
+
+                            <td className="py-3 px-3">
+                              <span
+                                className={`px-1.5 py-0.5 text-[10px] font-bold uppercase border ${
+                                  isFirst
+                                    ? "bg-amber-50 text-amber-800 border-amber-300"
+                                    : "bg-emerald-50 text-emerald-800 border-emerald-300"
+                                }`}
+                              >
+                                {weighmentLabel}
+                              </span>
+                            </td>
+
+                            <td className="py-3 px-3 text-right tabular-nums font-bold text-neutral-900">
+                              {isFirst ? (
+                                <span>
+                                  {v.declaredWeightMT
+                                    ? `${v.declaredWeightMT.toFixed(2)} MT`
+                                    : "—"}
+                                </span>
+                              ) : (
+                                <span className="text-[#059669]">
+                                  {v.grossWeightMT
+                                    ? `${v.grossWeightMT.toFixed(2)} MT`
+                                    : "42.80 MT"}
+                                </span>
+                              )}
+                            </td>
+
+                            <td className="py-3 px-3 text-center">
+                              <span className="font-mono text-xs font-bold px-2 py-0.5 bg-neutral-100 border border-neutral-300 text-neutral-800">
+                                {targetDeck}
+                              </span>
+                            </td>
+
+                            <td className="py-3 px-3 text-right">
+                              <button
+                                type="button"
+                                onClick={() => handlePositionAndWeigh(v)}
+                                className="h-8 px-3 bg-[#18181B] hover:bg-[#059669] text-white text-xs font-bold uppercase tracking-wider inline-flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs ml-auto"
+                              >
+                                <Scale className="w-3.5 h-3.5 text-emerald-400" />
+                                <span>Weigh on {targetDeck}</span>
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </>
+          )}
+        </div>
       </div>
 
       {/* Weighment Capture Modal */}

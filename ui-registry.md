@@ -265,6 +265,100 @@ Operational verification pattern that requires explicit security/operator confir
 
 ---
 
+### Weighbridge Live Scale Cockpit & Waiting Queue Workbench
+
+File: `src/components/weighbridge/weighbridge-home.tsx` / `scale-indicator.tsx`
+Last updated: 04 Oct 2026
+
+| Property             | Class                                                |
+| -------------------- | ---------------------------------------------------- |
+| Cockpit Container    | `bg-white border border-neutral-300 overflow-hidden shadow-2xs` |
+| Cockpit Split        | `grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-neutral-200` |
+| Digital Readout Zone | `lg:col-span-6 p-4 sm:p-5 flex flex-col justify-between space-y-4` |
+| Live Tonnage Readout | `font-mono text-5xl sm:text-6xl font-black tracking-tight text-neutral-900` |
+| Stabilization Beacon | `inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-bold tracking-wider uppercase border bg-emerald-50 text-emerald-800 border-emerald-300` |
+| Active Truck Card    | `lg:col-span-6 p-4 sm:p-5 flex flex-col justify-between space-y-3 bg-[#FAFAFA]` |
+| Primary Action       | `w-full py-3 px-4 text-xs font-bold uppercase tracking-wider bg-[#059669] hover:bg-[#047857] text-white border border-[#10B981] shadow-xs` |
+| Queue Section Header | `flex items-center justify-between border-b border-neutral-300 pb-3` |
+| Movement Filter Tabs | `px-3 py-2 text-xs font-bold uppercase tracking-wider bg-[#18181B] text-white border-[#18181B]` |
+| Plate Pill           | `px-2 py-0.5 font-mono font-bold text-sm bg-neutral-50 border border-neutral-300 text-neutral-900 inline-block` |
+| Table Row Action     | `h-8 px-3 bg-[#18181B] hover:bg-[#059669] text-white text-xs font-bold uppercase tracking-wider inline-flex items-center gap-1.5 shadow-xs` |
+
+---
+
+### Desktop Dual View Mode Switcher (Cards / Table)
+
+File: `src/components/gate/gate-home.tsx` / `gate-exit.tsx` / `weighbridge-home.tsx`
+Last updated: 04 Oct 2026
+
+| Property         | Class                                                |
+| ---------------- | ---------------------------------------------------- |
+| Container        | `hidden sm:inline-flex border border-neutral-300 divide-x divide-neutral-300 text-xs shrink-0 h-10` |
+| Active Pill      | `bg-[#18181B] text-white font-semibold px-3 py-1.5 flex items-center` |
+| Inactive Pill    | `bg-neutral-200/50 text-neutral-700 hover:bg-neutral-200 px-3 py-1.5 flex items-center` |
+| Mobile Behavior  | Hidden on mobile (`hidden sm:inline-flex`); mobile ALWAYS renders vertical responsive cards (`grid-cols-1 sm:hidden gap-3`) |
+
+**Pattern notes:**
+Mandatory control for every operational queue, fleet roster, or weight history ledger. Eliminates wide table horizontal scrollbars on mobile phones while giving desktop industrial workstation operators the flexibility of dense tabular scanning or rich visual card inspection.
+
+---
+
+### Transparent Industrial Table Standard (Strict Ban on Table White Backgrounds)
+
+File: `src/components/gate/gate-home.tsx` / `gate-exit.tsx` / `weighbridge-home.tsx`
+Last updated: 04 Oct 2026
+
+| Property         | Class                                                |
+| ---------------- | ---------------------------------------------------- |
+| Container        | `overflow-x-auto border border-neutral-300 bg-transparent` |
+| Table            | `w-full text-left text-xs border-collapse` (Strictly NO `bg-white`) |
+| Thead Row        | `border-b border-neutral-300 bg-neutral-200/50 text-neutral-600 font-bold uppercase tracking-wider text-[10px]` |
+| Tbody            | `divide-y divide-neutral-300`                        |
+| Table Row (Tr)   | `hover:bg-neutral-200/40 transition-colors cursor-pointer` |
+| Vehicle Plate    | `px-2 py-0.5 font-mono font-bold text-xs bg-neutral-50 border border-neutral-300 text-neutral-900 inline-block` |
+| Weights & Times  | `font-mono tabular-nums text-xs font-semibold text-neutral-800` |
+| Row Action       | `h-8 px-3 bg-[#18181B] hover:bg-[#059669] text-white text-xs font-bold uppercase tracking-wider inline-flex items-center gap-1.5 shadow-xs transition-colors` |
+
+**Pattern notes:**
+Tables must sit transparently on the `#F4F5F7` canvas or container insets rather than having thick solid white rectangles. Uses cool mist slate headers (`bg-neutral-200/50`) and soft hairline dividers (`divide-neutral-300`) with subtle mouseover illumination (`hover:bg-neutral-200/40`).
+
+---
+
+### Translucent Operational Queue Card (`bg-white/40`)
+
+File: `src/components/gate/gate-home.tsx` / `gate-exit.tsx` / `weighbridge-home.tsx`
+Last updated: 04 Oct 2026
+
+| Property         | Class                                                |
+| ---------------- | ---------------------------------------------------- |
+| Card Container   | `border border-neutral-300 hover:border-neutral-900 bg-white/40 p-3.5 flex flex-col justify-between space-y-3 transition-all group` |
+| Header Strip     | `flex items-start justify-between gap-1 pb-2 border-b border-neutral-200` |
+| Primary Plate    | `font-mono font-bold text-neutral-900 text-sm group-hover:text-[#059669] transition-colors` |
+| Secondary Pass   | `text-[10px] text-neutral-500 font-mono mt-0.5`      |
+| Details Grid     | `space-y-1 text-xs text-neutral-700`                 |
+| Weight Telemetry | Monospace 3-col telemetry strip (`bg-neutral-100/70 border border-neutral-200 p-2`) |
+| Action Footer    | `pt-2 border-t border-neutral-200 flex items-center justify-between` |
+
+**Pattern notes:**
+Universal card standard for all queue vehicles (Gate arrivals, Weighbridge waiting, Yard unloading, Exit clearance). The translucent `bg-white/40` gives card surfaces rich atmospheric layering over the `#F4F5F7` background.
+
+---
+
+### Movement Direction Badging Standard
+
+File: `src/components/gate/gate-home.tsx` / `live-vehicle-tracker.tsx` / `weighbridge-home.tsx`
+Last updated: 04 Oct 2026
+
+| Direction | Badging Classes | Visual Label |
+|---|---|---|
+| **Inbound Biomass RM** | `border border-emerald-300 bg-emerald-50 text-[#047857] text-[10px] font-bold uppercase px-2 py-0.5` | `Inbound RM` |
+| **Outbound Dispatch FG** | `border border-neutral-300 bg-[#18181B] text-white text-[10px] font-bold uppercase px-2 py-0.5` | `Outbound FG` |
+
+**Pattern notes:**
+Strictly standardized across Gate, Weighbridge, Inventory, and Production. Inbound raw biomass arrival represents active plant intake and uses Surgical Bio-Emerald tint (`bg-emerald-50 text-[#047857]`). Outbound finished pellet dispatch uses heavy industrial Pitch Charcoal (`bg-[#18181B] text-white`).
+
+---
+
 ## Animation Patterns
 
 ### Page Transitions
