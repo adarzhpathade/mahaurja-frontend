@@ -6,6 +6,8 @@ import {
   Search,
   Printer,
   Eye,
+  LayoutGrid,
+  Table as TableIcon,
 } from "lucide-react";
 import { useWeighbridge } from "@/lib/context/weighbridge-context";
 import { WeighbridgeSlipModal } from "@/components/weighbridge/weighbridge-slip-modal";
@@ -75,70 +77,107 @@ export function WeightRecordsPage() {
             <button
               type="button"
               onClick={() => setViewMode("CARDS")}
-              className={`px-3 py-1.5 transition-colors cursor-pointer flex items-center ${
+              className={`px-3 py-1.5 transition-colors cursor-pointer flex items-center gap-1.5 ${
                 viewMode === "CARDS"
                   ? "bg-[#18181B] text-white font-semibold"
                   : "bg-neutral-200/50 text-neutral-700 hover:bg-neutral-200"
               }`}
             >
-              Cards
+              <LayoutGrid className="w-3.5 h-3.5" />
+              <span>Cards</span>
             </button>
             <button
               type="button"
               onClick={() => setViewMode("TABLE")}
-              className={`px-3 py-1.5 transition-colors cursor-pointer flex items-center ${
+              className={`px-3 py-1.5 transition-colors cursor-pointer flex items-center gap-1.5 ${
                 viewMode === "TABLE"
                   ? "bg-[#18181B] text-white font-semibold"
                   : "bg-neutral-200/50 text-neutral-700 hover:bg-neutral-200"
               }`}
             >
-              Table
+              <TableIcon className="w-3.5 h-3.5" />
+              <span>Table</span>
             </button>
           </div>
         </div>
 
         <div className="border-0 p-0 bg-transparent sm:border sm:border-neutral-300 sm:p-6 sm:bg-white/30 space-y-4">
-          {/* Subheader & Filters Controls */}
-          <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 border-b border-neutral-300 pb-3">
-            {/* Search */}
-            <div className="sm:col-span-6 relative">
+          {/* Subheader & Search / Filter Controls */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pb-3 border-b border-neutral-300">
+            {/* Search Input */}
+            <div className="relative w-full flex-1 sm:max-w-md">
               <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
               <input
                 type="text"
-                placeholder="Search slip number, vehicle, supplier/customer, gate pass..."
+                placeholder="Search slip, vehicle, supplier/customer, material..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full h-11 sm:h-10 pl-9.5 pr-3 text-sm bg-white border border-neutral-300 text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-[#059669] transition-colors"
-                style={{ borderRadius: 0 }}
               />
             </div>
 
-            {/* Direction Filter */}
-            <div className="sm:col-span-3">
-              <select
-                value={filterDirection}
-                onChange={(e) => setFilterDirection(e.target.value as any)}
-                className="w-full h-11 sm:h-10 px-3 text-xs font-semibold bg-white border border-neutral-300 focus:outline-none focus:border-[#059669]"
-                style={{ borderRadius: 0 }}
+            {/* Filter Tabs */}
+            <div className="flex items-center border border-neutral-300 divide-x divide-neutral-300 text-xs overflow-x-auto no-scrollbar shrink-0 h-10 bg-white">
+              <button
+                type="button"
+                onClick={() => setFilterDirection("ALL")}
+                className={`h-full px-3.5 cursor-pointer transition-colors whitespace-nowrap flex items-center gap-1.5 ${
+                  filterDirection === "ALL"
+                    ? "bg-[#18181B] text-white font-semibold"
+                    : "bg-white text-neutral-700 hover:bg-neutral-100"
+                }`}
               >
-                <option value="ALL">All Directions</option>
-                <option value="INBOUND_RM">Inbound Raw Material</option>
-                <option value="OUTBOUND_DISPATCH">Outbound Dispatch</option>
-              </select>
-            </div>
-
-            {/* Status Filter */}
-            <div className="sm:col-span-3">
-              <select
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value as any)}
-                className="w-full h-11 sm:h-10 px-3 text-xs font-semibold bg-white border border-neutral-300 focus:outline-none focus:border-[#059669]"
-                style={{ borderRadius: 0 }}
+                <span>All</span>
+                <span
+                  className={`px-1.5 py-0.2 text-[10px] font-bold ${
+                    filterDirection === "ALL"
+                      ? "bg-[#059669] text-white"
+                      : "bg-neutral-200 text-neutral-700"
+                  }`}
+                >
+                  {records.length}
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setFilterDirection("INBOUND_RM")}
+                className={`h-full px-3.5 cursor-pointer transition-colors whitespace-nowrap flex items-center gap-1.5 ${
+                  filterDirection === "INBOUND_RM"
+                    ? "bg-[#18181B] text-white font-semibold"
+                    : "bg-white text-neutral-700 hover:bg-neutral-100"
+                }`}
               >
-                <option value="ALL">All Statuses</option>
-                <option value="COMPLETED">Completed (Net Slip Issued)</option>
-                <option value="PENDING_SECOND_WEIGHMENT">Pending 2nd Weighment</option>
-              </select>
+                <span>RM Inbound</span>
+                <span
+                  className={`px-1.5 py-0.2 text-[10px] font-bold ${
+                    filterDirection === "INBOUND_RM"
+                      ? "bg-[#059669] text-white"
+                      : "bg-neutral-200 text-neutral-700"
+                  }`}
+                >
+                  {records.filter((r) => r.direction === "INBOUND_RM").length}
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setFilterDirection("OUTBOUND_DISPATCH")}
+                className={`h-full px-3.5 cursor-pointer transition-colors whitespace-nowrap flex items-center gap-1.5 ${
+                  filterDirection === "OUTBOUND_DISPATCH"
+                    ? "bg-[#18181B] text-white font-semibold"
+                    : "bg-white text-neutral-700 hover:bg-neutral-100"
+                }`}
+              >
+                <span>FG Outbound</span>
+                <span
+                  className={`px-1.5 py-0.2 text-[10px] font-bold ${
+                    filterDirection === "OUTBOUND_DISPATCH"
+                      ? "bg-[#059669] text-white"
+                      : "bg-neutral-200 text-neutral-700"
+                  }`}
+                >
+                  {records.filter((r) => r.direction === "OUTBOUND_DISPATCH").length}
+                </span>
+              </button>
             </div>
           </div>
 

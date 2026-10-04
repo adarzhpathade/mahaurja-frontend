@@ -12,6 +12,9 @@ import {
   Calendar,
   Plus,
   X,
+  LayoutGrid,
+  Table as TableIcon,
+  SlidersHorizontal,
 } from "lucide-react";
 import { GateVehicle } from "@/lib/types/gate";
 import { useGate } from "@/lib/context/gate-context";
@@ -107,6 +110,7 @@ export function GateHome({ onNavigateTab, onOpenEntryModal }: GateHomeProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState<"ALL" | "APPROACHING" | "SCHEDULED">("ALL");
   const [viewMode, setViewMode] = useState<"CARDS" | "TABLE">("CARDS");
+  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
   const [selectedArrival, setSelectedArrival] = useState<ExpectedArrival | null>(null);
   const [checkedInIds, setCheckedInIds] = useState<string[]>([]);
 
@@ -159,12 +163,33 @@ export function GateHome({ onNavigateTab, onOpenEntryModal }: GateHomeProps) {
   return (
     <div className="w-full space-y-8 sm:space-y-10 select-none">
       {/* ========================================================================= */}
-      {/* 1. COMPACT COMMAND HEADER                                                 */}
+      {/* 1. COMPACT COMMAND HEADER (with Desktop Actions)                          */}
       {/* ========================================================================= */}
-      <div className="border-b border-neutral-300 pb-4 sm:pb-5">
+      <div className="border-b border-neutral-300 pb-4 sm:pb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-neutral-900">
           Gate Operations
         </h1>
+
+        {/* Action Buttons: Visible on Tablet/Desktop (sm and up) */}
+        <div className="hidden sm:flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => onNavigateTab("live-tracker")}
+            className="h-10 px-4 border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-800 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors cursor-pointer"
+          >
+            <Truck className="w-4 h-4 text-neutral-600" />
+            <span>Tracker ({totalInside})</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => onOpenEntryModal()}
+            className="h-10 px-5 bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs"
+          >
+            <Plus className="w-4 h-4" strokeWidth={2.5} />
+            <span>New Gate Entry</span>
+          </button>
+        </div>
       </div>
 
       {/* ========================================================================= */}
@@ -237,13 +262,13 @@ export function GateHome({ onNavigateTab, onOpenEntryModal }: GateHomeProps) {
       </div>
 
       {/* ========================================================================= */}
-      {/* 3. QUICK ACTION BUTTONS                                                   */}
+      {/* 3. QUICK ACTION BUTTONS (Mobile View Only)                                */}
       {/* ========================================================================= */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 w-full">
+      <div className="flex flex-col items-stretch gap-2.5 w-full sm:hidden">
         <button
           type="button"
           onClick={() => onNavigateTab("live-tracker")}
-          className="h-11 sm:h-10 px-4 border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-800 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors cursor-pointer w-full sm:w-auto"
+          className="h-11 px-4 border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-800 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors cursor-pointer w-full"
         >
           <Truck className="w-4 h-4 text-neutral-600" />
           <span>Tracker ({totalInside})</span>
@@ -252,7 +277,7 @@ export function GateHome({ onNavigateTab, onOpenEntryModal }: GateHomeProps) {
         <button
           type="button"
           onClick={() => onOpenEntryModal()}
-          className="h-11 sm:h-10 px-5 bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs w-full sm:w-auto"
+          className="h-11 px-5 bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs w-full"
         >
           <Plus className="w-4 h-4" strokeWidth={2.5} />
           <span>New Gate Entry</span>
@@ -263,99 +288,183 @@ export function GateHome({ onNavigateTab, onOpenEntryModal }: GateHomeProps) {
       {/* 4. PRE-ADVISED INBOUND ARRIVALS (SCHEDULED FLEET ROSTER)                  */}
       {/* ========================================================================= */}
       <div className="space-y-4 pt-3 sm:pt-6">
-        {/* Section Heading */}
+        {/* Section Heading (Matching Weighbridge Reference) */}
         <div className="flex items-center justify-between border-b border-neutral-300 pb-3">
-          <div className="flex items-center gap-2.5">
-            <Calendar className="w-5 h-5 text-neutral-800 shrink-0" />
-            <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-neutral-900">
+          <div className="flex items-center gap-2">
+            <Calendar className="w-4 h-4 text-neutral-800 shrink-0" />
+            <h2 className="text-xs font-bold uppercase tracking-wider text-neutral-900">
               Expected Arrivals
             </h2>
-            <span className="text-[11px] sm:text-xs font-bold font-mono px-2 py-0.5 bg-neutral-200 border border-neutral-300 text-neutral-800">
+            <span className="text-[10px] font-bold font-mono px-1.5 py-0.5 bg-neutral-200 border border-neutral-300 text-neutral-800">
               {filteredExpected.length}
             </span>
+          </div>
+
+          {/* View Mode Toggle (PC Only) */}
+          <div className="hidden sm:inline-flex border border-neutral-300 divide-x divide-neutral-300 text-xs shrink-0 h-10">
+            <button
+              type="button"
+              onClick={() => setViewMode("CARDS")}
+              className={`px-3 py-1.5 transition-colors cursor-pointer flex items-center gap-1.5 ${
+                viewMode === "CARDS"
+                  ? "bg-[#18181B] text-white font-semibold"
+                  : "bg-neutral-200/50 text-neutral-700 hover:bg-neutral-200"
+              }`}
+            >
+              <LayoutGrid className="w-3.5 h-3.5" />
+              <span>Cards</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode("TABLE")}
+              className={`px-3 py-1.5 transition-colors cursor-pointer flex items-center gap-1.5 ${
+                viewMode === "TABLE"
+                  ? "bg-[#18181B] text-white font-semibold"
+                  : "bg-neutral-200/50 text-neutral-700 hover:bg-neutral-200"
+              }`}
+            >
+              <TableIcon className="w-3.5 h-3.5" />
+              <span>Table</span>
+            </button>
           </div>
         </div>
 
         <div className="border-0 p-0 bg-transparent sm:border sm:border-neutral-300 sm:p-6 sm:bg-white/30 space-y-4 sm:space-y-5">
-          {/* Subheader & Search / View Controls */}
+          {/* Subheader & Search / Filter Controls */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pb-3 border-b border-neutral-300">
-            {/* Search + View Mode row on mobile */}
-            <div className="flex items-center gap-2 w-full flex-1 sm:max-w-md">
-              <div className="relative w-full">
-                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
+            {/* Search Input with Mobile Filter Button */}
+            <div className="flex items-center gap-2 flex-1 sm:max-w-md">
+              <div className="relative flex-1">
+                <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
                 <input
                   type="text"
                   placeholder="Search plate, supplier, PO..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full h-11 sm:h-10 pl-9.5 pr-3 text-sm bg-white border border-neutral-300 text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-[#059669] transition-colors"
+                  className="w-full h-10 pl-8.5 pr-3 text-xs bg-white border border-neutral-300 text-neutral-900 placeholder:text-[11px] placeholder:text-neutral-400 focus:outline-none focus:border-[#059669] transition-colors"
                 />
               </div>
-
-              {/* View Mode Toggle (PC Only) */}
-              <div className="hidden sm:inline-flex border border-neutral-300 divide-x divide-neutral-300 text-xs shrink-0 h-10">
-                <button
-                  type="button"
-                  onClick={() => setViewMode("CARDS")}
-                  className={`px-3 py-1.5 transition-colors cursor-pointer flex items-center ${
-                    viewMode === "CARDS"
-                      ? "bg-[#18181B] text-white font-semibold"
-                      : "bg-neutral-200/50 text-neutral-700 hover:bg-neutral-200"
-                  }`}
-                >
-                  Cards
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setViewMode("TABLE")}
-                  className={`px-3 py-1.5 transition-colors cursor-pointer flex items-center ${
-                    viewMode === "TABLE"
-                      ? "bg-[#18181B] text-white font-semibold"
-                      : "bg-neutral-200/50 text-neutral-700 hover:bg-neutral-200"
-                  }`}
-                >
-                  Table
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={() => setIsMobileFilterOpen(true)}
+                className="sm:hidden w-10 h-10 flex items-center justify-center border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-700 shrink-0 cursor-pointer"
+                title="Filter Options"
+              >
+                <SlidersHorizontal className="w-4 h-4" />
+              </button>
             </div>
 
-            {/* Filter Tabs (PC Only) */}
+            {/* Desktop Filter Tabs */}
             <div className="hidden sm:flex items-center border border-neutral-300 divide-x divide-neutral-300 text-xs overflow-x-auto no-scrollbar shrink-0 h-10 bg-white">
               <button
                 type="button"
                 onClick={() => setFilterType("ALL")}
-                className={`h-full px-3.5 cursor-pointer transition-colors whitespace-nowrap flex items-center ${
+                className={`h-full px-3.5 cursor-pointer transition-colors whitespace-nowrap flex items-center gap-1.5 ${
                   filterType === "ALL"
                     ? "bg-[#18181B] text-white font-semibold"
                     : "bg-white text-neutral-700 hover:bg-neutral-100"
                 }`}
               >
-                All ({PRE_ADVISED_ARRIVALS.length})
+                <span>All</span>
+                <span
+                  className={`px-1.5 py-0.2 text-[10px] font-bold ${
+                    filterType === "ALL"
+                      ? "bg-[#059669] text-white"
+                      : "bg-neutral-200 text-neutral-700"
+                  }`}
+                >
+                  {PRE_ADVISED_ARRIVALS.length}
+                </span>
               </button>
               <button
                 type="button"
                 onClick={() => setFilterType("APPROACHING")}
-                className={`h-full px-3.5 cursor-pointer transition-colors whitespace-nowrap flex items-center ${
+                className={`h-full px-3.5 cursor-pointer transition-colors whitespace-nowrap flex items-center gap-1.5 ${
                   filterType === "APPROACHING"
                     ? "bg-[#18181B] text-white font-semibold"
                     : "bg-white text-neutral-700 hover:bg-neutral-100"
                 }`}
               >
-                Near (1)
+                <span>Near</span>
+                <span
+                  className={`px-1.5 py-0.2 text-[10px] font-bold ${
+                    filterType === "APPROACHING"
+                      ? "bg-[#059669] text-white"
+                      : "bg-neutral-200 text-neutral-700"
+                  }`}
+                >
+                  1
+                </span>
               </button>
               <button
                 type="button"
                 onClick={() => setFilterType("SCHEDULED")}
-                className={`h-full px-3.5 cursor-pointer transition-colors whitespace-nowrap flex items-center ${
+                className={`h-full px-3.5 cursor-pointer transition-colors whitespace-nowrap flex items-center gap-1.5 ${
                   filterType === "SCHEDULED"
                     ? "bg-[#18181B] text-white font-semibold"
                     : "bg-white text-neutral-700 hover:bg-neutral-100"
                 }`}
               >
-                Scheduled (2)
+                <span>Scheduled</span>
+                <span
+                  className={`px-1.5 py-0.2 text-[10px] font-bold ${
+                    filterType === "SCHEDULED"
+                      ? "bg-[#059669] text-white"
+                      : "bg-neutral-200 text-neutral-700"
+                  }`}
+                >
+                  2
+                </span>
               </button>
             </div>
           </div>
+
+          {/* Mobile Filter Sheet Modal */}
+          {isMobileFilterOpen && (
+            <div className="fixed inset-0 z-50 bg-black/40 flex items-end sm:hidden">
+              <div className="bg-white w-full border-t border-neutral-300 p-4 space-y-3">
+                <div className="flex items-center justify-between border-b border-neutral-200 pb-2">
+                  <span className="text-xs font-bold uppercase tracking-wider text-neutral-800">Filter Options</span>
+                  <button
+                    type="button"
+                    onClick={() => setIsMobileFilterOpen(false)}
+                    className="text-xs font-bold text-neutral-500 hover:text-neutral-800"
+                  >
+                    Close ✕
+                  </button>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => { setFilterType("ALL"); setIsMobileFilterOpen(false); }}
+                    className={`p-2.5 text-xs font-medium border text-center ${
+                      filterType === "ALL" ? "border-neutral-900 bg-[#18181B] text-white font-bold" : "border-neutral-300 bg-neutral-50 text-neutral-700"
+                    }`}
+                  >
+                    All ({PRE_ADVISED_ARRIVALS.length})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setFilterType("APPROACHING"); setIsMobileFilterOpen(false); }}
+                    className={`p-2.5 text-xs font-medium border text-center ${
+                      filterType === "APPROACHING" ? "border-neutral-900 bg-[#18181B] text-white font-bold" : "border-neutral-300 bg-neutral-50 text-neutral-700"
+                    }`}
+                  >
+                    Near (1)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setFilterType("SCHEDULED"); setIsMobileFilterOpen(false); }}
+                    className={`p-2.5 text-xs font-medium border text-center ${
+                      filterType === "SCHEDULED" ? "border-neutral-900 bg-[#18181B] text-white font-bold" : "border-neutral-300 bg-neutral-50 text-neutral-700"
+                    }`}
+                  >
+                    Scheduled (2)
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
         {/* Content: Cards Grid (Always on Mobile, or PC when Cards selected) or Table (PC only) */}
         {filteredExpected.length === 0 ? (

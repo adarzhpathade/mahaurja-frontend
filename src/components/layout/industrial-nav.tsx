@@ -309,37 +309,39 @@ export function IndustrialNav({
                       </span>
                     </div>
 
-                    {/* Operational Station Quick Switcher */}
+                    {/* Operational Station Quick Switcher (All 8 Roles) */}
                     <div className="pt-2.5 mt-2 border-t border-neutral-200">
                       <div className="text-[10px] font-bold uppercase tracking-wider text-neutral-500 mb-1.5 flex items-center justify-between">
-                        <span>Operational Desks</span>
-                        <span className="text-[9px] text-emerald-600 font-bold">ONLINE</span>
+                        <span>Switch Operational Desk</span>
+                        <span className="text-[9px] text-emerald-600 font-bold">8 DESKS ONLINE</span>
                       </div>
-                      <div className="space-y-1">
-                        <a
-                          href="/gate"
-                          className={`flex items-center justify-between px-2.5 py-1.5 text-xs font-semibold border transition-colors ${
-                            currentRole.id === "gate-security"
-                              ? "bg-[#18181B] text-white border-[#18181B]"
-                              : "bg-neutral-50 text-neutral-800 border-neutral-200 hover:bg-neutral-100"
-                          }`}
-                          style={{ borderRadius: 0 }}
-                        >
-                          <span>Gate / Security Desk</span>
-                          <span className="text-[10px] opacity-75 font-mono">Role 2</span>
-                        </a>
-                        <a
-                          href="/weighbridge"
-                          className={`flex items-center justify-between px-2.5 py-1.5 text-xs font-semibold border transition-colors ${
-                            currentRole.id === "weighbridge"
-                              ? "bg-[#18181B] text-white border-[#18181B]"
-                              : "bg-neutral-50 text-neutral-800 border-neutral-200 hover:bg-neutral-100"
-                          }`}
-                          style={{ borderRadius: 0 }}
-                        >
-                          <span>Weighbridge Station</span>
-                          <span className="text-[10px] opacity-75 font-mono">Role 3</span>
-                        </a>
+                      <div className="space-y-1 max-h-56 overflow-y-auto pr-0.5">
+                        {[
+                          { id: "gate-security", label: "Gate & Security", url: "/gate" },
+                          { id: "weighbridge", label: "Weighbridge Metrology", url: "/weighbridge" },
+                          { id: "qc-lab", label: "QC & Testing Lab", url: "/quality" },
+                          { id: "production", label: "Pelletising Production", url: "/production" },
+                          { id: "warehouse", label: "Warehouse & Yards", url: "/inventory" },
+                          { id: "sales-dispatch", label: "Sales & Dispatch", url: "/sales" },
+                          { id: "management", label: "Management Directorate", url: "/management" },
+                          { id: "admin", label: "Admin & Master Setup", url: "/admin" },
+                        ].map((role) => (
+                          <a
+                            key={role.id}
+                            href={role.url}
+                            className={`flex items-center justify-between px-2.5 py-1.5 text-xs font-semibold border transition-colors ${
+                              currentRole.id === role.id
+                                ? "bg-[#18181B] text-white border-[#18181B]"
+                                : "bg-neutral-50 text-neutral-800 border-neutral-200 hover:bg-neutral-100"
+                            }`}
+                            style={{ borderRadius: 0 }}
+                          >
+                            <span>{role.label}</span>
+                            {currentRole.id === role.id && (
+                              <span className="text-[9px] text-emerald-400 font-bold uppercase">Active</span>
+                            )}
+                          </a>
+                        ))}
                       </div>
                     </div>
                   </div>
@@ -460,29 +462,30 @@ export function IndustrialNav({
                 <span>Switch Station</span>
                 <span className="text-[9px] text-emerald-600 font-bold">ONLINE</span>
               </div>
-              <div className="grid grid-cols-2 gap-2">
-                <a
-                  href="/gate"
-                  className={`px-3 py-2 text-xs font-semibold border text-center transition-colors ${
-                    currentRole.id === "gate-security"
-                      ? "bg-[#18181B] text-white border-[#18181B]"
-                      : "bg-white text-neutral-800 border-neutral-300 hover:bg-neutral-50"
-                  }`}
-                  style={{ borderRadius: 0 }}
-                >
-                  Gate Desk
-                </a>
-                <a
-                  href="/weighbridge"
-                  className={`px-3 py-2 text-xs font-semibold border text-center transition-colors ${
-                    currentRole.id === "weighbridge"
-                      ? "bg-[#18181B] text-white border-[#18181B]"
-                      : "bg-white text-neutral-800 border-neutral-300 hover:bg-neutral-50"
-                  }`}
-                  style={{ borderRadius: 0 }}
-                >
-                  Weighbridge
-                </a>
+              <div className="grid grid-cols-2 gap-1.5">
+                {[
+                  { id: "gate-security", label: "Gate & Security", url: "/gate" },
+                  { id: "weighbridge", label: "Weighbridge", url: "/weighbridge" },
+                  { id: "qc-lab", label: "QC & Lab", url: "/quality" },
+                  { id: "production", label: "Production", url: "/production" },
+                  { id: "warehouse", label: "Warehouse", url: "/inventory" },
+                  { id: "sales-dispatch", label: "Sales & Dispatch", url: "/sales" },
+                  { id: "management", label: "Management", url: "/management" },
+                  { id: "admin", label: "Admin Masters", url: "/admin" },
+                ].map((role) => (
+                  <a
+                    key={role.id}
+                    href={role.url}
+                    className={`px-2 py-1.5 text-[11px] font-semibold border text-center transition-colors truncate ${
+                      currentRole.id === role.id
+                        ? "bg-[#18181B] text-white border-[#18181B]"
+                        : "bg-white text-neutral-800 border-neutral-300 hover:bg-neutral-50"
+                    }`}
+                    style={{ borderRadius: 0 }}
+                  >
+                    {role.label}
+                  </a>
+                ))}
               </div>
             </div>
 

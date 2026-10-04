@@ -8,6 +8,9 @@ import {
   Printer,
   Truck,
   ArrowRight,
+  LayoutGrid,
+  Table as TableIcon,
+  SlidersHorizontal,
 } from "lucide-react";
 import { useWeighbridge } from "@/lib/context/weighbridge-context";
 import { ScaleIndicator } from "./scale-indicator";
@@ -36,6 +39,7 @@ export function WeighbridgeHome() {
 
   const [filterType, setFilterType] = useState<"ALL" | "FIRST" | "SECOND">("ALL");
   const [deckFilter, setDeckFilter] = useState<"ALL" | "INBOUND_RM" | "OUTBOUND_DISPATCH">("ALL");
+  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"CARDS" | "TABLE">("CARDS");
 
@@ -233,12 +237,12 @@ export function WeighbridgeHome() {
       <div className="space-y-4 pt-2">
         {/* Section Heading (Matching Gate Expected Arrivals) */}
         <div className="flex items-center justify-between border-b border-neutral-300 pb-3">
-          <div className="flex items-center gap-2.5">
-            <Truck className="w-5 h-5 text-neutral-800 shrink-0" />
-            <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-neutral-900">
+          <div className="flex items-center gap-2">
+            <Truck className="w-4 h-4 text-neutral-800 shrink-0" />
+            <h2 className="text-xs font-bold uppercase tracking-wider text-neutral-900">
               Waiting Vehicles
             </h2>
-            <span className="text-[11px] sm:text-xs font-bold font-mono px-2 py-0.5 bg-neutral-200 border border-neutral-300 text-neutral-800">
+            <span className="text-[10px] font-bold font-mono px-1.5 py-0.5 bg-neutral-200 border border-neutral-300 text-neutral-800">
               {displayedQueue.length}
             </span>
           </div>
@@ -248,24 +252,26 @@ export function WeighbridgeHome() {
             <button
               type="button"
               onClick={() => setViewMode("CARDS")}
-              className={`px-3 py-1.5 transition-colors cursor-pointer flex items-center ${
+              className={`px-3 py-1.5 transition-colors cursor-pointer flex items-center gap-1.5 ${
                 viewMode === "CARDS"
                   ? "bg-[#18181B] text-white font-semibold"
                   : "bg-neutral-200/50 text-neutral-700 hover:bg-neutral-200"
               }`}
             >
-              Cards
+              <LayoutGrid className="w-3.5 h-3.5" />
+              <span>Cards</span>
             </button>
             <button
               type="button"
               onClick={() => setViewMode("TABLE")}
-              className={`px-3 py-1.5 transition-colors cursor-pointer flex items-center ${
+              className={`px-3 py-1.5 transition-colors cursor-pointer flex items-center gap-1.5 ${
                 viewMode === "TABLE"
                   ? "bg-[#18181B] text-white font-semibold"
                   : "bg-neutral-200/50 text-neutral-700 hover:bg-neutral-200"
               }`}
             >
-              Table
+              <TableIcon className="w-3.5 h-3.5" />
+              <span>Table</span>
             </button>
           </div>
         </div>
@@ -274,20 +280,30 @@ export function WeighbridgeHome() {
         <div className="border-0 p-0 bg-transparent sm:border sm:border-neutral-300 sm:p-6 sm:bg-white/30 space-y-4 sm:space-y-5">
           {/* Subheader & Search / Filter Controls */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pb-3 border-b border-neutral-300">
-            {/* Search Input */}
-            <div className="relative w-full flex-1 sm:max-w-md">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
-              <input
-                type="text"
-                placeholder="Search plate, supplier, pass, material..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full h-11 sm:h-10 pl-9.5 pr-3 text-sm bg-white border border-neutral-300 text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-[#059669] transition-colors"
-              />
+            {/* Search Input with Mobile Filter Button */}
+            <div className="flex items-center gap-2 flex-1 sm:max-w-md">
+              <div className="relative flex-1">
+                <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
+                <input
+                  type="text"
+                  placeholder="Search plate, supplier, pass, material..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full h-10 pl-8.5 pr-3 text-xs bg-white border border-neutral-300 text-neutral-900 placeholder:text-[11px] placeholder:text-neutral-400 focus:outline-none focus:border-[#059669] transition-colors"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsMobileFilterOpen(true)}
+                className="sm:hidden w-10 h-10 flex items-center justify-center border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-700 shrink-0 cursor-pointer"
+                title="Filter Options"
+              >
+                <SlidersHorizontal className="w-4 h-4" />
+              </button>
             </div>
 
-            {/* Filter Tabs */}
-            <div className="flex items-center border border-neutral-300 divide-x divide-neutral-300 text-xs overflow-x-auto no-scrollbar shrink-0 h-10 bg-white">
+            {/* Desktop Filter Tabs */}
+            <div className="hidden sm:flex items-center border border-neutral-300 divide-x divide-neutral-300 text-xs overflow-x-auto no-scrollbar shrink-0 h-10 bg-white">
               <button
                 type="button"
                 onClick={() => setFilterType("ALL")}
@@ -350,6 +366,53 @@ export function WeighbridgeHome() {
               </button>
             </div>
           </div>
+
+          {/* Mobile Filter Sheet Modal */}
+          {isMobileFilterOpen && (
+            <div className="fixed inset-0 z-50 bg-black/40 flex items-end sm:hidden">
+              <div className="bg-white w-full border-t border-neutral-300 p-4 space-y-3">
+                <div className="flex items-center justify-between border-b border-neutral-200 pb-2">
+                  <span className="text-xs font-bold uppercase tracking-wider text-neutral-800">Filter Options</span>
+                  <button
+                    type="button"
+                    onClick={() => setIsMobileFilterOpen(false)}
+                    className="text-xs font-bold text-neutral-500 hover:text-neutral-800"
+                  >
+                    Close ✕
+                  </button>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => { setFilterType("ALL"); setIsMobileFilterOpen(false); }}
+                    className={`p-2.5 text-xs font-medium border text-center ${
+                      filterType === "ALL" ? "border-neutral-900 bg-[#18181B] text-white font-bold" : "border-neutral-300 bg-neutral-50 text-neutral-700"
+                    }`}
+                  >
+                    All ({firstWeighmentQueue.length + secondWeighmentQueue.length})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setFilterType("FIRST"); setIsMobileFilterOpen(false); }}
+                    className={`p-2.5 text-xs font-medium border text-center ${
+                      filterType === "FIRST" ? "border-neutral-900 bg-[#18181B] text-white font-bold" : "border-neutral-300 bg-neutral-50 text-neutral-700"
+                    }`}
+                  >
+                    1st Gross ({firstWeighmentQueue.length})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setFilterType("SECOND"); setIsMobileFilterOpen(false); }}
+                    className={`p-2.5 text-xs font-medium border text-center ${
+                      filterType === "SECOND" ? "border-neutral-900 bg-[#18181B] text-white font-bold" : "border-neutral-300 bg-neutral-50 text-neutral-700"
+                    }`}
+                  >
+                    2nd Tare ({secondWeighmentQueue.length})
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Content: Cards Grid (Always on Mobile, or PC when Cards selected) or Table (PC only) */}
           {displayedQueue.length === 0 ? (

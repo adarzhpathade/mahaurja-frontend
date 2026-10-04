@@ -1,7 +1,7 @@
 # 📊 MAHAURJA – Project Progress Tracker
 
-> **Last Updated:** 04 Oct 2026, 01:05 IST
-> **Status:** 🟢 Gate & Weighbridge Modules Complete · UI Standards & Registry Codified · QC Lab Next
+> **Last Updated:** 04 Oct 2026, 13:10 IST
+> **Status:** 🟢 8 Core Roles Implemented & Type-Checked (0 Errors) · 🟡 UI Harmonization in Progress (Gate & QC Lab 100% Done; Weighbridge, Sales, Production, Inventory, Admin, Management queued) · Detailed Blueprint in `SESSION_HANDOFF.md`
 
 ---
 
@@ -10,16 +10,17 @@
 | Phase | Status | Progress |
 |---|---|---|
 | Project Setup (Next.js, Tailwind v4, Motion, Lenis) | 🟢 Complete | 100% |
-| Design System & Shared Components (Registry & Standards) | 🟢 Complete | 85% |
-| Auth (Login / Forgot Password) | 🔴 Not Started | 0% |
-| Role 1 — Admin / Super Admin | 🔴 Not Started | 0% |
-| Role 2 — Gate / Security Operator | 🟢 Complete | 100% |
-| Role 3 — Weighbridge Operator | 🟢 Complete | 100% |
-| Role 4 — QC / Lab Technician | 🟡 Next Up | 0% |
-| Role 5 — Production Supervisor | 🔴 Not Started | 0% |
-| Role 6 — Warehouse / Inventory Manager | 🔴 Not Started | 0% |
-| Role 7 — Sales / Dispatch Manager | 🔴 Not Started | 0% |
-| Role 8 — Management / Plant Director | 🔴 Not Started | 0% |
+| Design System & Shared Components (Registry & Standards) | 🟢 Complete | 100% |
+| Role 1 — Admin / Super Admin (`/admin`) | 🟢 Functional | 100% |
+| Role 2 — Gate / Security Operator (`/gate`) | 🟢 Complete & Harmonized | 100% |
+| Role 3 — Weighbridge Operator (`/weighbridge`) | 🟢 Functional (Harmonization Queued) | 90% |
+| Role 4 — QC / Lab Technician (`/quality`) | 🟢 Complete & Harmonized | 100% |
+| Role 5 — Production Supervisor (`/production`) | 🟢 Functional (Harmonization Queued) | 90% |
+| Role 6 — Warehouse / Inventory Manager (`/inventory`) | 🟢 Functional (Harmonization Queued) | 90% |
+| Role 7 — Sales / Dispatch Manager (`/sales`) | 🟢 Functional (Harmonization Queued) | 90% |
+| Role 8 — Management / Plant Director (`/management`) | 🟢 Functional (Harmonization Queued) | 90% |
+| UI Harmonization (Command Headers & Mobile Cards) | 🟡 In Progress | 2/8 Roles Done (25%) |
+| Auth (Optional Single-Sign-On) | ⚪ Optional / Ready for Backend Bindings | 50% |
 
 **Legend:** 🔴 Not Started · 🟡 In Progress / Next Up · 🟢 Complete · 🔵 Under Review
 
@@ -41,340 +42,267 @@
 
 ## Phase 1 — Design System & Shared Components
 
-### UI Primitives (`components/ui/`)
-- [ ] Button (variants: primary, secondary, ghost, danger, outline)
-- [ ] Input (text, number, date, search)
-- [ ] Select / Dropdown
-- [ ] Textarea
-- [ ] Checkbox & Radio
-- [ ] Toggle / Switch
-- [ ] Badge (status colors)
-- [ ] Card (glass effect, elevated, flat)
-- [ ] Table (sortable, paginated, responsive)
-- [ ] Modal / Dialog
-- [ ] Drawer (mobile slide-in panel)
-- [ ] Toast / Notification
-- [ ] Skeleton loader
-- [ ] Tooltip
-- [ ] Tabs
-- [ ] Breadcrumb
-- [ ] Pagination
-- [ ] File Upload / Dropzone
-- [ ] Date Picker
-- [ ] Search with filters
+### UI Standards & Codified Patterns (`AGENTS.md` & `ui-registry.md`)
+- [x] **Standard 1:** Section Spacing & Breathing Room (`mt-6 sm:mt-5 pt-5 sm:pt-4 border-t border-neutral-200`)
+- [x] **Standard 2:** Command Typography (`text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-neutral-900`)
+- [x] **Standard 3:** Minimal Cards & Desktop Zero-Scroll (< 650px total form height on desktop)
+- [x] **Standard 4:** Plain English UI Terminology (eliminated complex jargon across forms)
+- [x] **Standard 5:** Mandatory Desktop Dual View (`[ Cards ] [ Table ]` with `h-10` switcher; responsive cards strictly on mobile)
+- [x] **Standard 6:** Strict Ban on Table White Backgrounds (transparent wrappers, mist headers `bg-neutral-200/50`, hairline dividers `divide-neutral-300`)
+- [x] **Standard 7:** Translucent Queue Cards (`bg-white/40 border border-neutral-300`) & Bio-Emerald / Pitch Charcoal direction badges
+- [x] **Standard 8:** Precision Industrial Navigation System with strongly-typed role profiles and 8-station desktop/mobile switcher
 
-### Layout Components (`components/layout/`)
-- [ ] Sidebar (collapsible, role-based nav, mobile responsive)
-- [ ] Topbar (search, notifications, profile, dark mode toggle)
-- [ ] Mobile Bottom Nav
-- [ ] Page Header (title, breadcrumb, actions)
-- [ ] Dashboard Shell (sidebar + topbar wrapper)
-
-### Shared Business Components (`components/shared/`)
-- [ ] Status Badge (color-coded workflow states)
-- [ ] KPI Card (animated counters, trend indicators)
-- [ ] Traceability Chain (visual linkage component)
-- [ ] Empty State (illustration + CTA)
-- [ ] Data Table with actions (view, edit, delete)
-- [ ] Filter Bar (date range, status, search)
-- [ ] Timeline / Activity Log
+### Streamlined Role-Based Navigation (`components/layout/industrial-nav.tsx`)
+- [x] Audited all 8 user roles against `Mahaurja Operational Flow.pdf` (Section 38 "Physical-to-Digital" rule)
+- [x] Eliminated generic logistics mock terms ("Transportations", "Load Planning", "Shipping")
+- [x] Type-safe named role profile bindings (`ROLE_GATE_SECURITY`, `ROLE_WEIGHBRIDGE`, `ROLE_SALES_DISPATCH`, `ROLE_QC_LAB`, `ROLE_PRODUCTION`, `ROLE_WAREHOUSE`, `ROLE_ADMIN`, `ROLE_MANAGEMENT`)
+- [x] Operational desk switcher in top-right user menu linking all 8 physical consoles with real-time active indicators
 
 ---
 
-## Phase 2 — Auth
+## Phase 2 — Role 1: Admin / Super Admin (`/admin`)
 
-- [ ] Login page (premium design, responsive)
-- [ ] Forgot Password page
-- [ ] Role-based redirect after login
-- [ ] Auth layout (separate from dashboard)
+### Suppliers Master (`admin/masters/suppliers/`)
+- [x] Supplier list with dual view (`[ Cards ] [ Table ]`)
+- [x] Add Supplier modal (Farmer, Trader, Aggregator, Company) with bank, GSTIN, PAN
+- [x] Lifetime metrics (Total supplied MT, Lifetime payout INR)
+- [x] Type filters & search
 
----
+### Customers Master (`admin/masters/customers/`)
+- [x] Industrial customer directory with dual view switcher
+- [x] Add Customer modal with payment terms, delivery address, credit limit
+- [x] Real-time credit exposure utilization progress bar
+- [x] Status toggle (Active / Inactive)
 
-## Phase 3 — Role 1: Admin / Super Admin
+### Materials & Storage Locations (`admin/masters/materials/`)
+- [x] Biomass materials specs (Moisture Max %, Ash Max %, GCV Min, Base Rate INR/MT)
+- [x] Physical storage locations (Yard A, Yard B, Shed 01, Shed 02) with capacity utilization bars
+- [x] Add Material & Add Storage Location modals
 
-### Dashboard
-- [ ] Admin overview dashboard (system stats, recent activity)
+### Blend Formulas (`admin/masters/formulas/`)
+- [x] Biomass blend recipe cards with ingredient percentage composition bars
+- [x] Target GCV and Ash tolerance benchmarks
+- [x] Create Blend Formula modal with sum-to-100% ingredient builder
 
-### User Management (`admin/users/`)
-- [ ] User list (table with search, filter by role, status)
-- [ ] Add / Edit user form (name, email, role, permissions)
-- [ ] User detail view
-- [ ] Activate / Deactivate user
-
-### Role & Permission Settings (`admin/settings/`)
-- [ ] Role list & permission matrix
-- [ ] System configuration page
-
-### Masters — Supplier / Farmer (`admin/masters/suppliers/`)
-- [ ] Supplier list (table with search, filter by type/status)
-- [ ] Add / Edit supplier form (ID, name, village, material, bank, GST)
-- [ ] Supplier detail view (purchase history, payment history)
-- [ ] Supplier type filter (Farmer, Trader, Aggregator, Company)
-
-### Masters — Materials (`admin/masters/materials/`)
-- [ ] Material list
-- [ ] Add / Edit material form (name, category, QC parameters)
-- [ ] Material detail view
-
-### Masters — Storage Locations (`admin/masters/storage-locations/`)
-- [ ] Storage location list (Yard A, Warehouse 1, Shed 2, etc.)
-- [ ] Add / Edit storage location form
-- [ ] Location capacity & current stock view
-
-### Masters — Formulas / Blends (`admin/masters/formulas/`)
-- [ ] Formula list
-- [ ] Add / Edit formula (material mix ratios, target output)
-- [ ] Formula detail view
+### User Access & Station Profiles (`admin/users/`)
+- [x] Operator personnel roster with dual view switcher
+- [x] Station assignments (Gate 01, WB 01/02, QC Lab, Pellet Line, Sheds, Dispatch, Directorate)
+- [x] Shift assignments and instant status toggle (On Duty / Suspended)
+- [x] Register Plant Operator modal
 
 ---
 
-## Phase 4 — Role 2: Gate / Security Operator
+## Phase 3 — Role 2: Gate / Security Operator (`/gate`)
 
-### Gate Dashboard & Operations Hub (`gate/dashboard/` & `gate/gate-home.tsx`)
+### Gate Dashboard & Operations Hub (`/gate`)
 - [x] Operations Hub with real-time digital master clock & rapid hotbar
 - [x] Shift 01 telemetry, on-duty guard badge, barricade health & weighbridge sync
 - [x] Shift pulse KPIs (Movements today, Biomass inflow, Turnaround, Safety record)
-- [x] Tactical guard rapid workflow launchpad (Pass creation, check-in, barrier override)
-- [x] Expected Inbound Biomass Consignments Queue with 1-click fast check-in
-- [x] Live perimeter camera feed status & manual barrier override controls
-- [x] Interactive guard shift log & physical security checklists with timestamps
-- [x] Real-time gate event & vehicle movement audit feed with category filters
-- [x] Shift Handover Sign-Off protocol with relief guard validation
+- [x] Expected Inbound Consignments Queue with 1-click fast check-in
+- [x] Dual view (translucent cards & transparent table) with `h-10` view switcher
+- [x] Real-time gate event & vehicle movement audit feed
 
-### Live Vehicle Tracker (`gate/live-tracker/` & `gate/live-vehicle-tracker.tsx`)
+### Live Vehicle Tracker (`/gate/tracker`)
 - [x] Interactive multi-compartment vehicle visualizer (Cab + Bay 1-4) with 3D SVG axles
 - [x] Stage progression pipeline (Gate In -> Weighment -> Unloading -> QC Lab -> Exit)
 - [x] Smooth card open/collapse animations with Motion (`motion/react`)
-- [x] Status filter chips, search filtering, and driver biometric modal view
-- [x] Switzer typography with tabular numbers
-- [x] Direct navigation link to Outward Exit Desk for ready-to-clear vehicles
+- [x] Driver biometric modal view & rapid exit routing
 
-### Gate Entries (`gate/entries/`, `/gate/entry` & `gate/gate-entry.tsx`)
-- [x] Dedicated Vehicle Gate Entry Console (`/gate/entry`) with bold industrial typography
-- [x] Zero-scroll desktop experience (< 650px total height, 3-column field grid)
+### Gate Entry Desk (`/gate/entry`)
+- [x] Dedicated Vehicle Gate Entry Console (< 650px total height, zero-scroll desktop)
 - [x] Native transparent background on mobile viewports (≤ 640px)
 - [x] Responsive direction switcher (`Inbound RM` vs `Outbound FG`)
-- [x] RM Gate Entry form (vehicle, driver, supplier, material, PO, expected weight)
-- [x] Dispatch Gate Entry form (vehicle, driver, customer, SO)
-- [x] Fast-track prefill support from expected arrivals queue
-- [x] Auto-generated Gate Entry No (`RM-GATE-261003-XXX`) following spec pattern
-- [x] Tactile Security Inspection & Remarks preset chips with generous touch padding
-- [x] Plain English UI vocabulary (replaced jargon across forms)
-- [x] Reactive state integration: newly created passes automatically enter live fleet queue
+- [x] Auto-generated Gate Entry No (`RM-GATE-261003-XXX`)
+- [x] Tactile Security Inspection & Remarks preset chips
 
-### Vehicle Exit Desk (`gate/exits/` & `gate/gate-exit.tsx`)
+### Vehicle Exit Desk (`/gate/exit`)
 - [x] Exit clearance queue with direction pills, dwell time, and WB slip reconciliation
-- [x] Shift Telemetry KPIs (Exit Queue, Departed Today, Avg Dwell, Security Compliance)
 - [x] 4-Step Physical Security Clearance modal (WB slip, cargo bed, breathalyzer, gate pass)
-- [x] "Select All 4 Checks" helper for rapid processing
-- [x] Guard remarks & officer sign-off logging
 - [x] Barrier 02 Cycle automation (Raise -> Pass -> Lower alert sequence)
 - [x] Printable official Outward Clearance Pass (`EXT-261003-00X`) with QR and letterhead
-- [x] Departed Today Audit Trail with search and pass reprint functionality
-- [x] Manual Barrier Override modal with 20s auto-lower safety timer
-- [x] Clean `@media print` layout for thermal and A4 printers
-
-### Document Verification Desk (`gate/docs/` & `gate/gate-doc-verification.tsx`)
-- [x] Statutory compliance header with GST NIC gateway status (32ms latency) & Rule 138 alert
-- [x] Optical QR / Barcode Scanner simulator for e-Way bills and physical challans
-- [x] Consignment audit table with HSN, GSTIN, transporter, and validity tracking
-- [x] Multi-field search and 5 status filter chips (All, Pending, Verified, Expired, Flagged)
-- [x] Split-screen Document Audit modal with interactive 4-point verification checklist
-- [x] One-click "Verify All Checks" helper
-- [x] Discrepancy flagging: Plate Mismatch, Expired e-Way Bill, Tax Invoice Missing
-- [x] Printable Statutory Clearance Certificate with officer verification stamp
-- [x] Clean `@media print` layout for legal documentation
-
-### Vehicle Details Drawer (`gate/vehicle-details-drawer.tsx`)
-- [x] Slide-over inspection drawer for granular vehicle, driver, and consignment diagnostics
-- [x] 5-stage visual timeline progression with step advance actions
-- [x] Gate pass slip generation and print action
-
-### Plant Intercom (`gate/intercom-modal.tsx`)
-- [x] Tactical intercom directory linking Gate to WB-01, QC Lab, Yard, and Admin
-- [x] Live line status, push-to-talk simulation, and emergency broadcast toggle
-
-### Shared State Architecture (`src/app/page.tsx` & `src/lib/types/gate.ts`)
-- [x] Lifted `vehicles[]` reactive state to root `page.tsx`
-- [x] Two-way synchronization across Home, Tracker, Entry Modal, Exit Desk, and Doc Verification
-- [x] Status progression transitions synced in real-time across all views
 
 ---
 
-## Phase 5 — Role 3: Weighbridge Operator
+## Phase 4 — Role 3: Weighbridge Operator (`/weighbridge`)
 
-### Weighbridge Home & Operations Console (`weighbridge/weighbridge-home.tsx`)
-- [x] Dual-platform live monitoring console: WB-01 (Inbound RM Gross/Tare) and WB-02 (Outbound FG Tare/Gross)
-- [x] Live digital scale indicator telemetry with Rice Lake / Avery high-contrast CRT styling
-- [x] Real-time stability beacon (`STABLE` in bio-emerald vs `IN_MOTION` in amber pulsing)
-- [x] Dynamic axle load distribution graphic with individual load cell readouts
-- [x] Tare zeroing and calibration override controls
-- [x] Platform occupancy cards with live vehicle assignment and pass tracking
-- [x] Quick-action hotbar: Capture Gross, Capture Tare, Manual Calibration, Print Slip
+### Scale Terminal (`/weighbridge`)
+- [x] Dual-platform live monitoring console: WB-01 (Inbound RM) and WB-02 (Outbound FG)
+- [x] Razor-sharp 3-zone divided cockpit alignment (`ScaleIndicator`)
+- [x] Dual view waiting vehicle queue with `h-10` desktop segmented switcher
+- [x] Transparent table styling (`bg-transparent`, mist headers `bg-neutral-200/50`)
+- [x] Automated Net Weight calculation (`Net = |Gross - Tare|`) strictly non-editable
 
-### Weighment Capture Modal (`weighbridge/weighment-capture-modal.tsx`)
-- [x] Gross weighment entry with digital scale sync and camera snapshot
-- [x] Tare weighment entry with automated gross-tare reconciliation
-- [x] Strictly automated non-editable Net Weight calculation (`Net = |Gross - Tare|`)
-- [x] Tolerance limit check against expected PO/SO quantity (warning on > 5% variance)
-- [x] Automatic vehicle state progression (Inbound: Gate -> Gross Weighed -> QC Pending; Outbound: Tare Weighed -> Loading -> Gross Weighed -> Cleared)
-
-### Official Weighbridge Slips (`weighbridge/weighbridge-slip-modal.tsx`)
+### Official Weighbridge Slips & Records (`/weighbridge/weighments`)
 - [x] Printable legal metrology weight certificate with Bharat Industrial & Renewables LLP header
-- [x] Dual-stage weighment audit matrix (Gross, Tare, Net weights with exact operator timestamps)
-- [x] Barcode identifier strip and QR tracking tag
-- [x] Metrology legal declaration and weighbridge operator digital signature block
-- [x] Clean print stylesheets (`@media print`) for thermal receipt and laser A4 printers
-
-### Weighment Records & History
-- [x] Real-time searchable and filterable weighment log
-- [x] Filter by Direction (Inbound RM / Outbound FG), Platform (WB-01 / WB-02), and Status
-- [x] 1-Click slip reprint and vehicle inspection drawer linkage
+- [x] Dual-stage weighment audit matrix (Gross, Tare, Net weights with operator timestamps)
+- [x] Barcode identifier strip, QR tracking tag, and digital signature block
+- [x] Searchable, filterable audit ledger of all completed weighments with reprint
 
 ---
 
-## Phase 6 — Role 4: QC / Lab Technician
+## Phase 5 — Role 4: QC / Lab Technician (`/quality`)
 
-### RM Testing (`quality/rm-testing/`)
-- [ ] Pending samples list (awaiting QC)
-- [ ] QC test entry form (Moisture%, Ash%, GCV, Bulk Density, Foreign Matter%)
-- [ ] Approve / Hold / Reject workflow with remarks
-- [ ] QC report detail view
+### Lab Overview & Testing Pulse (`/quality`)
+- [x] Digital shift clock, shift testing pulse KPIs, rapid test launchpad
+- [x] Pending sampling queue with 1-click test launch
+- [x] Recent test results feed with parameter preview
 
-### FG Testing (`quality/fg-testing/`)
-- [ ] FG pending samples list
-- [ ] FG QC test entry form (GCV, Moisture, Ash, diameter, fines%)
-- [ ] FG Approve / Hold / Reject workflow
-- [ ] FG QC report detail view
+### RM Testing Workbench (`/quality/rm-testing`)
+- [x] 6-parameter tolerance workbench (Moisture%, Ash%, GCV, Foreign Matter%, Bulk Density, Grade)
+- [x] Instant tolerance validation against acceptable limits with visual feedback
+- [x] Approve / Hold / Reject decision workflow with mandatory remarks
+- [x] Auto lot formation trigger on approval
 
-### Reports (`quality/reports/`)
-- [ ] QC reports list (filterable by date, material, status)
-- [ ] COA (Certificate of Analysis) generation
-- [ ] QC analytics (pass/fail trends)
+### FG Testing Workbench (`/quality/fg-testing`)
+- [x] 6-parameter finished goods testing (Diameter 8mm, GCV, Moisture, Ash, Bulk Density, Fines%)
+- [x] Batch dispatch authorization workflow (Release for Dispatch / Quarantine / Re-process)
+- [x] Automatic dispatchable inventory status update
 
----
-
-## Phase 7 — Role 5: Production Supervisor / Operator
-
-### Production Plans (`production/plans/`)
-- [ ] Production plan list (date, shift, target, status)
-- [ ] Create production plan form (date, shift, target, product, formula, material mix)
-- [ ] Production plan detail view
-
-### Material Issue (`production/material-issue/`)
-- [ ] Material issue request form (RM lots selection, quantities)
-- [ ] Material issue list
-- [ ] Auto inventory deduction display
-
-### Processing Stages (`production/processing/`)
-- [ ] Stage-wise logging UI:
-  - [ ] Cleaning (input, output, rejected, loss)
-  - [ ] Size Reduction / Grinding (machine, time, operator)
-  - [ ] Drying / Moisture Control (moisture before/after, dryer)
-  - [ ] Blending / Mixing (formula, lots, actual vs target)
-  - [ ] Pelletisation (batch, machine, shift, diameter)
-  - [ ] Cooling (batch, input, output, loss)
-  - [ ] Screening (good production, fines, rejected/recycle)
-
-### Batches (`production/batches/`)
-- [ ] Production batch list
-- [ ] Production batch detail (linked RM lots, formula, operator, machine)
-- [ ] FG Batch creation
-
-### Downtime (`production/downtime/`)
-- [ ] Downtime log entry (machine, start, end, reason)
-- [ ] Downtime history & analytics
+### COA Reports Suite (`/quality/reports`)
+- [x] Official Certificate of Analysis modal with Bharat Industrial & Renewables LLP letterhead
+- [x] Customer target vs actual test matrix with pass/fail indicators
+- [x] QR code, batch lineage reference, and lab technician signature block
+- [x] Print stylesheet support (`window.print()`)
 
 ---
 
-## Phase 8 — Role 6: Warehouse / Inventory Manager
+## Phase 6 — Role 5: Production Supervisor (`/production`)
 
-### Raw Materials (`inventory/raw-materials/`)
-- [ ] RM inventory dashboard (material-wise stock, location-wise view)
-- [ ] RM stock movement log (received, issued, consumed)
-- [ ] RM inventory detail by material
+### Production Plans (`/production/plans`)
+- [x] Shift targets console (MT, Product specs 8mm, Blend formula)
+- [x] New Production Plan modal with recipe selection
+- [x] Dual view (`[ Cards ] [ Table ]`) plan tracker
 
-### Finished Goods (`inventory/finished-goods/`)
-- [ ] FG inventory dashboard (batch-wise, status: QC Pending / Approved / Dispatched)
-- [ ] FG stock movement log
-- [ ] FG inventory detail by batch
+### Material Issue (`/production/material-issue`)
+- [x] RM lot deduction and issue console linking warehouse stock to production plans
+- [x] Issue Material modal with live lot availability check and inventory reduction
+- [x] Issued material tracking table
 
-### Lots (`inventory/lots/`)
-- [ ] RM Lot list (lot ID, material, supplier, QC status, quantity)
-- [ ] Lot detail view (full traceability: supplier → vehicle → QC → storage)
-- [ ] Lot traceability chain visualization
+### 7-Stage Processing Console (`/production/processing`)
+- [x] Stage-wise operational console covering all 7 stages:
+  1. Cleaning (14) - Destoner, magnetic separator
+  2. Grinding (15) - Hammer mill screen
+  3. Drying (16) - Rotary drum dryer, moisture in/out
+  4. Blending (17) - Multi-biomass mixing ratio
+  5. Pelletisation (18) - Ring die press 8mm, amp load
+  6. Cooling (19) - Counter-flow cooler
+  7. Screening (20) - Vibratory screen, fines recycle
+- [x] Stage-wise logging modals and live status badges
 
-### Packaging (`inventory/packaging/`)
-- [ ] Packaging entry form (batch, type: bagged/bulk, bag size, quantity)
-- [ ] Packaging history list
-
----
-
-## Phase 9 — Role 7: Sales / Dispatch Manager
-
-### Customers (`sales/customers/`)
-- [ ] Customer list
-- [ ] Add / Edit customer form
-- [ ] Customer detail (order history, payment history)
-
-### Orders (`sales/orders/`)
-- [ ] Sales order list (status workflow tracking)
-- [ ] Create sales order form (customer, product, quantity, rate, delivery, terms)
-- [ ] Sales order detail view
-- [ ] Order status progression (Enquiry → Quotation → Confirmed → Dispatched → Closed)
-
-### Dispatch (`sales/dispatch/`)
-- [ ] Dispatch planning screen (available FG vs order requirements)
-- [ ] Loading transaction form (link: customer → SO → FG batch → vehicle)
-- [ ] Dispatch list & detail view
-
-### Invoices (`sales/invoices/`)
-- [ ] Invoice generation (auto from dispatch)
-- [ ] Invoice list
-- [ ] Document generation: Delivery Challan, E-way Bill, Weighbridge Slip, LR, COA
-
-### Delivery (`sales/delivery/`)
-- [ ] Delivery tracking (Dispatched → In Transit → Delivered → POD Received)
-- [ ] POD upload & customer acknowledgement
-- [ ] Delivery history
-
-### Payments (`sales/payments/`)
-- [ ] Payment receivable dashboard (outstanding, overdue, received)
-- [ ] Payment entry form (amount, date, mode, reference)
-- [ ] Invoice vs payment reconciliation
-- [ ] Payment status tracking (Outstanding → Part Payment → Fully Paid → Closed)
+### Batch History & Performance (`/production/batches`)
+- [x] Historical batch performance ledger (`PB-YYMMDD-seq` and `FG-BATCH-YYMMDD-seq`)
+- [x] Yield analysis (Input RM MT vs Output Pellets MT, % Yield)
+- [x] Shift downtime tracker with machine and reason logging
 
 ---
 
-## Phase 10 — Role 8: Management / Plant Director
+## Phase 7 — Role 6: Warehouse / Inventory Manager (`/inventory`)
 
-### Dashboard (`management/dashboard/`)
-- [ ] Live KPI dashboard:
-  - [ ] Vehicles inside plant
-  - [ ] RM awaiting QC
-  - [ ] RM available stock (MT)
-  - [ ] Production today vs target
-  - [ ] FG awaiting QC
-  - [ ] FG stock (MT)
-  - [ ] Orders pending (MT)
-  - [ ] Today's dispatches (count + MT)
-  - [ ] Outstanding receivables (₹)
-  - [ ] Average RM cost (₹/MT)
-  - [ ] Production cost (₹/MT)
-- [ ] Charts: production trends, inventory trends, revenue trends
+### Raw Material Yards (`/inventory/raw-materials`)
+- [x] Location-wise stock map (Yard A, Yard B, Sheds) with capacity/occupancy telemetry
+- [x] Stock movement ledger (Received, Issued, Balance)
+- [x] Rapid lot allocation links
 
-### Traceability (`management/traceability/`)
-- [ ] Forward trace: Supplier → RM Lot → Production → FG → Customer
-- [ ] Reverse trace: Customer → Dispatch → FG Batch → Production → RM Lot → Supplier
-- [ ] Visual chain/flow diagram
+### Finished Goods Stock (`/inventory/finished-goods`)
+- [x] Batch-wise FG inventory categorized by Produced → QC Pending → QC Approved → Dispatchable
+- [x] Dual view (`[ Cards ] [ Table ]`)
+- [x] Storage location allocations (Shed 01, Shed 02)
 
-### Reports (`management/reports/`)
-- [ ] Daily production report
-- [ ] Inventory summary report
-- [ ] Sales & dispatch report
-- [ ] QC summary report
-- [ ] Financial summary (receivables, costs)
-- [ ] Export to PDF / Excel
+### Packaging & Bagging (`/inventory/packaging`)
+- [x] Bagged (25/40/50 kg) or bulk vehicle dispatch logging console
+- [x] Bagging workbench with tare weight deduction and bag count calculation
+- [x] Completed packaging ledger
+
+### Lot Traceability Ledger (`/inventory/lots`)
+- [x] Complete RM lot ledger (`RMLOT-material-YYMMDD-seq`)
+- [x] Digital lineage linking Supplier → Vehicle → Gross/Tare → QC Lab → Storage Bay
+- [x] Dual view switcher with search and material filters
+
+---
+
+## Phase 8 — Role 7: Sales / Dispatch Manager (`/sales`)
+
+### Sales Orders (`/sales/orders`)
+- [x] Customer order booking console with rate (₹/MT) and target specs
+- [x] Order status workflow (New → Confirmed → Partially Dispatched → Fully Dispatched → Closed)
+- [x] Dual view switcher (`[ Cards ] [ Table ]`)
+
+### Dispatch Planning (`/sales/dispatch`)
+- [x] Stock verification against open orders
+- [x] Vehicle allocation workbench linking approved FG batches to customer sales orders
+- [x] Loading slips and driver dispatch clearance
+
+### Invoices & Documentation Suite (`/sales/invoices`)
+- [x] Automated generation of Sales Invoice, Delivery Challan, E-Way Bill, Weighbridge Slip, LR, and COA suite (PDF Sec 30)
+- [x] Printable official documents with QR code and company letterhead
+- [x] Invoice audit ledger
+
+### Delivery & POD (`/sales/delivery`)
+- [x] In-transit vehicle tracking and ETA monitoring
+- [x] Proof of Delivery (POD) upload and customer acknowledgment logging
+- [x] Completed trip audit trail
+
+### Payments Ledger (`/sales/payments`)
+- [x] Accounts receivable ledger with credit limit exposure tracking
+- [x] Payment reconciliation entry form (NEFT / RTGS / Cheque / Cash)
+- [x] Payment status workflow (Outstanding → Part Payment → Fully Paid → Closed)
+
+---
+
+## Phase 9 — Role 8: Management / Plant Director (`/management`)
+
+### Executive Command Dashboard (`/management`)
+- [x] All 11 Core Plant Telemetry KPIs from PDF Section 37 (Page 23):
+  1. Vehicles Inside Plant
+  2. Raw Material Awaiting QC
+  3. Raw Material Available Stock (MT)
+  4 & 5. Production Today vs Target (MT & %)
+  6. Finished Goods Awaiting QC
+  7. Finished Goods Stock (MT)
+  8. Orders Pending (MT)
+  9 & 10. Dispatches Today (Count & MT)
+  11. Outstanding Receivables (₹)
+- [x] Unit Economics Telemetry: RM Avg Cost (₹/MT), Production Cost (₹/MT), Net Operational Margin
+- [x] Live Physical-to-Digital Stream (PDF Sec 38 compliance)
+
+### Bi-Directional Digital Traceability Explorer (`/management/traceability`)
+- [x] PDF Section 34 Non-Negotiable Core Architecture:
+  - Reverse Trace: Customer &rarr; Sales Order &rarr; Dispatch &rarr; FG Batch &rarr; Production Run &rarr; RM Lots &rarr; Suppliers
+  - Forward Trace: Supplier &rarr; Vehicle Inbound &rarr; Gross/Tare &rarr; RM Lot &rarr; Production Run &rarr; FG Batch &rarr; Dispatch &rarr; Customer
+- [x] Visual interactive lineage chain diagram with expandable node telemetry
+
+### Cost Breakdown, Yield & Operational Margin (`/management/cost-yield`)
+- [x] Unit economics breakdown per Metric Ton (MT) finished biomass pellet
+- [x] Raw biomass cost, electricity/power, consumables, labour, and transport cost stack
+- [x] Gross margin calculation (₹1,750 / MT, 25.3% margin)
+
+### Executive Reports & Audits (`/management/reports`)
+- [x] Audit-ready reporting suite covering Daily Production, Inventory Balances, Sales Dispatches, and Quality Pass/Fail
+- [x] Print / PDF export capabilities (`window.print()`)
+- [x] Period filtering (Today, This Week, This Month)
+
+---
+
+## Phase 10 — UI Harmonization & Mobile Refinement
+
+Harmonizing all workbenches to match the Gate Operations and QC Lab design language:
+- Clean Command Headers directly on canvas (`border-b border-neutral-300 pb-4 sm:pb-5`)
+- Zero redundant subheadings on single-ledger pages (count badge & `[ Cards ] [ Table ]` in main header)
+- Zero duplicate navigation buttons in headers (tab switching handled exclusively by `IndustrialNav`)
+- Mandatory mobile responsive cards (`hidden sm:block` on tables; cards rendered on small screens)
+- Punchy Plain English metric card labels (`PENDING RM`, `TESTED TODAY`, `PASS RATE`, `INSIDE PLANT`)
+- Selectors with `flex-1 min-w-0 truncate` and `shrink-0` to eliminate mobile overflow
+
+| Operational Role | Harmonization Status | Key Files Updated |
+|---|---|---|
+| **Role 2: Gate / Security** | 🟢 100% Complete | `gate-home.tsx`, `live-vehicle-tracker.tsx`, `gate-entry-modal.tsx`, `gate-exit.tsx` |
+| **Role 4: QC / Lab** | 🟢 100% Complete | `qc-overview.tsx`, `qc-records-ledger.tsx`, `rm-testing-workbench.tsx`, `fg-testing-workbench.tsx` |
+| **Role 3: Weighbridge** | 🟡 Next Up | `weighbridge-home.tsx`, `weighments-ledger.tsx` |
+| **Role 7: Sales / Dispatch** | 🟡 Queued | `sales-orders-view.tsx`, `dispatch-planning-view.tsx`, `invoices-docs-view.tsx`, `delivery-pod-view.tsx`, `payments-ledger-view.tsx` |
+| **Role 5: Production** | 🟡 Queued | `production-plans-view.tsx`, `material-issue-view.tsx`, `processing-view.tsx`, `batch-history-view.tsx` |
+| **Role 6: Inventory** | 🟡 Queued | `raw-materials-view.tsx`, `finished-goods-view.tsx`, `packaging-view.tsx`, `lot-traceability-view.tsx` |
+| **Role 1: Admin Masters** | 🟡 Queued | `suppliers-master-view.tsx`, `customers-master-view.tsx`, `materials-storage-view.tsx`, `formulas-master-view.tsx`, `users-access-view.tsx` |
+| **Role 8: Management** | 🟡 Queued | `management-dashboard-view.tsx`, `traceability-explorer-view.tsx`, `cost-yield-view.tsx`, `management-reports-view.tsx` |
 
 ---
 
@@ -384,14 +312,18 @@
 |---|---|---|
 | Project setup & design system complete | 03 Oct 2026 | 🟢 Complete |
 | Gate + Weighbridge complete | 04 Oct 2026 | 🟢 Complete |
-| QC + Inventory complete | TBD | 🟡 Next Up |
-| Production module complete | TBD | 🔴 Planned |
-| Sales & Dispatch complete | TBD | 🔴 Planned |
-| Management Dashboard complete | TBD | 🔴 Planned |
-| Auth + Admin panel complete | TBD | 🔴 Planned |
-| Full integration & polish | TBD | 🔴 Planned |
-| **🚀 Launch Ready** | TBD | 🔴 Planned |
+| QC Lab Technician workbench complete | 04 Oct 2026 | 🟢 Complete |
+| Warehouse & Inventory management complete | 04 Oct 2026 | 🟢 Complete |
+| Pelletising Production supervisor console complete | 04 Oct 2026 | 🟢 Complete |
+| Sales & Outbound Dispatch complete | 04 Oct 2026 | 🟢 Complete |
+| Management Directorate & Bi-Directional Traceability complete | 04 Oct 2026 | 🟢 Complete |
+| Admin Masters & User Access setup complete | 04 Oct 2026 | 🟢 Complete |
+| All 8 Roles Navigation & Station Switcher unified | 04 Oct 2026 | 🟢 Complete |
+| Gate Operations UI Harmonization & Mobile Zero-Scroll | 04 Oct 2026 | 🟢 Complete |
+| QC Lab UI Harmonization & Mobile Responsive Cards | 04 Oct 2026 | 🟢 Complete |
+| Comprehensive Session Handoff Blueprint (`SESSION_HANDOFF.md`) | 04 Oct 2026 | 🟢 Complete |
+| Remaining 6 Modules UI Harmonization | 04 Oct 2026 | 🟡 Next Up |
 
 ---
 
-> **Note:** This tracker will be updated as each screen/component is completed. Check off items as they are built and change status emojis accordingly.
+> **Note:** Master implementation blueprint for remaining modules is documented in [`SESSION_HANDOFF.md`](./SESSION_HANDOFF.md). All code compiles with 0 errors (`npx tsc --noEmit`).

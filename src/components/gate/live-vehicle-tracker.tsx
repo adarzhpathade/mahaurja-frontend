@@ -17,6 +17,8 @@ import {
   Eye,
   SlidersHorizontal,
   ChevronDown,
+  LayoutGrid,
+  Table as TableIcon,
 } from "lucide-react";
 import { GateVehicle, VehicleDirection, GateStage } from "@/lib/types/gate";
 import { INITIAL_GATE_VEHICLES } from "@/lib/data/mock-gate-vehicles";
@@ -249,147 +251,165 @@ export function LiveVehicleTracker({
       {/* ========================================================================= */}
       {/* MAIN VEHICLE FLEET TABLE                                                  */}
       {/* ========================================================================= */}
-      <div className="border-0 sm:border sm:border-neutral-300">
-        {/* Filter Tabs & Search Controls */}
-        <div className="p-0 sm:p-4 pb-3 sm:pb-4 border-b border-neutral-300 space-y-2.5">
-          {/* Top Row: Search Input (Full Width on mobile) + Filters Toggle (PC) + View Mode Switcher (PC) */}
+      <div className="space-y-4 pt-2">
+        {/* Section Heading (Matching Weighbridge Reference) */}
+        <div className="flex items-center justify-between border-b border-neutral-300 pb-2.5">
           <div className="flex items-center gap-2">
-            <div className="relative w-full flex-1">
-              <Search className="w-4 h-4 text-neutral-400 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search plate, pass ID, material, driver..."
-                className="w-full h-11 sm:h-10 pl-9.5 pr-8 bg-white border border-neutral-300 text-sm text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:border-[#059669] transition-colors"
-              />
-              {searchQuery && (
-                <button
-                  type="button"
-                  onClick={() => setSearchQuery("")}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-700 cursor-pointer"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              )}
-            </div>
-
-            {/* Filters Toggle Button (PC Only) */}
-            <button
-              type="button"
-              onClick={() => setShowFilters(!showFilters)}
-              className={`hidden sm:flex h-10 px-3.5 border text-xs font-bold uppercase tracking-wider items-center gap-2 transition-colors cursor-pointer shrink-0 ${
-                showFilters || activeTab !== "ALL"
-                  ? "bg-[#18181B] text-white border-[#18181B]"
-                  : "bg-white text-neutral-700 border-neutral-300 hover:bg-neutral-100"
-              }`}
-            >
-              <SlidersHorizontal className="w-4 h-4" />
-              <span>Filters</span>
-              {activeTab !== "ALL" && (
-                <span className="text-[10px] bg-[#059669] text-white px-1.5 py-0.2 rounded font-mono font-bold">
-                  1
-                </span>
-              )}
-              <ChevronDown
-                className={`w-3.5 h-3.5 transition-transform ${
-                  showFilters ? "rotate-180" : ""
-                }`}
-              />
-            </button>
-
-            {/* View Mode Switcher (PC Only) */}
-            <div className="hidden sm:inline-flex border border-neutral-300 divide-x divide-neutral-300 text-xs shrink-0 h-10">
-              <button
-                type="button"
-                onClick={() => setViewMode("CARDS")}
-                className={`px-3 py-1.5 transition-colors cursor-pointer flex items-center ${
-                  viewMode === "CARDS"
-                    ? "bg-[#18181B] text-white font-semibold"
-                    : "bg-neutral-200/50 text-neutral-700 hover:bg-neutral-200"
-                }`}
-              >
-                Cards
-              </button>
-              <button
-                type="button"
-                onClick={() => setViewMode("TABLE")}
-                className={`px-3 py-1.5 transition-colors cursor-pointer flex items-center ${
-                  viewMode === "TABLE"
-                    ? "bg-[#18181B] text-white font-semibold"
-                    : "bg-neutral-200/50 text-neutral-700 hover:bg-neutral-200"
-                }`}
-              >
-                Table
-              </button>
-            </div>
+            <Truck className="w-4 h-4 text-neutral-800 shrink-0" />
+            <h2 className="text-xs font-bold uppercase tracking-wider text-neutral-900">
+              Active Plant Fleet
+            </h2>
+            <span className="text-[10px] font-bold font-mono px-1.5 py-0.5 bg-neutral-200 border border-neutral-300 text-neutral-800">
+              {filteredVehicles.length}
+            </span>
           </div>
 
-          {/* Active Filter summary chip (PC Only) */}
-          {!showFilters && activeTab !== "ALL" && (
-            <div className="hidden sm:flex items-center gap-2 pt-0.5 text-xs">
-              <span className="text-neutral-500 font-medium">Filter:</span>
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-neutral-900 text-white font-bold text-[11px] uppercase tracking-wide">
-                <span>
-                  {
-                    [
-                      { key: "INBOUND_RM", label: "Inbound Biomass" },
-                      { key: "OUTBOUND_DISPATCH", label: "Outbound Dispatch" },
-                      { key: "WAITING_WEIGHMENT", label: "Awaiting Weighment" },
-                      { key: "UNLOADING", label: "Yard Unload & QC" },
-                      { key: "CLEARED_EXIT", label: "Cleared for Exit" },
-                    ].find((f) => f.key === activeTab)?.label
-                  }
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setActiveTab("ALL")}
-                  className="hover:text-red-400 cursor-pointer ml-1"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              </span>
-            </div>
-          )}
+          {/* View Mode Toggle (PC Only) */}
+          <div className="hidden sm:inline-flex border border-neutral-300 divide-x divide-neutral-300 text-xs shrink-0 h-10">
+            <button
+              type="button"
+              onClick={() => setViewMode("CARDS")}
+              className={`px-3 py-1.5 transition-colors cursor-pointer flex items-center gap-1.5 ${
+                viewMode === "CARDS"
+                  ? "bg-[#18181B] text-white font-semibold"
+                  : "bg-neutral-200/50 text-neutral-700 hover:bg-neutral-200"
+              }`}
+            >
+              <LayoutGrid className="w-3.5 h-3.5" />
+              <span>Cards</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode("TABLE")}
+              className={`px-3 py-1.5 transition-colors cursor-pointer flex items-center gap-1.5 ${
+                viewMode === "TABLE"
+                  ? "bg-[#18181B] text-white font-semibold"
+                  : "bg-neutral-200/50 text-neutral-700 hover:bg-neutral-200"
+              }`}
+            >
+              <TableIcon className="w-3.5 h-3.5" />
+              <span>Table</span>
+            </button>
+          </div>
+        </div>
 
-          {/* Expandable Filter Tabs Grid/Pills (PC Only) */}
-          {showFilters && (
-            <div className="hidden sm:block pt-2 border-t border-neutral-200 space-y-2">
-              <div className="flex flex-wrap items-center gap-1.5">
-                {[
-                  { key: "ALL", label: "All Inside", count: stats.totalInside },
-                  { key: "INBOUND_RM", label: "Inbound Biomass", count: stats.inboundRM },
-                  { key: "OUTBOUND_DISPATCH", label: "Outbound Dispatch", count: stats.outboundFG },
-                  { key: "WAITING_WEIGHMENT", label: "Awaiting Weighment", count: stats.awaitingWeighbridge },
-                  { key: "UNLOADING", label: "Yard Unload & QC", count: stats.activeUnloading },
-                  { key: "CLEARED_EXIT", label: "Cleared for Exit", count: stats.clearedForExit },
-                ].map((tab) => (
-                  <button
-                    key={tab.key}
-                    type="button"
-                    onClick={() => setActiveTab(tab.key as FilterTab)}
-                    className={`px-3 py-1.5 text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer border whitespace-nowrap flex items-center gap-1.5 ${
-                      activeTab === tab.key
-                        ? "bg-[#18181B] text-white border-[#18181B]"
-                        : "bg-white text-neutral-700 border-neutral-300 hover:bg-neutral-100"
-                    }`}
-                  >
-                    <span>{tab.label}</span>
-                    <span className="opacity-75 font-mono text-[11px]">({tab.count})</span>
-                  </button>
-                ))}
-                {activeTab !== "ALL" && (
+        {/* Content container - borderless on mobile, bordered on PC */}
+        <div className="border-0 p-0 bg-transparent sm:border sm:border-neutral-300 sm:p-6 sm:bg-white/30 space-y-4 sm:space-y-5">
+          {/* Subheader & Search / Filter Controls */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pb-3 border-b border-neutral-300">
+            {/* Search Input & Mobile Filter Button */}
+            <div className="flex items-center gap-2 flex-1 sm:max-w-md">
+              <div className="relative flex-1">
+                <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search plate, pass ID, material, driver..."
+                  className="w-full h-10 pl-8.5 pr-8 bg-white border border-neutral-300 text-xs text-neutral-900 placeholder:text-[11px] placeholder:text-neutral-400 focus:outline-none focus:border-[#059669] transition-colors"
+                />
+                {searchQuery && (
                   <button
                     type="button"
-                    onClick={() => setActiveTab("ALL")}
-                    className="text-xs text-neutral-500 hover:text-neutral-900 underline underline-offset-2 ml-2 cursor-pointer font-medium"
+                    onClick={() => setSearchQuery("")}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-700 cursor-pointer"
                   >
-                    Reset
+                    <X className="w-3.5 h-3.5" />
                   </button>
                 )}
               </div>
-              <div className="text-[11px] text-neutral-500">
-                Showing <strong className="text-neutral-900">{filteredVehicles.length}</strong> vehicles matching criteria
+
+              {/* Mobile Filter Square Button */}
+              <button
+                type="button"
+                onClick={() => setShowFilters(true)}
+                className="sm:hidden w-10 h-10 flex items-center justify-center border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-700 shrink-0 cursor-pointer"
+                title="Filter Options"
+              >
+                <SlidersHorizontal className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Desktop Filter Tabs */}
+            <div className="hidden sm:flex items-center border border-neutral-300 divide-x divide-neutral-300 text-xs overflow-x-auto no-scrollbar shrink-0 h-10 bg-white">
+              {[
+                { key: "ALL", label: "All", count: stats.totalInside },
+                { key: "INBOUND_RM", label: "Inbound RM", count: stats.inboundRM },
+                { key: "OUTBOUND_DISPATCH", label: "Outbound FG", count: stats.outboundFG },
+                { key: "WAITING_WEIGHMENT", label: "Weighbridge", count: stats.awaitingWeighbridge },
+                { key: "UNLOADING", label: "Unload & QC", count: stats.activeUnloading },
+              ].map((tab) => (
+                <button
+                  key={tab.key}
+                  type="button"
+                  onClick={() => setActiveTab(tab.key as FilterTab)}
+                  className={`h-full px-3.5 cursor-pointer transition-colors whitespace-nowrap flex items-center gap-1.5 ${
+                    activeTab === tab.key
+                      ? "bg-[#18181B] text-white font-semibold"
+                      : "bg-white text-neutral-700 hover:bg-neutral-100"
+                  }`}
+                >
+                  <span>{tab.label}</span>
+                  <span
+                    className={`px-1.5 py-0.2 text-[10px] font-bold ${
+                      activeTab === tab.key
+                        ? "bg-[#059669] text-white"
+                        : "bg-neutral-200 text-neutral-700"
+                    }`}
+                  >
+                    {tab.count}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Mobile Filter Modal Popup */}
+          {showFilters && (
+            <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-end sm:hidden">
+              <div className="w-full bg-white border-t border-neutral-300 p-4 space-y-4 max-h-[80vh] overflow-y-auto">
+                <div className="flex items-center justify-between border-b border-neutral-200 pb-3">
+                  <div className="flex items-center gap-2">
+                    <SlidersHorizontal className="w-4 h-4 text-[#059669]" />
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-neutral-900">
+                      Filter Active Fleet
+                    </h3>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowFilters(false)}
+                    className="p-1 hover:bg-neutral-100 text-neutral-500 hover:text-neutral-900"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 gap-2">
+                  {[
+                    { key: "ALL", label: "All Vehicles", count: stats.totalInside },
+                    { key: "INBOUND_RM", label: "Inbound RM", count: stats.inboundRM },
+                    { key: "OUTBOUND_DISPATCH", label: "Outbound FG", count: stats.outboundFG },
+                    { key: "WAITING_WEIGHMENT", label: "Weighbridge Queue", count: stats.awaitingWeighbridge },
+                    { key: "UNLOADING", label: "Unload & QC", count: stats.activeUnloading },
+                  ].map((tab) => (
+                    <button
+                      key={tab.key}
+                      type="button"
+                      onClick={() => {
+                        setActiveTab(tab.key as FilterTab);
+                        setShowFilters(false);
+                      }}
+                      className={`h-11 px-4 text-xs font-semibold flex items-center justify-between border ${
+                        activeTab === tab.key
+                          ? "bg-[#18181B] text-white border-[#18181B]"
+                          : "bg-white text-neutral-800 border-neutral-200"
+                      }`}
+                    >
+                      <span>{tab.label}</span>
+                      <span className="font-mono text-[11px] font-bold px-1.5 py-0.5 bg-neutral-200/40">{tab.count}</span>
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           )}

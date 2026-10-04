@@ -31,6 +31,8 @@ import {
   QrCode,
   Building,
   Calendar,
+  LayoutGrid,
+  Table as TableIcon,
 } from "lucide-react";
 import { GateVehicle, ExitClearanceRecord, VehicleDirection, GateStage } from "@/lib/types/gate";
 import { INITIAL_DEPARTED_VEHICLES } from "@/lib/data/mock-gate-vehicles";
@@ -66,6 +68,7 @@ export function GateExit({ vehicles, onUpdateStage, onNavigateTab }: GateExitPro
   const [directionFilter, setDirectionFilter] = useState<"ALL" | VehicleDirection>("ALL");
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"CARDS" | "TABLE">("CARDS");
+  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
   // Barrier Status State
   const [barrierState, setBarrierState] = useState<"LOWERED" | "RAISED" | "AUTO_CYCLE">("LOWERED");
@@ -408,186 +411,214 @@ export function GateExit({ vehicles, onUpdateStage, onNavigateTab }: GateExitPro
       {/* 5. EXIT QUEUE & REGISTRY                                                  */}
       {/* ========================================================================= */}
       <div className="space-y-4 pt-3 sm:pt-6">
-        {/* Section Heading */}
-        <div className="flex items-center justify-between border-b border-neutral-300 pb-3">
-          <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-neutral-900">
-            Exit Queue & Registry
-          </h2>
-          <div className="flex items-center gap-3">
-            <div className="text-xs font-semibold text-neutral-500">
-              {activeTab === "DEPARTED"
-                ? `${filteredDepartedLog.length} departures logged`
-                : `${displayedVehicles.length} in view`}
-            </div>
-
-            {/* View Mode Switcher (PC Only) */}
-            <div className="hidden sm:inline-flex border border-neutral-300 divide-x divide-neutral-300 text-xs shrink-0 h-9">
-              <button
-                type="button"
-                onClick={() => setViewMode("CARDS")}
-                className={`px-3 py-1.5 transition-colors cursor-pointer flex items-center ${
-                  viewMode === "CARDS"
-                    ? "bg-[#18181B] text-white font-semibold"
-                    : "bg-neutral-200/50 text-neutral-700 hover:bg-neutral-200"
-                }`}
-              >
-                Cards
-              </button>
-              <button
-                type="button"
-                onClick={() => setViewMode("TABLE")}
-                className={`px-3 py-1.5 transition-colors cursor-pointer flex items-center ${
-                  viewMode === "TABLE"
-                    ? "bg-[#18181B] text-white font-semibold"
-                    : "bg-neutral-200/50 text-neutral-700 hover:bg-neutral-200"
-                }`}
-              >
-                Table
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div
-          className="border-0 p-0 bg-transparent space-y-3 sm:bg-white sm:border sm:border-neutral-300 sm:p-4 sm:space-y-4"
-          style={{ borderRadius: 0 }}
-        >
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-neutral-200 pb-3">
-          {/* Main View Tabs (Scrollable on Mobile) */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 max-w-full md:flex-wrap">
-            <button
-              type="button"
-              onClick={() => setActiveTab("QUEUE")}
-              className={`px-3 py-2 text-xs font-bold uppercase tracking-wider border cursor-pointer transition-colors flex items-center gap-2 shrink-0 whitespace-nowrap ${
-                activeTab === "QUEUE"
-                  ? "bg-[#18181B] text-white border-[#18181B]"
-                  : "bg-white text-neutral-700 border-neutral-300 hover:bg-neutral-50"
-              }`}
-              style={{ borderRadius: 0 }}
-            >
-              <span>Ready for Exit</span>
-              <span
-                className={`px-1.5 py-0.2 text-[10px] font-bold ${
-                  activeTab === "QUEUE"
-                    ? "bg-[#059669] text-white"
-                    : "bg-neutral-200 text-neutral-800"
-                }`}
-              >
-                {exitQueueVehicles.length}
-              </span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveTab("ALL_INSIDE")}
-              className={`px-3 py-2 text-xs font-bold uppercase tracking-wider border cursor-pointer transition-colors flex items-center gap-2 shrink-0 whitespace-nowrap ${
-                activeTab === "ALL_INSIDE"
-                  ? "bg-[#18181B] text-white border-[#18181B]"
-                  : "bg-white text-neutral-700 border-neutral-300 hover:bg-neutral-50"
-              }`}
-              style={{ borderRadius: 0 }}
-            >
-              <span>All Active In-Plant</span>
-              <span
-                className={`px-1.5 py-0.2 text-[10px] font-bold ${
-                  activeTab === "ALL_INSIDE"
-                    ? "bg-neutral-700 text-white"
-                    : "bg-neutral-200 text-neutral-800"
-                }`}
-              >
-                {vehicles.filter((v) => v.stage !== "EXIT_COMPLETED").length}
-              </span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveTab("DEPARTED")}
-              className={`px-3 py-2 text-xs font-bold uppercase tracking-wider border cursor-pointer transition-colors flex items-center gap-2 shrink-0 whitespace-nowrap ${
-                activeTab === "DEPARTED"
-                  ? "bg-[#18181B] text-white border-[#18181B]"
-                  : "bg-white text-neutral-700 border-neutral-300 hover:bg-neutral-50"
-              }`}
-              style={{ borderRadius: 0 }}
-            >
-              <span>Departed Today</span>
-              <span
-                className={`px-1.5 py-0.2 text-[10px] font-bold ${
-                  activeTab === "DEPARTED"
-                    ? "bg-neutral-700 text-white"
-                    : "bg-neutral-200 text-neutral-800"
-                }`}
-              >
-                {departedLog.length}
-              </span>
-            </button>
+        {/* Section Heading (Matching Weighbridge / Gate Expected Arrivals Standard) */}
+        <div className="flex items-center justify-between border-b border-neutral-300 pb-2.5">
+          <div className="flex items-center gap-2">
+            <LogOut className="w-4 h-4 text-neutral-800 shrink-0" />
+            <h2 className="text-xs font-bold uppercase tracking-wider text-neutral-900">
+              Exit Queue &amp; Registry
+            </h2>
+            <span className="text-[10px] font-bold font-mono px-1.5 py-0.5 bg-neutral-200 border border-neutral-300 text-neutral-800">
+              {activeTab === "DEPARTED" ? filteredDepartedLog.length : displayedVehicles.length}
+            </span>
           </div>
 
-          {/* Direction Filter Pills (PC Only) */}
-          <div className="hidden sm:flex items-center gap-1 border border-neutral-300 p-0.5 bg-neutral-50 overflow-x-auto shrink-0 self-start md:self-auto">
-            {(["ALL", "INBOUND_RM", "OUTBOUND_DISPATCH"] as const).map((dir) => (
-              <button
-                key={dir}
-                type="button"
-                onClick={() => setDirectionFilter(dir)}
-                className={`px-2.5 py-1 text-[11px] font-semibold transition-colors cursor-pointer shrink-0 whitespace-nowrap ${
-                  directionFilter === dir
-                    ? "bg-[#18181B] text-white"
-                    : "text-neutral-600 hover:text-neutral-900"
-                }`}
-                style={{ borderRadius: 0 }}
-              >
-                {dir === "ALL"
-                  ? "All Movements"
-                  : dir === "INBOUND_RM"
-                  ? "RM Inbound"
-                  : "FG Outbound"}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Search Bar & View Mode Toggle (Gate Reference Standard) */}
-        <div className="flex items-center gap-2">
-          <div className="relative w-full flex-1">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by Vehicle Plate (e.g. MH 20), Gate Pass #, Driver Name, Transporter, or Material..."
-              className="w-full h-11 sm:h-10 pl-9.5 pr-4 border border-neutral-300 bg-white text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-[#059669] transition-colors"
-              style={{ borderRadius: 0 }}
-            />
-          </div>
-
-          {/* View Toggle (PC Only - Standard Gate Pattern) */}
+          {/* View Mode Toggle (PC Only) */}
           <div className="hidden sm:inline-flex border border-neutral-300 divide-x divide-neutral-300 text-xs shrink-0 h-10">
             <button
               type="button"
               onClick={() => setViewMode("CARDS")}
-              className={`px-3 py-1.5 transition-colors cursor-pointer flex items-center ${
+              className={`px-3 py-1.5 transition-colors cursor-pointer flex items-center gap-1.5 ${
                 viewMode === "CARDS"
                   ? "bg-[#18181B] text-white font-semibold"
                   : "bg-neutral-200/50 text-neutral-700 hover:bg-neutral-200"
               }`}
             >
-              Cards
+              <LayoutGrid className="w-3.5 h-3.5" />
+              <span>Cards</span>
             </button>
             <button
               type="button"
               onClick={() => setViewMode("TABLE")}
-              className={`px-3 py-1.5 transition-colors cursor-pointer flex items-center ${
+              className={`px-3 py-1.5 transition-colors cursor-pointer flex items-center gap-1.5 ${
                 viewMode === "TABLE"
                   ? "bg-[#18181B] text-white font-semibold"
                   : "bg-neutral-200/50 text-neutral-700 hover:bg-neutral-200"
               }`}
             >
-              Table
+              <TableIcon className="w-3.5 h-3.5" />
+              <span>Table</span>
             </button>
           </div>
         </div>
-      </div>
-    </div>
+
+        {/* Content container - borderless on mobile, bordered on PC */}
+        <div className="border-0 p-0 bg-transparent sm:border sm:border-neutral-300 sm:p-6 sm:bg-white/30 space-y-4 sm:space-y-5">
+          {/* Subheader & Search / Filter Controls */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pb-3 border-b border-neutral-300">
+            {/* Search Input & Mobile Filter Button */}
+            <div className="flex items-center gap-2 flex-1 sm:max-w-md">
+              <div className="relative flex-1">
+                <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
+                <input
+                  type="text"
+                  placeholder="Search plate, gate pass, driver, material..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full h-10 pl-8.5 pr-3 text-xs bg-white border border-neutral-300 text-neutral-900 placeholder:text-[11px] placeholder:text-neutral-400 focus:outline-none focus:border-[#059669] transition-colors"
+                />
+              </div>
+
+              {/* Mobile Filter Square Button */}
+              <button
+                type="button"
+                onClick={() => setIsMobileFilterOpen(true)}
+                className="sm:hidden w-10 h-10 flex items-center justify-center border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-700 shrink-0 cursor-pointer"
+                title="Filter Options"
+              >
+                <SlidersHorizontal className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Desktop Filter Tabs */}
+            <div className="hidden sm:flex items-center border border-neutral-300 divide-x divide-neutral-300 text-xs overflow-x-auto no-scrollbar shrink-0 h-10 bg-white">
+              <button
+                type="button"
+                onClick={() => setActiveTab("QUEUE")}
+                className={`h-full px-3.5 cursor-pointer transition-colors whitespace-nowrap flex items-center gap-1.5 ${
+                  activeTab === "QUEUE"
+                    ? "bg-[#18181B] text-white font-semibold"
+                    : "bg-white text-neutral-700 hover:bg-neutral-100"
+                }`}
+              >
+                <span>Ready for Exit</span>
+                <span
+                  className={`px-1.5 py-0.2 text-[10px] font-bold ${
+                    activeTab === "QUEUE"
+                      ? "bg-[#059669] text-white"
+                      : "bg-neutral-200 text-neutral-700"
+                  }`}
+                >
+                  {exitQueueVehicles.length}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveTab("ALL_INSIDE")}
+                className={`h-full px-3.5 cursor-pointer transition-colors whitespace-nowrap flex items-center gap-1.5 ${
+                  activeTab === "ALL_INSIDE"
+                    ? "bg-[#18181B] text-white font-semibold"
+                    : "bg-white text-neutral-700 hover:bg-neutral-100"
+                }`}
+              >
+                <span>All Active</span>
+                <span
+                  className={`px-1.5 py-0.2 text-[10px] font-bold ${
+                    activeTab === "ALL_INSIDE"
+                      ? "bg-[#059669] text-white"
+                      : "bg-neutral-200 text-neutral-700"
+                  }`}
+                >
+                  {vehicles.filter((v) => v.stage !== "EXIT_COMPLETED").length}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveTab("DEPARTED")}
+                className={`h-full px-3.5 cursor-pointer transition-colors whitespace-nowrap flex items-center gap-1.5 ${
+                  activeTab === "DEPARTED"
+                    ? "bg-[#18181B] text-white font-semibold"
+                    : "bg-white text-neutral-700 hover:bg-neutral-100"
+                }`}
+              >
+                <span>Departed Today</span>
+                <span
+                  className={`px-1.5 py-0.2 text-[10px] font-bold ${
+                    activeTab === "DEPARTED"
+                      ? "bg-[#059669] text-white"
+                      : "bg-neutral-200 text-neutral-700"
+                  }`}
+                >
+                  {departedLog.length}
+                </span>
+              </button>
+            </div>
+          </div>
+
+          {/* Mobile Filter Modal Popup */}
+          {isMobileFilterOpen && (
+            <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-end sm:hidden">
+              <div className="w-full bg-white border-t border-neutral-300 p-4 space-y-4 max-h-[80vh] overflow-y-auto">
+                <div className="flex items-center justify-between border-b border-neutral-200 pb-3">
+                  <div className="flex items-center gap-2">
+                    <SlidersHorizontal className="w-4 h-4 text-[#059669]" />
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-neutral-900">
+                      Filter Exit Queue
+                    </h3>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsMobileFilterOpen(false)}
+                    className="p-1 hover:bg-neutral-100 text-neutral-500 hover:text-neutral-900"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActiveTab("QUEUE");
+                      setIsMobileFilterOpen(false);
+                    }}
+                    className={`h-11 px-4 text-xs font-semibold flex items-center justify-between border ${
+                      activeTab === "QUEUE"
+                        ? "bg-[#18181B] text-white border-[#18181B]"
+                        : "bg-white text-neutral-800 border-neutral-200"
+                    }`}
+                  >
+                    <span>Ready for Exit</span>
+                    <span className="font-mono text-[11px] font-bold px-1.5 py-0.5 bg-neutral-200/40">{exitQueueVehicles.length}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActiveTab("ALL_INSIDE");
+                      setIsMobileFilterOpen(false);
+                    }}
+                    className={`h-11 px-4 text-xs font-semibold flex items-center justify-between border ${
+                      activeTab === "ALL_INSIDE"
+                        ? "bg-[#18181B] text-white border-[#18181B]"
+                        : "bg-white text-neutral-800 border-neutral-200"
+                    }`}
+                  >
+                    <span>All Active</span>
+                    <span className="font-mono text-[11px] font-bold px-1.5 py-0.5 bg-neutral-200/40">
+                      {vehicles.filter((v) => v.stage !== "EXIT_COMPLETED").length}
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActiveTab("DEPARTED");
+                      setIsMobileFilterOpen(false);
+                    }}
+                    className={`h-11 px-4 text-xs font-semibold flex items-center justify-between border ${
+                      activeTab === "DEPARTED"
+                        ? "bg-[#18181B] text-white border-[#18181B]"
+                        : "bg-white text-neutral-800 border-neutral-200"
+                    }`}
+                  >
+                    <span>Departed Today</span>
+                    <span className="font-mono text-[11px] font-bold px-1.5 py-0.5 bg-neutral-200/40">{departedLog.length}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
       {/* 
         ============================================================
@@ -1123,6 +1154,8 @@ export function GateExit({ vehicles, onUpdateStage, onNavigateTab }: GateExitPro
           )}
         </section>
       )}
+        </div>
+      </div>
 
       {/* 
         ============================================================

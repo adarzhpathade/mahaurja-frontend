@@ -16,6 +16,8 @@ import {
   ExternalLink,
   SlidersHorizontal,
   ChevronDown,
+  LayoutGrid,
+  Table as TableIcon,
 } from "lucide-react";
 import { GateVehicle, GateStage } from "@/lib/types/gate";
 
@@ -353,24 +355,26 @@ export function GateDocVerification({
               <button
                 type="button"
                 onClick={() => setViewMode("CARDS")}
-                className={`px-3 py-1.5 transition-colors cursor-pointer flex items-center ${
+                className={`px-3 py-1.5 transition-colors cursor-pointer flex items-center gap-1.5 ${
                   viewMode === "CARDS"
                     ? "bg-[#18181B] text-white font-semibold"
                     : "bg-neutral-200/50 text-neutral-700 hover:bg-neutral-200"
                 }`}
               >
-                Cards
+                <LayoutGrid className="w-3.5 h-3.5" />
+                <span>Cards</span>
               </button>
               <button
                 type="button"
                 onClick={() => setViewMode("TABLE")}
-                className={`px-3 py-1.5 transition-colors cursor-pointer flex items-center ${
+                className={`px-3 py-1.5 transition-colors cursor-pointer flex items-center gap-1.5 ${
                   viewMode === "TABLE"
                     ? "bg-[#18181B] text-white font-semibold"
                     : "bg-neutral-200/50 text-neutral-700 hover:bg-neutral-200"
                 }`}
               >
-                Table
+                <TableIcon className="w-3.5 h-3.5" />
+                <span>Table</span>
               </button>
             </div>
           </div>

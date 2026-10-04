@@ -122,11 +122,14 @@ Always replace complex or bureaucratic jargon with direct, easy-to-read terms:
 | Tare Quantification | **Empty Weight (Tare)** | Weighbridge tare capture |
 | Gross Metrology | **Loaded Weight (Gross)** | Weighbridge gross capture |
 
-### 5. Mandatory Desktop Dual View (Cards & Table)
+### 5. Mandatory Desktop Dual View (Cards & Table with Icons)
 Every operational queue, fleet roster, or history ledger must provide a desktop segmented view switcher (`[ Cards ] [ Table ]`):
 - **Switcher Container:** `<div className="hidden sm:inline-flex border border-neutral-300 divide-x divide-neutral-300 text-xs shrink-0 h-10">`
-- **Active Pill:** `bg-[#18181B] text-white font-semibold`
-- **Inactive Pill:** `bg-neutral-200/50 text-neutral-700 hover:bg-neutral-200`
+- **Cards Button:** `<button className="..."><LayoutGrid className="w-3.5 h-3.5" /><span>Cards</span></button>`
+- **Table Button:** `<button className="..."><TableIcon className="w-3.5 h-3.5" /><span>Table</span></button>`
+- **Ordering:** Strictly `[ Cards ] [ Table ]` left-to-right.
+- **Active Pill:** `bg-[#18181B] text-white font-semibold flex items-center gap-1.5`
+- **Inactive Pill:** `bg-neutral-200/50 text-neutral-700 hover:bg-neutral-200 flex items-center gap-1.5`
 - **Mobile Rule:** On mobile devices (≤ 640px), the view MUST always render responsive cards (`grid-cols-1 sm:hidden gap-3`), never forcing horizontal table scrolling on small touchscreens.
 
 ### 6. Strict Ban on Table White Backgrounds (Transparent Industrial Tables)
@@ -142,6 +145,21 @@ Tables must NEVER have `bg-white` on the wrapper, table, or body:
 - **Direction Badging Standard:**
   - **Inbound Biomass RM:** `border border-emerald-300 bg-emerald-50 text-[#047857] text-[10px] font-bold uppercase px-2 py-0.5`
   - **Outbound Dispatch FG:** `border border-neutral-300 bg-[#18181B] text-white text-[10px] font-bold uppercase px-2 py-0.5`
+
+### 8. Precision Industrial Navigation System (IndustrialNav & Type-Safe Bindings)
+- **Central Navigation Component:** Located at `src/components/layout/industrial-nav.tsx`. Provides a center-aligned horizontal tab bar on desktop, razor-sharp borders, and high-contrast pitch charcoal active tabs (`bg-[#18181B] text-white border-[#18181B]`).
+- **Type-Safe Layout Role Binding Rule:** Layout files MUST NEVER use fragile numeric array indexing (e.g. `USER_ROLES[1]`). Layouts MUST import and bind strongly typed named exports:
+  - `ROLE_GATE_SECURITY` (`gate-security`)
+  - `ROLE_WEIGHBRIDGE` (`weighbridge`)
+  - `ROLE_SALES_DISPATCH` (`sales-dispatch`)
+  - `ROLE_QC_LAB` (`qc-lab`)
+  - `ROLE_PRODUCTION` (`production`)
+  - `ROLE_WAREHOUSE` (`warehouse`)
+  - `ROLE_ADMIN` (`admin`)
+  - `ROLE_MANAGEMENT` (`management`)
+  or use `getRoleById(roleId)`.
+- **Top-Right Quick Role Switcher:** Allows plant managers or testing engineers to quickly switch profiles and desks on the fly.
+- **Streamlined Physical-to-Digital Principle (PDF Sec 38):** Standalone virtual software desks that lack physical station counterparts are strictly prohibited. Gate document verification is integrated directly into Gate Entry and Vehicle Exit clearance; Gross and Tare weighments are integrated directly into the live Scale Terminal.
 
 ---
 
@@ -189,112 +207,91 @@ If something is ambiguous in the design image, ask for clarification rather than
 
 ## User Roles (8 Total)
 
-Each role has its own comprehensive operational workbench and dedicated screens. Role-based access control restricts visibility.
+Each role has its own comprehensive operational workbench and dedicated screens, bound directly to `IndustrialNav` using type-safe constants. Role-based access control restricts visibility.
 
-### 1. Admin / Super Admin
-- **Purpose:** System configuration, user management, master data setup
-- **PDF Sections:** 2 (Supplier/Farmer Master), 11 (Storage Locations), 12 (Formulas/Blends), 25 (Customer Master)
-- **Screens:** User management, role/permission settings, system config, material masters, storage location masters, formula/blend masters, supplier/farmer master
-- **Priority:** 🥇 Build first — establishes design system and core UI patterns
-
-### 2. Gate / Security Operator
-- **Purpose:** Records vehicle arrivals and exits for both RM and dispatch
+### 1. Gate / Security Operator (`ROLE_GATE_SECURITY`)
+- **Operator Profile:** Ramesh Pawar · Department: Inbound / Outbound Gate
 - **PDF Sections:** 3 (Vehicle Arrival & Gate Entry), 27 (Dispatch Vehicle Arrival), 31 (Vehicle Exit)
-- **Screens:**
-  - **Gate Entry Console:** Date, Time, Vehicle No, Driver Name & Mobile, Supplier (dropdown), Material (dropdown), Purpose, PO Reference, Expected Quantity, Security Remarks, Direction (Inbound RM / Outbound FG). Auto-generates ID: `RM-GATE-YYMMDD-seq`
-  - **Live Gate Dashboard & Vehicle Tracker:** Visual plant tracking, arrival monitoring, dwell time counters, approaching/delayed alerts
-  - **Vehicle Exit Verification:** Exit clearance checklist (verify weighbridge slip for RM exit; verify Vehicle, Quantity, Invoice, Dispatch docs, Customer, and Authorization for FG exit)
-  - **Gate Operations Ledger:** Real-time log of today's gate entries and exits with status badges
+- **Operational Desks & Tabs:**
+  - **Gate Dashboard (`/gate`):** Real-time digital clock, shift pulse KPIs, expected inbound arrivals queue with 1-click prefill, live security event log.
+  - **Vehicle Tracker (`/gate/tracker`):** Interactive multi-compartment vehicle visualizer (Cab + Bays 1-4) with 3D axles, plant stage pipeline, driver biometric preview.
+  - **Gate Entry (`/gate/entry`):** Dedicated zero-scroll entry console (< 650px height), Inbound RM / Outbound FG toggle, auto-generated `RM-GATE-YYMMDD-seq` pass, tactile inspection chips.
+  - **Vehicle Exit (`/gate/exit`):** Exit clearance queue, 4-step physical security checklist (WB slip, cargo bed, breathalyzer, pass), barrier cycle automation, printable outward clearance pass `EXT-YYMMDD-seq`. Document verification is integrated directly here (Sec 31 & 38).
 - **Status Flow:** ARRIVED → GATE ENTRY CREATED → WAITING FOR WEIGHMENT → ... → VEHICLE EXIT COMPLETED
 
-### 3. Weighbridge Operator
-- **Purpose:** Records gross/tare/net weighments for incoming RM and outgoing dispatch
+### 2. Weighbridge Operator (`ROLE_WEIGHBRIDGE`)
+- **Operator Profile:** Sunil Shinde · Department: Weighment Station
 - **PDF Sections:** 4 (Gross Weighment), 7 (Tare Weighment), 29 (Dispatch Weighment), 30 (Weighbridge Slip)
-- **Screens:**
-  - **Weighment Capture Workbench:** Dual platform support, digital scale indicator with live stability & motion status, axle load distribution, gross & tare capture
-  - **Auto Net-Weight Calculation:** Net = Gross − Tare auto-calculated by system (strictly non-editable by operator)
-  - **Weighbridge Slip Generation:** Printable official WB slips with company header, vehicle details, gross/tare/net timestamps, and operator signature fields
-  - **Weighment Records & History:** Searchable, filterable archive of all completed weighments
-- **Key Rule:** System auto-calculates Net = Gross − Tare. Never manual.
+- **Operational Desks & Tabs:**
+  - **Scale Terminal (`/weighbridge`):** Live dual-platform console (WB-01 Inbound, WB-02 Outbound), 3-zone industrial cockpit (Telemetry, Active Truck, Official Weighment), load cell stability indicator, automated Net Weight calculation (`Net = |Gross - Tare|`, non-editable).
+  - **Weight Records (`/weighbridge/weighments`):** Searchable metrology ledger, direction filters, instant official slip viewing, reprint, and PDF export. Standalone duplicate gross/tare/slip routes eliminated per PDF Sec 38.
+- **Key Metrology Rule:** Net = Gross − Tare strictly calculated by software; never manual.
 
-### 4. QC / Lab Technician
-- **Purpose:** Sampling, testing, and approval of both raw materials and finished goods
-- **PDF Sections:** 6 (Sampling & QC), 22 (Final QC for FG), 30 (COA Generation)
-- **Screens:**
-  - **RM Testing Workbench:** Moisture%, Ash%, GCV, Foreign Matter%, Bulk Density, Material Grade testing form with instant tolerance validation; Approve / Hold / Reject decisions. ID: `QC-YYMMDD-seq`
-  - **FG Testing Workbench:** GCV, Moisture%, Ash%, Bulk Density, Pellet Diameter, Fines%, customer-specific specs. ID: `FG-QC-YYMMDD-seq`
-  - **QC Reports & COA Console:** Searchable test repository and Certificate of Analysis (COA) generator for approved FG batches
-  - **Sample Audit History:** Historical logs with lab technician signatures and status tracking
-- **Status Flow:** PENDING → TESTING → APPROVED / HOLD / REJECTED
-- **Key Rules:**
-  - Rejected material must NOT become available inventory
-  - HOLD material must remain blocked until authorised release
-  - Only approved FG should become dispatchable inventory
-
-### 5. Production Supervisor / Operator
-- **Purpose:** Manages entire production lifecycle across all 7 processing stages
-- **PDF Sections:** 12 (Production Planning), 13 (Material Issue), 14–20 (7 Processing Stages), 21 (FG Batch)
-- **Screens:**
-  - **Production Planning:** Shift, target quantity (MT), product specification (e.g., 8mm pellet), formula/blend selection. ID: `PRD-YYMMDD-seq`
-  - **Material Issue Request & Lot Allocation:** Allocation of RM lots to active plan, deducting inventory with full lot-level traceability. ID: `ISS-YYMMDD-seq`
-  - **Stage-Wise Production Console (7 Sequential Stages):**
-    - Stage 1 — Cleaning *(Sec 14)*: Input qty, Output qty, Rejected qty, Loss
-    - Stage 2 — Grinding *(Sec 15)*: Machine, Start/End time, Input, Output, Operator, Shift, Downtime
-    - Stage 3 — Drying *(Sec 16)*: Input, Output, Moisture before/after, Dryer used, Loss
-    - Stage 4 — Blending *(Sec 17)*: Formula ID, RM lots, Actual quantities, Target quantities, Operator
-    - Stage 5 — Pelletisation *(Sec 18)*: Batch, Machine, Shift, Start/End, Input, Output, Pellet diameter, Operator, Downtime
-    - Stage 6 — Cooling *(Sec 19)*: Batch, Input, Output, Start/End, Machine, Operator, Loss
-    - Stage 7 — Screening *(Sec 20)*: Good production qty, Fines qty, Rejected/Recycle qty
-    Creates Production Batch `PB-YYMMDD-seq` and FG Batch `FG-BATCH-YYMMDD-seq`
-  - **Active Batch Monitor & Shift Downtime Tracker:** Live batch progress, machine uptime, operator assignment
-  - **Production Batch History & Lot Traceability:** Historical batch performance, yield analysis, formula compliance
-- **Status Flow:** PLANNED → MATERIAL ISSUED → PROCESSING → PELLETISATION → COOLING → SCREENING → PRODUCED → QC PENDING → APPROVED/HOLD/REJECTED → STORED
-
-### 6. Warehouse / Inventory Manager
-- **Purpose:** Manages RM inventory, FG inventory, storage locations, packaging, stock tracking
-- **PDF Sections:** 9 (RM Lot Creation), 10 (RM Inventory), 11 (RM Storage), 23 (Packaging), 24 (FG Storage)
-- **Screens:**
-  - **Location-Wise RM Inventory Dashboard:** Visual layout of Yard A, Warehouse 1, Sheds, with capacity & occupancy metrics (Sec 11)
-  - **RM Lot Traceability Ledger:** Material, Supplier, Vehicle, Date, Quantity, Rate, QC Report, QC parameters, Storage location, Status (Sec 9)
-  - **FG Inventory Console:** Grouped by FG Batch, product diameter, QC status (Produced → QC Pending → QC Approved → Dispatchable) (Sec 24)
-  - **Packaging & Bagging Workbench:** Bagged (25/40/50 kg), Bulk, or custom packaging entry, bag counting, date tagging (Sec 23)
-  - **Stock Movement Ledger:** Complete real-time audit trail of Receipts, Issues, and Dispatches
-
-### 7. Sales / Dispatch Manager
-- **Purpose:** Manages customer orders, dispatch planning, loading, invoicing, delivery, payments
+### 3. Sales / Dispatch Manager (`ROLE_SALES_DISPATCH`)
+- **Operator Profile:** Vikram Malhotra · Department: Logistics & Outbound
 - **PDF Sections:** 25 (Sales Order), 26 (Dispatch Planning), 27 (Dispatch Vehicle), 28 (Loading), 29 (Dispatch Weighment), 30 (Invoice & Docs), 32 (Customer Delivery), 33 (Payment)
-- **Screens:**
-  - **Sales Order Workbench:** Customer selection, order status, required date, rate (₹/MT), quantity, specs. ID: `SO-YYMMDD-seq`
-  - **Dispatch Planning & Allocation:** Check approved FG stock against orders, allocate FG batches to transport vehicles with full customer-to-batch linkage (Sec 28). ID: `DIS-YYMMDD-seq`
-  - **Loading & Inspection Console:** Vehicle loading verification, tare/gross dispatch weighment coordination
-  - **Invoice & Dispatch Document Suite:** Automated generation and archival of Sales Invoice, Delivery Challan, e-Way Bill, Weighbridge Slip, LR/Transport document, COA (Sec 30)
-  - **Customer Delivery & POD Tracking:** In-transit tracking, delivery confirmation, Proof of Delivery (POD) upload, feedback logging (Sec 32)
-  - **Receivables & Payment Ledger:** Invoice payment tracking (Invoice Generated → Outstanding → Part Payment → Fully Paid → Closed) (Sec 33)
+- **Operational Desks & Tabs:**
+  - **Sales Orders (`/sales/orders`):** Customer order booking, order status workflow, rate (₹/MT), target specs. ID: `SO-YYMMDD-seq`.
+  - **Dispatch Planning (`/sales/dispatch`):** Stock verification against orders, allocation of approved FG batches to vehicles with customer-to-batch traceability. ID: `DIS-YYMMDD-seq`.
+  - **Invoices & Docs (`/sales/invoices`):** Automated generation of Sales Invoice, Delivery Challan, E-Way Bill, Weighbridge Slip, LR, and COA suite (Sec 30).
+  - **Delivery & POD (`/sales/delivery`):** In-transit tracking, delivery confirmation, Proof of Delivery (POD) upload, feedback logging (Sec 32).
+  - **Payments (`/sales/payments`):** Accounts receivable ledger, payment reconciliation, partial/full payment tracking (Sec 33).
 - **Status Flows:**
   - Sales: NEW → CONFIRMED → PARTIALLY DISPATCHED → FULLY DISPATCHED → CLOSED
   - Dispatch: DISPATCHED → IN TRANSIT → DELIVERED → POD RECEIVED
   - Payment: INVOICE GENERATED → OUTSTANDING → PART PAYMENT → FULLY PAID → CLOSED
 
-### 8. Management / Plant Director
-- **Purpose:** High-level operational visibility, end-to-end traceability, financial analytics
+### 4. QC / Lab Technician (`ROLE_QC_LAB`)
+- **Operator Profile:** Dr. Ananya Deshmukh · Department: Quality Assurance Lab
+- **PDF Sections:** 6 (Sampling & QC), 22 (Final QC for FG), 30 (COA Generation)
+- **Operational Desks & Tabs:**
+  - **Lab Overview (`/quality`):** Shift testing pulse, pending sampling queue, awaiting QC KPIs, rapid test launchpad.
+  - **RM Quality Testing (`/quality/rm-testing`):** Inbound sampling queue, 6-parameter tolerance workbench (Moisture%, Ash%, GCV, Foreign Matter%, Bulk Density, Grade), instant tolerance validation, Approve / Hold / Reject decisions. ID: `QC-YYMMDD-seq`.
+  - **FG Quality Testing (`/quality/fg-testing`):** Finished pellet batch testing (8mm diameter, GCV, Moisture%, Ash%, Bulk Density, Fines%), batch dispatch authorization. ID: `FG-QC-YYMMDD-seq`.
+  - **COA Reports (`/quality/reports`):** Certificate of Analysis generation, customer spec vs actual matrix, lab digital signatures, and historical test audit ledger.
+- **Status Flow:** PENDING → TESTING → APPROVED / HOLD / REJECTED
+- **Key Operational Rules:**
+  - Rejected raw material MUST NOT become available inventory.
+  - HOLD material remains quarantined until authorized release.
+  - Only approved FG batches become dispatchable inventory.
+
+### 5. Production Supervisor (`ROLE_PRODUCTION`)
+- **Operator Profile:** Mahesh Kadam · Department: Pelletising Plant Line 1 & 2
+- **PDF Sections:** 12 (Production Planning), 13 (Material Issue), 14–20 (7 Processing Stages), 21 (FG Batch)
+- **Operational Desks & Tabs:**
+  - **Production Plans (`/production/plans`):** Shift targets (MT), product specs (8mm), blend formulas. ID: `PRD-YYMMDD-seq`.
+  - **Material Issue (`/production/material-issue`):** RM lot deduction and allocation with complete lot-level traceability. ID: `ISS-YYMMDD-seq`.
+  - **7-Stage Processing (`/production/processing`):** Stage-wise console covering Cleaning (14), Grinding (15), Drying (16), Blending (17), Pelletisation (18), Cooling (19), Screening (20). Generates `PB-YYMMDD-seq` and `FG-BATCH-YYMMDD-seq`.
+  - **Batch History (`/production/batches`):** Historical batch performance, yield analysis, shift downtime logs.
+- **Status Flow:** PLANNED → MATERIAL ISSUED → PROCESSING → PELLETISATION → COOLING → SCREENING → PRODUCED → QC PENDING → APPROVED/HOLD/REJECTED → STORED
+
+### 6. Warehouse / Inventory Manager (`ROLE_WAREHOUSE`)
+- **Operator Profile:** Nitin Joshi · Department: Raw Yards & Finished Sheds
+- **PDF Sections:** 9 (RM Lot Creation), 10 (RM Inventory), 11 (RM Storage), 23 (Packaging), 24 (FG Storage)
+- **Operational Desks & Tabs:**
+  - **Raw Material Yards (`/inventory/raw-materials`):** Location-wise stock map (Yard A, Warehouse 1, Sheds) with capacity/occupancy telemetry (Sec 11).
+  - **Finished Goods Stock (`/inventory/finished-goods`):** Batch-wise FG inventory categorized by Produced → QC Pending → QC Approved → Dispatchable (Sec 24).
+  - **Packaging & Bagging (`/inventory/packaging`):** Bagged (25/40/50 kg) or bulk vehicle dispatch logging (Sec 23).
+  - **Lot Traceability (`/inventory/lots`):** Complete RM lot ledger (`RMLOT-material-YYMMDD-seq`) linking material, supplier, vehicle, rate, QC report, and location.
+
+### 7. Admin / Super Admin (`ROLE_ADMIN`)
+- **Operator Profile:** Adarsh Sharma · Department: System Operations
+- **PDF Sections:** 2 (Supplier/Farmer Master), 11 (Storage Locations), 12 (Formulas/Blends), 25 (Customer Master)
+- **Operational Desks & Tabs:**
+  - **Suppliers Master (`/admin/masters/suppliers`):** Farmer, Trader, Aggregator master directory, purchase & payment history (Sec 2).
+  - **Customer Master (`/admin/masters/customers`):** Customer directory, credit terms, delivery locations (Sec 25).
+  - **Materials & Storage (`/admin/masters/materials`):** Raw biomass types, FG specs, storage locations & yard bins (Sec 11).
+  - **Blend Formulas (`/admin/masters/formulas`):** Raw biomass recipe ratios for pellet blending (Sec 12).
+  - **User Access & Roles (`/admin/users`):** Operator roles, access permissions, department assignments.
+
+### 8. Management / Plant Director (`ROLE_MANAGEMENT`)
+- **Operator Profile:** Pravin Singhania · Department: Executive Directorate
 - **PDF Sections:** 34 (Traceability), 37 (Dashboard KPIs)
-- **Screens:**
-  - **Executive Operational Dashboard:** Exact 11 core KPIs from PDF Sec 37:
-    - Vehicles Inside Plant
-    - Raw Material Awaiting QC
-    - Raw Material Available (MT)
-    - Production Today vs Production Target
-    - FG Awaiting QC (MT)
-    - Finished Goods Stock (MT)
-    - Orders Pending (MT)
-    - Dispatches Today (count + MT)
-    - Outstanding Receivables (₹)
-    - Raw Material Average Cost (₹/MT)
-    - Production Cost (₹/MT)
-  - **Bi-Directional Digital Traceability Explorer (PDF Sec 34):**
-    - Forward Trace: Supplier → RM Lot → Production Batch → FG Batch → Dispatch → Customer
-    - Reverse Trace: Customer → Dispatch → FG Batch → Production Batch → RM Lot → Supplier
-  - **Plant Operational & Financial Reports:** Daily production, inventory valuation, sales fulfillment, yield & loss analysis, export tools
+- **Operational Desks & Tabs:**
+  - **Live Plant KPIs (`/management/dashboard`):** Real-time operational pulse displaying all 11 core KPIs from PDF Sec 37.
+  - **Bi-Directional Trace (`/management/traceability`):** Forward (Supplier → RM Lot → Production → FG → Customer) and Reverse (Customer → Dispatch → FG → Production → RM Lot → Supplier) digital explorer (Sec 34).
+  - **Cost & Yield (`/management/reports/cost-yield`):** Raw material average cost (₹/MT), production conversion cost, yield and fines analysis.
+  - **Plant Reports (`/management/reports`):** Daily executive production, inventory valuation, and dispatch summaries.
 
 ---
 
@@ -320,78 +317,68 @@ src/
 ├── app/
 │   ├── layout.tsx                    # Root layout (fonts, providers, Lenis)
 │   ├── page.tsx                      # Login / Landing
-│   ├── (auth)/
-│   │   ├── login/
-│   │   └── forgot-password/
-│   ├── (dashboard)/
-│   │   ├── layout.tsx                # Dashboard shell (sidebar + topbar)
-│   │   ├── admin/
-│   │   │   ├── users/
-│   │   │   ├── masters/
-│   │   │   │   ├── suppliers/
-│   │   │   │   ├── materials/
-│   │   │   │   ├── storage-locations/
-│   │   │   │   └── formulas/
-│   │   │   └── settings/
-│   │   ├── gate/
-│   │   │   ├── entries/
-│   │   │   ├── exits/
-│   │   │   └── dashboard/
-│   │   ├── weighbridge/
-│   │   │   ├── weighments/
-│   │   │   └── slips/
-│   │   ├── quality/
-│   │   │   ├── rm-testing/
-│   │   │   ├── fg-testing/
-│   │   │   └── reports/
-│   │   ├── production/
-│   │   │   ├── plans/
-│   │   │   ├── material-issue/
-│   │   │   ├── processing/
-│   │   │   ├── batches/
-│   │   │   └── downtime/
-│   │   ├── inventory/
-│   │   │   ├── raw-materials/
-│   │   │   ├── finished-goods/
-│   │   │   ├── lots/
-│   │   │   └── packaging/
-│   │   ├── sales/
-│   │   │   ├── customers/
-│   │   │   ├── orders/
-│   │   │   ├── dispatch/
-│   │   │   ├── invoices/
-│   │   │   ├── delivery/
-│   │   │   └── payments/
-│   │   └── management/
-│   │       ├── dashboard/
-│   │       ├── traceability/
-│   │       └── reports/
+│   ├── gate/                         # Gate / Security Operator (ROLE_GATE_SECURITY)
+│   │   ├── layout.tsx                # Shell bound to ROLE_GATE_SECURITY & GateProvider
+│   │   ├── page.tsx                  # Gate Dashboard & Operations Hub (/gate)
+│   │   ├── tracker/page.tsx          # Live Vehicle Tracker (/gate/tracker)
+│   │   ├── entry/page.tsx            # Gate Entry Console (/gate/entry)
+│   │   └── exit/page.tsx             # Vehicle Exit Clearance Desk (/gate/exit)
+│   ├── weighbridge/                  # Weighbridge Operator (ROLE_WEIGHBRIDGE)
+│   │   ├── layout.tsx                # Shell bound to ROLE_WEIGHBRIDGE & WeighbridgeProvider
+│   │   ├── page.tsx                  # Live Scale Terminal & Cockpit (/weighbridge)
+│   │   └── weighments/page.tsx       # Weight Records History & Slips Ledger (/weighbridge/weighments)
+│   ├── quality/                      # QC / Lab Technician (ROLE_QC_LAB)
+│   │   ├── layout.tsx                # Shell bound to ROLE_QC_LAB & QualityProvider
+│   │   ├── page.tsx                  # Lab Overview & Active Queues (/quality)
+│   │   ├── rm-testing/page.tsx       # Raw Material Testing Workbench (/quality/rm-testing)
+│   │   ├── fg-testing/page.tsx       # Finished Goods Testing Workbench (/quality/fg-testing)
+│   │   └── reports/page.tsx          # COA Console & Test Audit Ledger (/quality/reports)
+│   ├── production/                   # Production Supervisor (ROLE_PRODUCTION)
+│   │   ├── layout.tsx                # Shell bound to ROLE_PRODUCTION
+│   │   ├── plans/page.tsx            # Production Plans (/production/plans)
+│   │   ├── material-issue/page.tsx   # Material Issue Request & Lot Allocation (/production/material-issue)
+│   │   ├── processing/page.tsx       # 7-Stage Sequential Processing Console (/production/processing)
+│   │   └── batches/page.tsx          # Batch History & Shift Downtime (/production/batches)
+│   ├── inventory/                    # Warehouse / Inventory Manager (ROLE_WAREHOUSE)
+│   │   ├── layout.tsx                # Shell bound to ROLE_WAREHOUSE
+│   │   ├── raw-materials/page.tsx    # Raw Material Yards & Location Map (/inventory/raw-materials)
+│   │   ├── finished-goods/page.tsx   # Finished Goods Stock Ledger (/inventory/finished-goods)
+│   │   ├── packaging/page.tsx        # Packaging & Bagging Console (/inventory/packaging)
+│   │   └── lots/page.tsx             # RM Lot Traceability Ledger (/inventory/lots)
+│   ├── sales/                        # Sales / Dispatch Manager (ROLE_SALES_DISPATCH)
+│   │   ├── layout.tsx                # Shell bound to ROLE_SALES_DISPATCH
+│   │   ├── orders/page.tsx           # Sales Orders Workbench (/sales/orders)
+│   │   ├── dispatch/page.tsx         # Dispatch Planning & Allocation (/sales/dispatch)
+│   │   ├── invoices/page.tsx         # Invoices & Dispatch Documents (/sales/invoices)
+│   │   ├── delivery/page.tsx         # Customer Delivery & POD Tracking (/sales/delivery)
+│   │   └── payments/page.tsx         # Receivables & Payment Ledger (/sales/payments)
+│   ├── admin/                        # Admin / Super Admin (ROLE_ADMIN)
+│   │   ├── layout.tsx                # Shell bound to ROLE_ADMIN
+│   │   ├── masters/
+│   │   │   ├── suppliers/page.tsx    # Supplier / Farmer Master (/admin/masters/suppliers)
+│   │   │   ├── customers/page.tsx    # Customer Master (/admin/masters/customers)
+│   │   │   ├── materials/page.tsx    # Materials & Storage Locations (/admin/masters/materials)
+│   │   │   └── formulas/page.tsx     # Blend Formulas Master (/admin/masters/formulas)
+│   │   └── users/page.tsx            # User Access & Roles (/admin/users)
+│   └── management/                   # Management / Plant Director (ROLE_MANAGEMENT)
+│       ├── layout.tsx                # Shell bound to ROLE_MANAGEMENT
+│       ├── dashboard/page.tsx        # 11 Core Plant KPIs Dashboard (/management/dashboard)
+│       ├── traceability/page.tsx     # Bi-Directional Digital Traceability Explorer (/management/traceability)
+│       └── reports/page.tsx          # Plant Operations & Financial Reports (/management/reports)
 ├── components/
-│   ├── ui/                           # Shared UI primitives
-│   │   ├── button.tsx
-│   │   ├── input.tsx
-│   │   ├── select.tsx
-│   │   ├── badge.tsx
-│   │   ├── card.tsx
-│   │   ├── table.tsx
-│   │   ├── modal.tsx
-│   │   ├── skeleton.tsx
-│   │   └── ...
 │   ├── layout/                       # Layout components
-│   │   ├── sidebar.tsx
-│   │   ├── topbar.tsx
-│   │   ├── mobile-nav.tsx
-│   │   └── page-header.tsx
-│   └── shared/                       # Shared business components
-│       ├── status-badge.tsx
-│       ├── traceability-chain.tsx
-│       ├── kpi-card.tsx
-│       └── ...
+│   │   ├── industrial-nav.tsx        # Center-aligned industrial navbar with role switcher
+│   │   ├── sidebar.tsx               # Collapsible side drawer for tablet/mobile
+│   │   └── smooth-scroll.tsx         # Lenis smooth scrolling wrapper
+│   ├── gate/                         # Gate & security operator components
+│   ├── weighbridge/                  # Weighbridge operator components & scale indicator
+│   ├── quality/                      # QC testing workbenches & COA document generator
+│   ├── ui/                           # Primitives (button, input, select, table, badge, modal)
+│   └── shared/                       # Cross-functional business components
 ├── lib/
-│   ├── types/                        # TypeScript interfaces
-│   ├── utils/                        # Utility functions
-│   ├── constants/                    # App constants, status enums
-│   └── hooks/                        # Custom React hooks
+│   ├── types/                        # Strongly typed TypeScript interfaces
+│   ├── context/                      # React Context providers (gate, weighbridge, quality)
+│   └── utils/                        # Utility functions
 └── styles/
     └── globals.css                   # Tailwind v4 theme + global styles
 ```
