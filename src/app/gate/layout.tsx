@@ -1,15 +1,17 @@
 "use client";
 
-import React from "react";
-import { usePathname, useRouter } from "next/navigation";
+import React, { Suspense } from "react";
+import { usePathname } from "next/navigation";
 import { IndustrialNav, ROLE_GATE_SECURITY } from "@/components/layout/industrial-nav";
 import { GateProvider, useGate } from "@/lib/context/gate-context";
 import { GateEntryModal } from "@/components/gate/gate-entry-modal";
 import { GateVehicle } from "@/lib/types/gate";
+import { IndustrialSkeleton } from "@/components/ui/industrial-skeleton";
+import { useNavTransition } from "@/lib/hooks/use-nav-transition";
 
 function GateNavShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const router = useRouter();
+  const { isNavigating, navigateTo } = useNavTransition();
   const {
     addVehicle,
     isEntryModalOpen,
@@ -26,22 +28,24 @@ function GateNavShell({ children }: { children: React.ReactNode }) {
     return "home"; // default /gate
   };
 
-  const handleTabChange = (tabId: string) => {
-    if (tabId === "entry") {
-      router.push("/gate/entry");
+  const handleTabChange = (tabId: string, href?: string) => {
+    if (href) {
+      navigateTo(href);
+    } else if (tabId === "entry") {
+      navigateTo("/gate/entry");
     } else if (tabId === "live-tracker") {
-      router.push("/gate/tracker");
+      navigateTo("/gate/tracker");
     } else if (tabId === "exit") {
-      router.push("/gate/exit");
+      navigateTo("/gate/exit");
     } else {
-      router.push("/gate");
+      navigateTo("/gate");
     }
   };
 
   const handleAddVehicleFromModal = (vehicle: GateVehicle) => {
     addVehicle(vehicle);
     closeEntryModal();
-    router.push("/gate/tracker");
+    navigateTo("/gate/tracker");
   };
 
   return (
@@ -55,7 +59,9 @@ function GateNavShell({ children }: { children: React.ReactNode }) {
 
       {/* Main Operational Canvas */}
       <main className="flex-1 max-w-[1920px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-7 space-y-6 sm:space-y-8">
-        {children}
+        <Suspense fallback={<IndustrialSkeleton />}>
+          {isNavigating ? <IndustrialSkeleton /> : children}
+        </Suspense>
       </main>
 
       {/* Centralized Gate Entry Pass Modal */}

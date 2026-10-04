@@ -1,14 +1,16 @@
 "use client";
 
-import React from "react";
-import { usePathname, useRouter } from "next/navigation";
+import React, { Suspense } from "react";
+import { usePathname } from "next/navigation";
 import { IndustrialNav, ROLE_PRODUCTION } from "@/components/layout/industrial-nav";
 import { ProductionProvider } from "@/lib/context/production-context";
 import { InventoryProvider } from "@/lib/context/inventory-context";
+import { IndustrialSkeleton } from "@/components/ui/industrial-skeleton";
+import { useNavTransition } from "@/lib/hooks/use-nav-transition";
 
 function ProductionNavShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const router = useRouter();
+  const { isNavigating, navigateTo } = useNavTransition();
 
   const getActiveTab = () => {
     if (pathname === "/production/material-issue") return "issue";
@@ -17,15 +19,17 @@ function ProductionNavShell({ children }: { children: React.ReactNode }) {
     return "plans"; // default /production/plans or /production
   };
 
-  const handleTabChange = (tabId: string) => {
-    if (tabId === "issue") {
-      router.push("/production/material-issue");
+  const handleTabChange = (tabId: string, href?: string) => {
+    if (href) {
+      navigateTo(href);
+    } else if (tabId === "issue") {
+      navigateTo("/production/material-issue");
     } else if (tabId === "processing") {
-      router.push("/production/processing");
+      navigateTo("/production/processing");
     } else if (tabId === "batch-history") {
-      router.push("/production/batches");
+      navigateTo("/production/batches");
     } else {
-      router.push("/production/plans");
+      navigateTo("/production/plans");
     }
   };
 
@@ -40,7 +44,9 @@ function ProductionNavShell({ children }: { children: React.ReactNode }) {
 
       {/* Main Operational Canvas */}
       <main className="flex-1 max-w-[1920px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-7 space-y-6 sm:space-y-8">
-        {children}
+        <Suspense fallback={<IndustrialSkeleton />}>
+          {isNavigating ? <IndustrialSkeleton /> : children}
+        </Suspense>
       </main>
     </div>
   );

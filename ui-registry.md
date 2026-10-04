@@ -516,20 +516,25 @@ Config: TBD
   - Desktop: `[ Reject ] [ Quarantine / HOLD ] [ Approve / Authorize -> ]` in a clean horizontal flex row.
   - Mobile: Full-width Bio-Emerald primary action on top (`h-11 bg-[#059669]`), followed by a balanced 2-column grid (`grid grid-cols-2 gap-2.5`) for cautionary actions (`Reject` and `Quarantine / HOLD`).
 
-### 6. Industrial Top Navigation Standard (Page Name & Square Action Buttons)
+### 6. Industrial Top Navigation Standard (Page Name & Spacious Operational Menu)
 - **File:** `src/components/layout/industrial-nav.tsx`
 - **Left Brand Area:**
-  - Displays the active page / desk name (`{activeNavItem ? activeNavItem.label.toUpperCase() : currentRole.roleName.toUpperCase()}`) in bold uppercase tracking-wider slate (`text-sm md:text-base font-bold tracking-tight text-[#0F172A] uppercase tracking-wider`).
+  - Displays the active page / desk name (`{activeNavItem ? activeNavItem.label.toUpperCase() : currentRole.roleName.toUpperCase()}`) in bold uppercase tracking-wider slate (`text-sm md:text-base font-black tracking-tight text-[#0F172A] uppercase tracking-wider`).
   - Eliminates static company name (`MAHAURJA`) clutter across all viewports to provide immediate situational orientation.
+- **Center Desktop Navigation Tabs:**
+  - Standardized `h-9 lg:h-10 flex items-center gap-2 px-3.5 lg:px-4 text-xs lg:text-[13px] font-bold tracking-tight border` segmented tabs with icons.
+  - Active: Pitch Charcoal `bg-[#18181B] text-white border-[#18181B] shadow-2xs` with Bio-Green icon accent (`text-[#10B981]`).
+  - Inactive: Tactile studio white `bg-white/80 hover:bg-white text-neutral-700 hover:text-neutral-900 border-neutral-300 hover:border-neutral-400 shadow-2xs`.
 - **Right Action Buttons:**
-  - **Dev Role Switcher Button (`Dev: Switch Desk`):** Amber dashed border button (`h-9 px-2 sm:px-2.5 border border-dashed border-amber-600/70 bg-amber-50/80 hover:bg-amber-100 text-amber-950 font-mono text-[11px] font-bold uppercase`) with `Terminal` icon and dropdown arrow. Opens an 8-desk fast navigation popover listing all plant operational desks with their operator name, direct route, and active station indicator. Also accessible via a helper strip at the bottom of the mobile drawer.
-  - **User Profile Button:** `w-9 h-9 border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-800 flex items-center justify-center relative shadow-xs` with green active-duty dot. Opens clean operator identity card and lock station action.
-  - **Mobile Menu Toggle Button:** Matching square box `w-9 h-9 border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-800 flex items-center justify-center relative shadow-xs` with `Menu` (hamburger) or `X` (close) icon.
-- **Mobile Menu Drawer Standard:**
-  - Displays only the operational desk navigation items for the current station in a clean `divide-y divide-neutral-200` list.
-  - Active item: highlighted with mist background (`bg-neutral-100`), bold slate text, Bio-Emerald border (`border-l-4 border-l-[#059669]`), and crisp `Active` pill.
-  - Inactive items: crisp white rows with smooth hover states and `ArrowRight` indicators.
-  - Footer: Includes a dedicated `Switch Station (Dev)` helper strip allowing 1-tap desk switching directly from within the mobile drawer.
+  - **Dev Role Switcher Button (`Dev: Switch Desk`):** Amber dashed border button (`h-9 px-2 sm:px-2.5 border border-dashed border-amber-600/70 bg-amber-50/80 hover:bg-amber-100 text-amber-950 font-mono text-[11px] font-bold uppercase`) with `Terminal` icon and dropdown arrow. Opens an 8-desk fast navigation popover listing all plant operational desks with their operator name, direct route, and active station indicator. Strictly separated from user-facing menus; mutually exclusive with profile and mobile drawers.
+  - **User Profile Button:** `w-9 h-9 border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-800 flex items-center justify-center relative shadow-2xs` with green active-duty dot. Opens clean operator identity card and lock station action.
+  - **Mobile Menu Toggle Button:** Matching square box `w-9 h-9 border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-800 flex items-center justify-center relative shadow-2xs` with `Menu` (hamburger) or `X` (close) icon.
+- **Spacious Mobile Drawer Menu Standard (Zero Dev Clutter):**
+  - **Station Context Bar:** `px-4 sm:px-6 py-3 bg-white border-b border-neutral-300 flex items-center justify-between` displaying emerald pulse indicator, uppercase active station name, and total desk count.
+  - **Spacious Desk Cards:** `p-3.5 sm:p-5 space-y-2.5` with generous touch targets (min height ~60px) and tactile borders.
+  - **Active Card:** Pitch Charcoal card `bg-[#18181B] text-white border border-[#18181B] shadow-sm` with `w-10 h-10` square icon box (`bg-neutral-800 border-neutral-700 text-[#10B981]`), title (`text-sm font-bold text-white`), sub-label (`Currently viewing desk`), and high-contrast Bio-Emerald `ACTIVE` badge.
+  - **Inactive Cards:** Studio white card `bg-white hover:bg-neutral-50 text-neutral-800 border border-neutral-300 hover:border-neutral-900 shadow-2xs` with `w-10 h-10` square icon box, title (`text-sm font-bold text-neutral-900`), sub-label (`Switch to desk`), and `ArrowRight` indicator.
+  - **Purely Operational Station Footer:** `px-4 sm:px-6 py-3 bg-white border-t border-neutral-300 flex items-center justify-between text-xs` displaying on-duty operator name, department, and green `ON DUTY` badge. Strictly eliminates any dev elements or testing shortcuts from end-user navigation drawers.
 
 ### 7. Mobile KPI Telemetry Card & Section Header Standard
 - **File:** `src/components/management/management-dashboard-view.tsx`
@@ -568,6 +573,27 @@ Config: TBD
 - **Responsive Direction Switcher & Presets:**
   - **Direction Switcher:** Symmetrical segmented buttons with icons (`RotateCcw` for Reverse Trace, `GitFork` for Forward Trace).
   - **Search & Presets Bar:** Combined search input and non-breaking preset chips (`DIS-261002-001`, `RMLOT-GS-261004-001`) with `shrink-0` to eliminate wrapping within identifier tags.
+
+### 9. Industrial Skeleton Loader & Instant Nav Transition Standard
+- **Files:** `src/components/ui/industrial-skeleton.tsx`, `src/lib/hooks/use-nav-transition.ts`, and `src/app/**/loading.tsx`
+- **Intelligent Background Route Prefetching:**
+  - When an operator logs in or lands on their station's initial page, the primary page receives 100% bandwidth and CPU priority to finish its initial render and hydration.
+  - Once the main thread is idle (`requestIdleCallback` or 400ms timer), `IndustrialNav` iterates through all remaining desk routes for that operator's station and calls `router.prefetch(item.href)` in the background.
+  - When the operator switches desks, the destination route payload and JavaScript chunks are already cached in browser memory, enabling instant page switches.
+- **Gesture-Triggered Prefetching:**
+  - All desktop navigation tabs and mobile cards include `onMouseEnter` and `onTouchStart` prefetch triggers, so any subtle touch or cursor movement towards an option instantly verifies or initiates chunk caching.
+- **Instant Optimistic Tab Feedback:**
+  - `IndustrialNav` maintains optimistic active state (`optimisticTab`). When an operator taps any desk button, the tab lights up immediately (0ms delay) with pitch charcoal background (`#18181B`) and Bio-Emerald active indicator (`#10B981`), providing instantaneous visual confirmation.
+- **Instant Skeleton Fallback Execution:**
+  - Layout shells (`src/app/**/layout.tsx`) use `useNavTransition()` to monitor route transitions. When a target path is clicked, `isNavigating` is set to `true`, instantly swapping out the previous workbench canvas with `<IndustrialSkeleton />` inside a React `<Suspense fallback={<IndustrialSkeleton />}>` boundary.
+  - When the new route mounts and rehydrates, `isNavigating` smoothly clears, preventing stale screen lag or unstyled flashes.
+- **Skeleton Component Ergonomics (`IndustrialSkeleton`):**
+  - **Telemetry Beacon:** Pulsing emerald indicator (`bg-emerald-50 text-[#047857] border-emerald-200`) labeled `Loading Workbench Telemetry...`.
+  - **Command Header Skeleton:** High-contrast header title placeholder + action button blocks.
+  - **KPI Grid Skeleton:** 4-column balanced card grid with label, metric, and subtitle pulse blocks.
+  - **Primary Workbench Skeleton:** Multi-column form fields and tabular rows in crisp studio white container with hairline neutral borders.
+- **Route-Level Native Next.js Streaming:**
+  - Implemented `loading.tsx` in root and all 8 station routes (`gate`, `weighbridge`, `sales`, `quality`, `production`, `inventory`, `admin`, `management`) for seamless server-side streaming and direct URL rehydration.
 
 ---
 

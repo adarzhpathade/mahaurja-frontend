@@ -1,13 +1,15 @@
 "use client";
 
-import React from "react";
-import { usePathname, useRouter } from "next/navigation";
+import React, { Suspense } from "react";
+import { usePathname } from "next/navigation";
 import { IndustrialNav, ROLE_WAREHOUSE } from "@/components/layout/industrial-nav";
 import { InventoryProvider } from "@/lib/context/inventory-context";
+import { IndustrialSkeleton } from "@/components/ui/industrial-skeleton";
+import { useNavTransition } from "@/lib/hooks/use-nav-transition";
 
 function InventoryNavShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const router = useRouter();
+  const { isNavigating, navigateTo } = useNavTransition();
 
   const getActiveTab = () => {
     if (pathname === "/inventory/finished-goods") return "fg-stock";
@@ -16,15 +18,17 @@ function InventoryNavShell({ children }: { children: React.ReactNode }) {
     return "rm-inventory"; // default /inventory/raw-materials or /inventory
   };
 
-  const handleTabChange = (tabId: string) => {
-    if (tabId === "fg-stock") {
-      router.push("/inventory/finished-goods");
+  const handleTabChange = (tabId: string, href?: string) => {
+    if (href) {
+      navigateTo(href);
+    } else if (tabId === "fg-stock") {
+      navigateTo("/inventory/finished-goods");
     } else if (tabId === "packaging") {
-      router.push("/inventory/packaging");
+      navigateTo("/inventory/packaging");
     } else if (tabId === "lots") {
-      router.push("/inventory/lots");
+      navigateTo("/inventory/lots");
     } else {
-      router.push("/inventory/raw-materials");
+      navigateTo("/inventory/raw-materials");
     }
   };
 
@@ -39,7 +43,9 @@ function InventoryNavShell({ children }: { children: React.ReactNode }) {
 
       {/* Main Operational Canvas */}
       <main className="flex-1 max-w-[1920px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-7 space-y-6 sm:space-y-8">
-        {children}
+        <Suspense fallback={<IndustrialSkeleton />}>
+          {isNavigating ? <IndustrialSkeleton /> : children}
+        </Suspense>
       </main>
     </div>
   );

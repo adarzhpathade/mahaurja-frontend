@@ -1,13 +1,15 @@
 "use client";
 
-import React from "react";
-import { usePathname, useRouter } from "next/navigation";
+import React, { Suspense } from "react";
+import { usePathname } from "next/navigation";
 import { IndustrialNav, ROLE_ADMIN } from "@/components/layout/industrial-nav";
 import { AdminProvider } from "@/lib/context/admin-context";
+import { IndustrialSkeleton } from "@/components/ui/industrial-skeleton";
+import { useNavTransition } from "@/lib/hooks/use-nav-transition";
 
 function AdminNavShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const router = useRouter();
+  const { isNavigating, navigateTo } = useNavTransition();
 
   const getActiveTab = () => {
     if (pathname.includes("/masters/customers") || pathname === "/admin/customers") return "customers";
@@ -17,17 +19,19 @@ function AdminNavShell({ children }: { children: React.ReactNode }) {
     return "suppliers"; // default /admin/masters/suppliers or /admin
   };
 
-  const handleTabChange = (tabId: string) => {
-    if (tabId === "customers") {
-      router.push("/admin/masters/customers");
+  const handleTabChange = (tabId: string, href?: string) => {
+    if (href) {
+      navigateTo(href);
+    } else if (tabId === "customers") {
+      navigateTo("/admin/masters/customers");
     } else if (tabId === "materials") {
-      router.push("/admin/masters/materials");
+      navigateTo("/admin/masters/materials");
     } else if (tabId === "formulas") {
-      router.push("/admin/masters/formulas");
+      navigateTo("/admin/masters/formulas");
     } else if (tabId === "users-access") {
-      router.push("/admin/users");
+      navigateTo("/admin/users");
     } else {
-      router.push("/admin/masters/suppliers");
+      navigateTo("/admin/masters/suppliers");
     }
   };
 
@@ -42,7 +46,9 @@ function AdminNavShell({ children }: { children: React.ReactNode }) {
 
       {/* Main Operational Canvas */}
       <main className="flex-1 max-w-[1920px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-7 space-y-6 sm:space-y-8">
-        {children}
+        <Suspense fallback={<IndustrialSkeleton />}>
+          {isNavigating ? <IndustrialSkeleton /> : children}
+        </Suspense>
       </main>
     </div>
   );

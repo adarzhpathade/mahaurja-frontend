@@ -1,13 +1,15 @@
 "use client";
 
-import React from "react";
-import { usePathname, useRouter } from "next/navigation";
+import React, { Suspense } from "react";
+import { usePathname } from "next/navigation";
 import { IndustrialNav, ROLE_QC_LAB } from "@/components/layout/industrial-nav";
 import { QualityProvider } from "@/lib/context/quality-context";
+import { IndustrialSkeleton } from "@/components/ui/industrial-skeleton";
+import { useNavTransition } from "@/lib/hooks/use-nav-transition";
 
 function QualityNavShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const router = useRouter();
+  const { isNavigating, navigateTo } = useNavTransition();
 
   const getActiveTab = () => {
     if (pathname === "/quality/rm-testing") return "rm-testing";
@@ -16,15 +18,17 @@ function QualityNavShell({ children }: { children: React.ReactNode }) {
     return "home"; // default /quality
   };
 
-  const handleTabChange = (tabId: string) => {
-    if (tabId === "rm-testing") {
-      router.push("/quality/rm-testing");
+  const handleTabChange = (tabId: string, href?: string) => {
+    if (href) {
+      navigateTo(href);
+    } else if (tabId === "rm-testing") {
+      navigateTo("/quality/rm-testing");
     } else if (tabId === "fg-testing") {
-      router.push("/quality/fg-testing");
+      navigateTo("/quality/fg-testing");
     } else if (tabId === "coa-reports") {
-      router.push("/quality/reports");
+      navigateTo("/quality/reports");
     } else {
-      router.push("/quality");
+      navigateTo("/quality");
     }
   };
 
@@ -39,7 +43,9 @@ function QualityNavShell({ children }: { children: React.ReactNode }) {
 
       {/* Main Operational Canvas */}
       <main className="flex-1 max-w-[1920px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-7 space-y-6 sm:space-y-8">
-        {children}
+        <Suspense fallback={<IndustrialSkeleton />}>
+          {isNavigating ? <IndustrialSkeleton /> : children}
+        </Suspense>
       </main>
     </div>
   );
