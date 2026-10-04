@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
+import { MobileFilterSheet } from "@/components/shared/mobile-filter-sheet";
 import {
   LogOut,
   Truck,
@@ -473,10 +474,17 @@ export function GateExit({ vehicles, onUpdateStage, onNavigateTab }: GateExitPro
               <button
                 type="button"
                 onClick={() => setIsMobileFilterOpen(true)}
-                className="sm:hidden w-10 h-10 flex items-center justify-center border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-700 shrink-0 cursor-pointer"
+                className={`sm:hidden w-10 h-10 flex items-center justify-center border shrink-0 cursor-pointer relative transition-colors ${
+                  activeTab !== "QUEUE"
+                    ? "bg-[#18181B] text-white border-[#18181B]"
+                    : "bg-white text-neutral-700 border-neutral-300 hover:bg-neutral-100"
+                }`}
                 title="Filter Options"
               >
                 <SlidersHorizontal className="w-4 h-4" />
+                {activeTab !== "QUEUE" && (
+                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-[#059669] rounded-full ring-2 ring-white" />
+                )}
               </button>
             </div>
 
@@ -547,78 +555,37 @@ export function GateExit({ vehicles, onUpdateStage, onNavigateTab }: GateExitPro
             </div>
           </div>
 
-          {/* Mobile Filter Modal Popup */}
-          {isMobileFilterOpen && (
-            <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-end sm:hidden">
-              <div className="w-full bg-white border-t border-neutral-300 p-4 space-y-4 max-h-[80vh] overflow-y-auto">
-                <div className="flex items-center justify-between border-b border-neutral-200 pb-3">
-                  <div className="flex items-center gap-2">
-                    <SlidersHorizontal className="w-4 h-4 text-[#059669]" />
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-neutral-900">
-                      Filter Exit Queue
-                    </h3>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setIsMobileFilterOpen(false)}
-                    className="p-1 hover:bg-neutral-100 text-neutral-500 hover:text-neutral-900"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-1 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setActiveTab("QUEUE");
-                      setIsMobileFilterOpen(false);
-                    }}
-                    className={`h-11 px-4 text-xs font-semibold flex items-center justify-between border ${
-                      activeTab === "QUEUE"
-                        ? "bg-[#18181B] text-white border-[#18181B]"
-                        : "bg-white text-neutral-800 border-neutral-200"
-                    }`}
-                  >
-                    <span>Ready for Exit</span>
-                    <span className="font-mono text-[11px] font-bold px-1.5 py-0.5 bg-neutral-200/40">{exitQueueVehicles.length}</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setActiveTab("ALL_INSIDE");
-                      setIsMobileFilterOpen(false);
-                    }}
-                    className={`h-11 px-4 text-xs font-semibold flex items-center justify-between border ${
-                      activeTab === "ALL_INSIDE"
-                        ? "bg-[#18181B] text-white border-[#18181B]"
-                        : "bg-white text-neutral-800 border-neutral-200"
-                    }`}
-                  >
-                    <span>All Active</span>
-                    <span className="font-mono text-[11px] font-bold px-1.5 py-0.5 bg-neutral-200/40">
-                      {vehicles.filter((v) => v.stage !== "EXIT_COMPLETED").length}
-                    </span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setActiveTab("DEPARTED");
-                      setIsMobileFilterOpen(false);
-                    }}
-                    className={`h-11 px-4 text-xs font-semibold flex items-center justify-between border ${
-                      activeTab === "DEPARTED"
-                        ? "bg-[#18181B] text-white border-[#18181B]"
-                        : "bg-white text-neutral-800 border-neutral-200"
-                    }`}
-                  >
-                    <span>Departed Today</span>
-                    <span className="font-mono text-[11px] font-bold px-1.5 py-0.5 bg-neutral-200/40">{departedLog.length}</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
+          {/* Mobile Filter Sheet */}
+          <MobileFilterSheet
+            isOpen={isMobileFilterOpen}
+            onClose={() => setIsMobileFilterOpen(false)}
+            title="Filter Exit Queue"
+            selectedId={activeTab}
+            onSelect={(id) => setActiveTab(id as typeof activeTab)}
+            options={[
+              {
+                id: "QUEUE",
+                label: "Ready for Exit",
+                count: exitQueueVehicles.length,
+                dotColor: "bg-[#059669]",
+                selectedDotColor: "bg-[#10B981] ring-2 ring-[#10B981]/40",
+              },
+              {
+                id: "ALL_INSIDE",
+                label: "All Active Inside",
+                count: vehicles.filter((v) => v.stage !== "EXIT_COMPLETED").length,
+                dotColor: "bg-blue-500",
+                selectedDotColor: "bg-sky-400 ring-2 ring-sky-400/40",
+              },
+              {
+                id: "DEPARTED",
+                label: "Departed Today",
+                count: departedLog.length,
+                dotColor: "bg-neutral-400",
+                selectedDotColor: "bg-white ring-2 ring-white/30",
+              },
+            ]}
+          />
 
       {/* 
         ============================================================

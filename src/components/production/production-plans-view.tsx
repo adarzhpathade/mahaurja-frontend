@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { MobileFilterSheet } from "@/components/shared/mobile-filter-sheet";
 import {
   CalendarRange,
   Plus,
@@ -72,77 +73,106 @@ export function ProductionPlansView() {
   return (
     <div className="space-y-6 select-none">
       {/* 1. COMPACT COMMAND HEADER */}
-      <div className="border-b border-neutral-300 pb-4 sm:pb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-neutral-900">
-          Shift Production Targets &amp; Recipes
-        </h1>
-        <button
-          type="button"
-          onClick={() => setIsCreateOpen(!isCreateOpen)}
-          className="h-10 px-4 bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold uppercase tracking-wider inline-flex items-center gap-2 transition-colors shadow-xs cursor-pointer"
-        >
-          <Plus className="w-4 h-4" />
-          <span>{isCreateOpen ? "Close Plan Form" : "+ Create Production Plan"}</span>
-        </button>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-neutral-300 pb-4 sm:pb-5">
+        <div className="flex items-center gap-2.5">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-neutral-900">
+            Production Planning
+          </h1>
+          <span className="text-xs sm:text-sm font-bold font-mono px-2 py-0.5 bg-neutral-200 border border-neutral-300 text-neutral-800">
+            {filteredPlans.length}
+          </span>
+        </div>
+
+        {/* Desktop Controls: Dual View Switcher + Action Button */}
+        <div className="hidden sm:flex items-center gap-3">
+          {/* Desktop Dual View */}
+          <div className="inline-flex border border-neutral-300 divide-x divide-neutral-300 text-xs shrink-0 h-10">
+            <button
+              type="button"
+              onClick={() => setViewMode("cards")}
+              className={`px-3 py-1.5 transition-colors cursor-pointer flex items-center gap-1.5 ${
+                viewMode === "cards"
+                  ? "bg-[#18181B] text-white font-semibold"
+                  : "bg-neutral-200/50 text-neutral-700 hover:bg-neutral-200"
+              }`}
+            >
+              <LayoutGrid className="w-3.5 h-3.5" />
+              <span>Cards</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode("table")}
+              className={`px-3 py-1.5 transition-colors cursor-pointer flex items-center gap-1.5 ${
+                viewMode === "table"
+                  ? "bg-[#18181B] text-white font-semibold"
+                  : "bg-neutral-200/50 text-neutral-700 hover:bg-neutral-200"
+              }`}
+            >
+              <TableIcon className="w-3.5 h-3.5" />
+              <span>Table</span>
+            </button>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setIsCreateOpen(!isCreateOpen)}
+            className="h-10 px-5 bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors shadow-xs cursor-pointer"
+          >
+            <Plus className="w-4 h-4" strokeWidth={2.5} />
+            <span>{isCreateOpen ? "Close Plan Form" : "Create Plan"}</span>
+          </button>
+        </div>
       </div>
 
       {/* Production Pulse KPI Tiles */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <div className="bg-white border border-neutral-300 p-4">
           <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-500 block mb-1">
-            Total Target Today
+            Total Target
           </span>
-          <div className="flex items-baseline justify-between">
-            <span className="font-mono font-black text-2xl sm:text-3xl text-neutral-900">
-              {metrics.todayTargetMT} MT
-            </span>
-            <span className="text-[10px] font-bold uppercase px-2 py-0.5 bg-neutral-100 text-neutral-700 border border-neutral-200">
-              Across Shifts
-            </span>
-          </div>
+          <span className="font-mono font-black text-2xl sm:text-3xl text-neutral-900 block">
+            {metrics.todayTargetMT} MT
+          </span>
         </div>
 
         <div className="bg-white border border-neutral-300 p-4">
           <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-500 block mb-1">
-            In-Mill Extruded Today
+            Extruded Today
           </span>
-          <div className="flex items-baseline justify-between">
-            <span className="font-mono font-black text-2xl sm:text-3xl text-[#059669]">
-              {metrics.todayProducedMT} MT
-            </span>
-            <span className="text-[10px] font-bold uppercase px-2 py-0.5 bg-emerald-50 text-[#047857] border border-emerald-200">
-              Line 1 Active
-            </span>
-          </div>
+          <span className="font-mono font-black text-2xl sm:text-3xl text-[#059669] block">
+            {metrics.todayProducedMT} MT
+          </span>
         </div>
 
         <div className="bg-white border border-neutral-300 p-4">
           <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-500 block mb-1">
-            Target Completion
+            Completion
           </span>
-          <div className="flex items-baseline justify-between">
-            <span className="font-mono font-black text-2xl sm:text-3xl text-neutral-900">
-              {Math.round((metrics.todayProducedMT / metrics.todayTargetMT) * 100)}%
-            </span>
-            <span className="text-[10px] font-bold uppercase px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-200">
-              On Schedule
-            </span>
-          </div>
+          <span className="font-mono font-black text-2xl sm:text-3xl text-neutral-900 block">
+            {Math.round((metrics.todayProducedMT / metrics.todayTargetMT) * 100)}%
+          </span>
         </div>
 
         <div className="bg-white border border-neutral-300 p-4">
           <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-500 block mb-1">
-            Overall Plant Efficiency
+            Plant Efficiency
           </span>
-          <div className="flex items-baseline justify-between">
-            <span className="font-mono font-black text-2xl sm:text-3xl text-[#059669]">
-              {metrics.plantEfficiencyPercent}%
-            </span>
-            <span className="text-[10px] font-bold uppercase px-2 py-0.5 bg-emerald-50 text-[#047857] border border-emerald-200">
-              Normal
-            </span>
-          </div>
+          <span className="font-mono font-black text-2xl sm:text-3xl text-[#059669] block">
+            {metrics.plantEfficiencyPercent}%
+          </span>
         </div>
+      </div>
+
+      {/* 2. MOBILE ACTION STACK (Gate UI Pattern) */}
+      <div className="sm:hidden flex flex-col items-stretch gap-2.5 w-full">
+        <button
+          type="button"
+          onClick={() => setIsCreateOpen(!isCreateOpen)}
+          className="h-11 px-5 bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs w-full"
+        >
+          <Plus className="w-4 h-4" strokeWidth={2.5} />
+          <span>{isCreateOpen ? "Close Plan Form" : "Create Plan"}</span>
+        </button>
       </div>
 
       {/* Plan Creation Inline Console (< 650px height) */}
@@ -151,7 +181,7 @@ export function ProductionPlansView() {
           <div className="flex items-center gap-2 pb-2 border-b border-neutral-200">
             <Plus className="w-4 h-4 text-[#059669]" />
             <h2 className="text-xs font-bold uppercase tracking-wider text-neutral-800">
-              Create New Production Shift Plan (PDF Sec 12)
+              Create New Shift Plan
             </h2>
           </div>
 
@@ -236,50 +266,8 @@ export function ProductionPlansView() {
         </form>
       )}
 
-      {/* Plans List Display */}
-      <div className="space-y-4 pt-2">
-        <div className="flex items-center justify-between border-b border-neutral-300 pb-2.5">
-          <div className="flex items-center gap-2">
-            <Layers className="w-4 h-4 text-neutral-800 shrink-0" />
-            <h2 className="text-xs font-bold uppercase tracking-wider text-neutral-900">
-              Shift Plans &amp; Recipes
-            </h2>
-            <span className="text-[10px] font-bold font-mono px-1.5 py-0.5 bg-neutral-200 border border-neutral-300 text-neutral-800">
-              {filteredPlans.length}
-            </span>
-          </div>
-
-          {/* Desktop Dual View */}
-          <div className="hidden sm:inline-flex border border-neutral-300 divide-x divide-neutral-300 text-xs shrink-0 h-10">
-            <button
-              type="button"
-              onClick={() => setViewMode("cards")}
-              className={`px-3 py-1.5 transition-colors cursor-pointer flex items-center gap-1.5 ${
-                viewMode === "cards"
-                  ? "bg-[#18181B] text-white font-semibold"
-                  : "bg-neutral-200/50 text-neutral-700 hover:bg-neutral-200"
-              }`}
-            >
-              <LayoutGrid className="w-3.5 h-3.5" />
-              <span>Cards</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setViewMode("table")}
-              className={`px-3 py-1.5 transition-colors cursor-pointer flex items-center gap-1.5 ${
-                viewMode === "table"
-                  ? "bg-[#18181B] text-white font-semibold"
-                  : "bg-neutral-200/50 text-neutral-700 hover:bg-neutral-200"
-              }`}
-            >
-              <TableIcon className="w-3.5 h-3.5" />
-              <span>Table</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Content container - borderless on mobile, bordered on PC */}
-        <div className="border-0 p-0 bg-transparent sm:border sm:border-neutral-300 sm:p-6 sm:bg-white/30 space-y-4 sm:space-y-5">
+      {/* Content container - borderless on mobile, bordered on PC */}
+      <div className="border-0 p-0 bg-transparent sm:border sm:border-neutral-300 sm:p-6 sm:bg-white/30 space-y-4 sm:space-y-5">
           {/* Subheader & Search / Filter Controls */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pb-3 border-b border-neutral-300">
             {/* Search Input with Mobile Filter Button */}
@@ -297,10 +285,17 @@ export function ProductionPlansView() {
               <button
                 type="button"
                 onClick={() => setIsMobileFilterOpen(true)}
-                className="sm:hidden w-10 h-10 flex items-center justify-center border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-700 shrink-0 cursor-pointer"
+                className={`sm:hidden w-10 h-10 flex items-center justify-center border shrink-0 cursor-pointer relative transition-colors ${
+                  filterStatus !== "ALL"
+                    ? "bg-[#18181B] text-white border-[#18181B]"
+                    : "bg-white text-neutral-700 border-neutral-300 hover:bg-neutral-100"
+                }`}
                 title="Filter Options"
               >
                 <SlidersHorizontal className="w-4 h-4" />
+                {filterStatus !== "ALL" && (
+                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-[#059669] rounded-full ring-2 ring-white" />
+                )}
               </button>
             </div>
 
@@ -389,61 +384,44 @@ export function ProductionPlansView() {
             </div>
           </div>
 
-          {/* Mobile Filter Sheet Modal */}
-          {isMobileFilterOpen && (
-            <div className="fixed inset-0 z-50 bg-black/40 flex items-end sm:hidden">
-              <div className="bg-white w-full border-t border-neutral-300 p-4 space-y-3">
-                <div className="flex items-center justify-between border-b border-neutral-200 pb-2">
-                  <span className="text-xs font-bold uppercase tracking-wider text-neutral-800">Filter Options</span>
-                  <button
-                    type="button"
-                    onClick={() => setIsMobileFilterOpen(false)}
-                    className="text-xs font-bold text-neutral-500 hover:text-neutral-800"
-                  >
-                    Close ✕
-                  </button>
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => { setFilterStatus("ALL"); setIsMobileFilterOpen(false); }}
-                    className={`p-2.5 text-xs font-medium border text-center ${
-                      filterStatus === "ALL" ? "border-neutral-900 bg-[#18181B] text-white font-bold" : "border-neutral-300 bg-neutral-50 text-neutral-700"
-                    }`}
-                  >
-                    All ({plans.length})
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { setFilterStatus("PROCESSING"); setIsMobileFilterOpen(false); }}
-                    className={`p-2.5 text-xs font-medium border text-center ${
-                      filterStatus === "PROCESSING" ? "border-neutral-900 bg-[#18181B] text-white font-bold" : "border-neutral-300 bg-neutral-50 text-neutral-700"
-                    }`}
-                  >
-                    In Production ({plans.filter((p) => p.status === "PROCESSING").length})
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { setFilterStatus("MATERIAL_ISSUED"); setIsMobileFilterOpen(false); }}
-                    className={`p-2.5 text-xs font-medium border text-center ${
-                      filterStatus === "MATERIAL_ISSUED" ? "border-neutral-900 bg-[#18181B] text-white font-bold" : "border-neutral-300 bg-neutral-50 text-neutral-700"
-                    }`}
-                  >
-                    Material Issued ({plans.filter((p) => p.status === "MATERIAL_ISSUED").length})
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { setFilterStatus("PLANNED"); setIsMobileFilterOpen(false); }}
-                    className={`p-2.5 text-xs font-medium border text-center ${
-                      filterStatus === "PLANNED" ? "border-neutral-900 bg-[#18181B] text-white font-bold" : "border-neutral-300 bg-neutral-50 text-neutral-700"
-                    }`}
-                  >
-                    Planned ({plans.filter((p) => p.status === "PLANNED").length})
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
+          {/* Mobile Filter Sheet */}
+          <MobileFilterSheet
+            isOpen={isMobileFilterOpen}
+            onClose={() => setIsMobileFilterOpen(false)}
+            title="Filter Plans"
+            selectedId={filterStatus}
+            onSelect={(id) => setFilterStatus(id as typeof filterStatus)}
+            options={[
+              {
+                id: "ALL",
+                label: "All Plans",
+                count: plans.length,
+                dotColor: "bg-neutral-400",
+                selectedDotColor: "bg-white ring-2 ring-white/30",
+              },
+              {
+                id: "PROCESSING",
+                label: "In Production",
+                count: plans.filter((p) => p.status === "PROCESSING").length,
+                dotColor: "bg-[#059669]",
+                selectedDotColor: "bg-[#10B981] ring-2 ring-[#10B981]/40",
+              },
+              {
+                id: "MATERIAL_ISSUED",
+                label: "Material Issued",
+                count: plans.filter((p) => p.status === "MATERIAL_ISSUED").length,
+                dotColor: "bg-blue-500",
+                selectedDotColor: "bg-sky-400 ring-2 ring-sky-400/40",
+              },
+              {
+                id: "PLANNED",
+                label: "Planned",
+                count: plans.filter((p) => p.status === "PLANNED").length,
+                dotColor: "bg-amber-500",
+                selectedDotColor: "bg-amber-400 ring-2 ring-amber-400/40",
+              },
+            ]}
+          />
 
           {filteredPlans.length === 0 ? (
             <div className="py-8 text-center text-xs text-neutral-500 font-mono">
@@ -452,137 +430,212 @@ export function ProductionPlansView() {
           ) : viewMode === "cards" ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {filteredPlans.map((p) => (
-            <div
-              key={p.id}
-              className="border border-neutral-300 hover:border-neutral-900 bg-white/40 p-4 flex flex-col justify-between space-y-4 transition-all"
-            >
-              <div>
-                <div className="flex items-start justify-between pb-2 border-b border-neutral-200">
+                <div
+                  key={p.id}
+                  className="border border-neutral-300 hover:border-neutral-900 bg-white/40 p-4 flex flex-col justify-between space-y-4 transition-all"
+                >
                   <div>
-                    <span className="text-[10px] font-mono text-neutral-500">{p.date} · {p.shift}</span>
-                    <h3 className="font-mono font-bold text-neutral-900 text-base">{p.id}</h3>
-                  </div>
-                  <span className={`text-[10px] font-bold uppercase px-2 py-0.5 ${
-                    p.status === "PROCESSING"
-                      ? "bg-amber-100 text-amber-800 border border-amber-300 animate-pulse"
-                      : p.status === "MATERIAL_ISSUED"
-                      ? "bg-blue-100 text-blue-800 border border-blue-300"
-                      : "bg-neutral-200 text-neutral-700"
-                  }`}>
-                    {p.status.replace("_", " ")}
-                  </span>
-                </div>
+                    <div className="flex items-start justify-between pb-2 border-b border-neutral-200">
+                      <div>
+                        <span className="text-[10px] font-mono text-neutral-500">{p.date} · {p.shift}</span>
+                        <h3 className="font-mono font-bold text-neutral-900 text-base">{p.id}</h3>
+                      </div>
+                      <span className={`text-[10px] font-bold uppercase px-2 py-0.5 ${
+                        p.status === "PROCESSING"
+                          ? "bg-amber-100 text-amber-800 border border-amber-300 animate-pulse"
+                          : p.status === "MATERIAL_ISSUED"
+                          ? "bg-blue-100 text-blue-800 border border-blue-300"
+                          : "bg-neutral-200 text-neutral-700"
+                      }`}>
+                        {p.status.replace("_", " ")}
+                      </span>
+                    </div>
 
-                <div className="mt-3 space-y-2 text-xs text-neutral-700">
-                  <div className="flex justify-between">
-                    <span className="text-neutral-500">Target Output:</span>
-                    <span className="font-mono font-bold text-neutral-900">{p.targetQuantityMT} MT ({p.pelletDiameterMm}mm)</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-neutral-500">Mill / Line:</span>
-                    <span className="font-semibold text-neutral-900">{p.productionLine}</span>
-                  </div>
-                  <div>
-                    <span className="text-neutral-500 block text-[11px] mb-1">Biomass Blend Mix (PDF Sec 12):</span>
-                    <div className="bg-neutral-100 p-2 border border-neutral-200 space-y-1 font-mono text-[11px]">
-                      {p.ingredients.map((ing) => (
-                        <div key={ing.materialCode} className="flex justify-between">
-                          <span className="text-neutral-700">{ing.materialName}:</span>
-                          <span className="font-bold text-neutral-900">{ing.plannedQuantityMT} MT</span>
+                    <div className="mt-3 space-y-2 text-xs text-neutral-700">
+                      <div className="flex justify-between">
+                        <span className="text-neutral-500">Target Output:</span>
+                        <span className="font-mono font-bold text-neutral-900">{p.targetQuantityMT} MT ({p.pelletDiameterMm}mm)</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-neutral-500">Mill / Line:</span>
+                        <span className="font-semibold text-neutral-900">{p.productionLine}</span>
+                      </div>
+                      <div>
+                        <span className="text-neutral-500 block text-[11px] mb-1">Biomass Recipe Blend:</span>
+                        <div className="bg-neutral-100 p-2 border border-neutral-200 space-y-1 font-mono text-[11px]">
+                          {p.ingredients.map((ing) => (
+                            <div key={ing.materialCode} className="flex justify-between">
+                              <span className="text-neutral-700">{ing.materialName}:</span>
+                              <span className="font-bold text-neutral-900">{ing.plannedQuantityMT} MT</span>
+                            </div>
+                          ))}
                         </div>
-                      ))}
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
 
-              <div className="pt-3 border-t border-neutral-200 flex items-center justify-between">
-                <span className="text-[10px] text-neutral-500 font-mono">
-                  Supervisor: {p.supervisorName}
-                </span>
-
-                {p.status === "PLANNED" ? (
-                  <Link
-                    href="/production/material-issue"
-                    className="h-8 px-3 bg-[#18181B] hover:bg-[#059669] text-white text-xs font-bold uppercase tracking-wider inline-flex items-center gap-1.5 transition-colors"
-                  >
-                    <PackageMinus className="w-3.5 h-3.5" />
-                    <span>Issue Material &rarr;</span>
-                  </Link>
-                ) : (
-                  <Link
-                    href="/production/processing"
-                    className="h-8 px-3 bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold uppercase tracking-wider inline-flex items-center gap-1.5 transition-colors"
-                  >
-                    <Factory className="w-3.5 h-3.5" />
-                    <span>7-Stage Console &rarr;</span>
-                  </Link>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        /* Transparent Table */
-        <div className="border border-neutral-300 overflow-x-auto bg-transparent">
-          <table className="w-full text-left text-xs border-collapse">
-            <thead>
-              <tr className="border-b border-neutral-300 bg-neutral-200/50 text-neutral-600 font-bold uppercase tracking-wider text-[10px]">
-                <th className="py-2.5 px-3">Plan ID</th>
-                <th className="py-2.5 px-3">Date / Shift</th>
-                <th className="py-2.5 px-3 font-mono">Target MT</th>
-                <th className="py-2.5 px-3">Product Spec</th>
-                <th className="py-2.5 px-3">Recipe Blend</th>
-                <th className="py-2.5 px-3">Production Line</th>
-                <th className="py-2.5 px-3">Status</th>
-                <th className="py-2.5 px-3 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-neutral-300">
-              {filteredPlans.map((p) => (
-                <tr key={p.id} className="hover:bg-neutral-200/40 transition-colors">
-                  <td className="py-2.5 px-3 font-mono font-bold text-neutral-900">{p.id}</td>
-                  <td className="py-2.5 px-3 text-neutral-800">{p.date} · {p.shift}</td>
-                  <td className="py-2.5 px-3 font-mono font-bold text-neutral-900">{p.targetQuantityMT} MT</td>
-                  <td className="py-2.5 px-3 text-neutral-700">{p.productName} ({p.pelletDiameterMm}mm)</td>
-                  <td className="py-2.5 px-3 text-neutral-700 truncate max-w-[200px]">{p.formulaName}</td>
-                  <td className="py-2.5 px-3 text-neutral-700">{p.productionLine}</td>
-                  <td className="py-2.5 px-3">
-                    <span className={`text-[10px] font-bold uppercase px-2 py-0.5 ${
-                      p.status === "PROCESSING"
-                        ? "bg-amber-100 text-amber-800 border border-amber-300 animate-pulse"
-                        : p.status === "MATERIAL_ISSUED"
-                        ? "bg-blue-100 text-blue-800 border border-blue-300"
-                        : "bg-neutral-200 text-neutral-700"
-                    }`}>
-                      {p.status.replace("_", " ")}
+                  <div className="pt-3 border-t border-neutral-200 flex items-center justify-between">
+                    <span className="text-[10px] text-neutral-500 font-mono">
+                      Supervisor: {p.supervisorName}
                     </span>
-                  </td>
-                  <td className="py-2.5 px-3 text-right">
+
                     {p.status === "PLANNED" ? (
                       <Link
                         href="/production/material-issue"
-                        className="h-7 px-2.5 bg-[#18181B] hover:bg-[#059669] text-white text-[11px] font-bold uppercase tracking-wider inline-flex items-center gap-1 transition-colors"
+                        className="h-8 px-3 bg-[#18181B] hover:bg-[#059669] text-white text-xs font-bold uppercase tracking-wider inline-flex items-center gap-1.5 transition-colors"
                       >
-                        <span>Issue RM</span>
+                        <PackageMinus className="w-3.5 h-3.5" />
+                        <span>Issue Material &rarr;</span>
                       </Link>
                     ) : (
                       <Link
                         href="/production/processing"
-                        className="h-7 px-2.5 bg-[#059669] hover:bg-[#047857] text-white text-[11px] font-bold uppercase tracking-wider inline-flex items-center gap-1 transition-colors"
+                        className="h-8 px-3 bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold uppercase tracking-wider inline-flex items-center gap-1.5 transition-colors"
                       >
-                        <span>Console</span>
+                        <Factory className="w-3.5 h-3.5" />
+                        <span>7-Stage Console &rarr;</span>
                       </Link>
                     )}
-                  </td>
-                </tr>
+                  </div>
+                </div>
               ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+            </div>
+          ) : (
+            <>
+              {/* Mobile Cards Fallback */}
+              <div className="grid grid-cols-1 sm:hidden gap-4">
+                {filteredPlans.map((p) => (
+                  <div
+                    key={p.id}
+                    className="border border-neutral-300 hover:border-neutral-900 bg-white/40 p-4 flex flex-col justify-between space-y-4 transition-all"
+                  >
+                    <div>
+                      <div className="flex items-start justify-between pb-2 border-b border-neutral-200">
+                        <div>
+                          <span className="text-[10px] font-mono text-neutral-500">{p.date} · {p.shift}</span>
+                          <h3 className="font-mono font-bold text-neutral-900 text-base">{p.id}</h3>
+                        </div>
+                        <span className={`text-[10px] font-bold uppercase px-2 py-0.5 ${
+                          p.status === "PROCESSING"
+                            ? "bg-amber-100 text-amber-800 border border-amber-300 animate-pulse"
+                            : p.status === "MATERIAL_ISSUED"
+                            ? "bg-blue-100 text-blue-800 border border-blue-300"
+                            : "bg-neutral-200 text-neutral-700"
+                        }`}>
+                          {p.status.replace("_", " ")}
+                        </span>
+                      </div>
+
+                      <div className="mt-3 space-y-2 text-xs text-neutral-700">
+                        <div className="flex justify-between">
+                          <span className="text-neutral-500">Target Output:</span>
+                          <span className="font-mono font-bold text-neutral-900">{p.targetQuantityMT} MT ({p.pelletDiameterMm}mm)</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-neutral-500">Mill / Line:</span>
+                          <span className="font-semibold text-neutral-900">{p.productionLine}</span>
+                        </div>
+                        <div>
+                          <span className="text-neutral-500 block text-[11px] mb-1">Biomass Recipe Blend:</span>
+                          <div className="bg-neutral-100 p-2 border border-neutral-200 space-y-1 font-mono text-[11px]">
+                            {p.ingredients.map((ing) => (
+                              <div key={ing.materialCode} className="flex justify-between">
+                                <span className="text-neutral-700">{ing.materialName}:</span>
+                                <span className="font-bold text-neutral-900">{ing.plannedQuantityMT} MT</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="pt-3 border-t border-neutral-200 flex items-center justify-between">
+                      <span className="text-[10px] text-neutral-500 font-mono">
+                        Supervisor: {p.supervisorName}
+                      </span>
+
+                      {p.status === "PLANNED" ? (
+                        <Link
+                          href="/production/material-issue"
+                          className="h-8 px-3 bg-[#18181B] hover:bg-[#059669] text-white text-xs font-bold uppercase tracking-wider inline-flex items-center gap-1.5 transition-colors"
+                        >
+                          <PackageMinus className="w-3.5 h-3.5" />
+                          <span>Issue Material &rarr;</span>
+                        </Link>
+                      ) : (
+                        <Link
+                          href="/production/processing"
+                          className="h-8 px-3 bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold uppercase tracking-wider inline-flex items-center gap-1.5 transition-colors"
+                        >
+                          <Factory className="w-3.5 h-3.5" />
+                          <span>7-Stage Console &rarr;</span>
+                        </Link>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Desktop Transparent Table */}
+              <div className="hidden sm:block border border-neutral-300 overflow-x-auto bg-transparent">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead>
+                    <tr className="border-b border-neutral-300 bg-neutral-200/50 text-neutral-600 font-bold uppercase tracking-wider text-[10px]">
+                      <th className="py-2.5 px-3">Plan ID</th>
+                      <th className="py-2.5 px-3">Date / Shift</th>
+                      <th className="py-2.5 px-3 font-mono">Target MT</th>
+                      <th className="py-2.5 px-3">Product Spec</th>
+                      <th className="py-2.5 px-3">Recipe Blend</th>
+                      <th className="py-2.5 px-3">Production Line</th>
+                      <th className="py-2.5 px-3">Status</th>
+                      <th className="py-2.5 px-3 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y border-neutral-300">
+                    {filteredPlans.map((p) => (
+                      <tr key={p.id} className="hover:bg-neutral-200/40 transition-colors">
+                        <td className="py-2.5 px-3 font-mono font-bold text-neutral-900">{p.id}</td>
+                        <td className="py-2.5 px-3 text-neutral-800">{p.date} · {p.shift}</td>
+                        <td className="py-2.5 px-3 font-mono font-bold text-neutral-900">{p.targetQuantityMT} MT</td>
+                        <td className="py-2.5 px-3 text-neutral-700">{p.productName} ({p.pelletDiameterMm}mm)</td>
+                        <td className="py-2.5 px-3 text-neutral-700 truncate max-w-[200px]">{p.formulaName}</td>
+                        <td className="py-2.5 px-3 text-neutral-700">{p.productionLine}</td>
+                        <td className="py-2.5 px-3">
+                          <span className={`text-[10px] font-bold uppercase px-2 py-0.5 ${
+                            p.status === "PROCESSING"
+                              ? "bg-amber-100 text-amber-800 border border-amber-300 animate-pulse"
+                              : p.status === "MATERIAL_ISSUED"
+                              ? "bg-blue-100 text-blue-800 border border-blue-300"
+                              : "bg-neutral-200 text-neutral-700"
+                          }`}>
+                            {p.status.replace("_", " ")}
+                          </span>
+                        </td>
+                        <td className="py-2.5 px-3 text-right">
+                          {p.status === "PLANNED" ? (
+                            <Link
+                              href="/production/material-issue"
+                              className="h-7 px-2.5 bg-[#18181B] hover:bg-[#059669] text-white text-[11px] font-bold uppercase tracking-wider inline-flex items-center gap-1 transition-colors"
+                            >
+                              <span>Issue RM</span>
+                            </Link>
+                          ) : (
+                            <Link
+                              href="/production/processing"
+                              className="h-7 px-2.5 bg-[#059669] hover:bg-[#047857] text-white text-[11px] font-bold uppercase tracking-wider inline-flex items-center gap-1 transition-colors"
+                            >
+                              <span>Console</span>
+                            </Link>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
         </div>
       </div>
-    </div>
-  );
-}
+    );
+  }

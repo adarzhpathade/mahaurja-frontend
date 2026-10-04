@@ -30,22 +30,19 @@ export function ProcessingStagesConsole() {
   return (
     <div className="space-y-6 select-none">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-neutral-300">
-        <div>
-          <div className="flex items-center gap-2 mb-0.5">
-            <Factory className="w-4 h-4 text-[#059669]" />
-            <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-600">
-              PDF Sections 14–20 · 7-Stage Continuous Pellet Production Line
-            </span>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-neutral-900">
-            7-Stage Biomass Processing &amp; Pelletising Console
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-neutral-300 pb-4 sm:pb-5">
+        <div className="flex items-center gap-2.5">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-neutral-900">
+            Pellet Processing Console
           </h1>
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-emerald-50 border border-emerald-300 text-[#047857] text-xs font-bold font-mono">
+            <span className="w-2 h-2 rounded-full bg-[#059669] animate-pulse" />
+            Line 1 Active
+          </span>
         </div>
 
-        <div className="flex items-center gap-2">
-          <span className="w-2.5 h-2.5 rounded-full bg-[#059669] animate-pulse" />
-          <span className="text-xs font-mono font-bold text-neutral-800">Line 1 · 8mm Pellets Live</span>
+        <div className="text-xs font-mono text-neutral-600">
+          8mm High-Caloric Pellets · Continuous Production
         </div>
       </div>
 
@@ -83,7 +80,7 @@ export function ProcessingStagesConsole() {
                 {stage.stageName.split(" ")[0]}
               </div>
               <div className="text-[10px] opacity-70 truncate mt-0.5">
-                {stage.sectionRef}
+                {stage.machineName.split(" ")[0]}
               </div>
             </button>
           );
@@ -97,7 +94,7 @@ export function ProcessingStagesConsole() {
           <div>
             <div className="flex items-center gap-2">
               <span className="font-mono font-bold text-xs text-neutral-500">
-                STAGE 0{activeStage.stageId} · {activeStage.sectionRef}
+                STAGE 0{activeStage.stageId} · Line 1
               </span>
               <span className={`text-[10px] font-bold uppercase px-2 py-0.5 ${
                 activeStage.status === "COMPLETED"

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { MobileFilterSheet } from "@/components/shared/mobile-filter-sheet";
 import {
   FileText,
   Search,
@@ -152,10 +153,17 @@ export function QcRecordsLedger() {
             <button
               type="button"
               onClick={() => setIsMobileFilterOpen(true)}
-              className="sm:hidden w-10 h-10 flex items-center justify-center border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-700 shrink-0 cursor-pointer"
+              className={`sm:hidden w-10 h-10 flex items-center justify-center border shrink-0 cursor-pointer relative transition-colors ${
+                filterType !== "ALL"
+                  ? "bg-[#18181B] text-white border-[#18181B]"
+                  : "bg-white text-neutral-700 border-neutral-300 hover:bg-neutral-100"
+              }`}
               title="Filter Options"
             >
               <SlidersHorizontal className="w-4 h-4" />
+              {filterType !== "ALL" && (
+                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-[#059669] rounded-full ring-2 ring-white" />
+              )}
             </button>
           </div>
 
@@ -193,43 +201,44 @@ export function QcRecordsLedger() {
           </div>
         </div>
 
-        {/* Mobile Filter Sheet Modal */}
-        {isMobileFilterOpen && (
-          <div className="fixed inset-0 z-50 bg-black/40 flex items-end sm:hidden">
-            <div className="bg-white w-full border-t border-neutral-300 p-4 space-y-3">
-              <div className="flex items-center justify-between border-b border-neutral-200 pb-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-neutral-800">Filter Options</span>
-                <button
-                  type="button"
-                  onClick={() => setIsMobileFilterOpen(false)}
-                  className="text-xs font-bold text-neutral-500 hover:text-neutral-800"
-                >
-                  Close ✕
-                </button>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                {(["ALL", "APPROVED", "HOLD", "REJECTED"] as const).map((filter) => {
-                  const count =
-                    filter === "ALL"
-                      ? allRecords.length
-                      : allRecords.filter((r) => r.status === filter).length;
-                  return (
-                    <button
-                      key={filter}
-                      type="button"
-                      onClick={() => { setFilterType(filter); setIsMobileFilterOpen(false); }}
-                      className={`p-2.5 text-xs font-medium border text-center ${
-                        filterType === filter ? "border-neutral-900 bg-[#18181B] text-white font-bold" : "border-neutral-300 bg-neutral-50 text-neutral-700"
-                      }`}
-                    >
-                      {filter === "ALL" ? "All" : filter} ({count})
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        )}
+        {/* Mobile Filter Sheet */}
+        <MobileFilterSheet
+          isOpen={isMobileFilterOpen}
+          onClose={() => setIsMobileFilterOpen(false)}
+          title="Filter QC Records"
+          selectedId={filterType}
+          onSelect={(id) => setFilterType(id as typeof filterType)}
+          options={[
+            {
+              id: "ALL",
+              label: "All Records",
+              count: allRecords.length,
+              dotColor: "bg-neutral-400",
+              selectedDotColor: "bg-white ring-2 ring-white/30",
+            },
+            {
+              id: "APPROVED",
+              label: "Approved",
+              count: allRecords.filter((r) => r.status === "APPROVED").length,
+              dotColor: "bg-[#059669]",
+              selectedDotColor: "bg-[#10B981] ring-2 ring-[#10B981]/40",
+            },
+            {
+              id: "HOLD",
+              label: "Quarantine / Hold",
+              count: allRecords.filter((r) => r.status === "HOLD").length,
+              dotColor: "bg-amber-500",
+              selectedDotColor: "bg-amber-400 ring-2 ring-amber-400/40",
+            },
+            {
+              id: "REJECTED",
+              label: "Rejected",
+              count: allRecords.filter((r) => r.status === "REJECTED").length,
+              dotColor: "bg-red-500",
+              selectedDotColor: "bg-red-400 ring-2 ring-red-400/40",
+            },
+          ]}
+        />
 
       {/* Main Records Display */}
       {/* 1. Cards View: Always on Mobile, respects viewMode on Desktop */}
@@ -287,24 +296,26 @@ export function QcRecordsLedger() {
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-neutral-200 flex items-center justify-between">
-                <span className={`text-[10px] font-bold uppercase px-2 py-0.5 ${
-                  r.status === "APPROVED"
-                    ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
-                    : r.status === "HOLD"
-                    ? "bg-amber-100 text-amber-800 border border-amber-300"
-                    : r.status === "REJECTED"
-                    ? "bg-red-100 text-red-800 border border-red-300"
-                    : "bg-neutral-200 text-neutral-700"
-                }`}>
-                  {r.status}
-                </span>
+              <div className="pt-3 border-t border-neutral-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                <div className="flex items-center">
+                  <span className={`text-[10px] font-bold uppercase px-2 py-0.5 ${
+                    r.status === "APPROVED"
+                      ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
+                      : r.status === "HOLD"
+                      ? "bg-amber-100 text-amber-800 border border-amber-300"
+                      : r.status === "REJECTED"
+                      ? "bg-red-100 text-red-800 border border-red-300"
+                      : "bg-neutral-200 text-neutral-700"
+                  }`}>
+                    {r.status}
+                  </span>
+                </div>
 
                 {r.type === "FG" && r.status === "APPROVED" ? (
                   <button
                     type="button"
                     onClick={() => handleOpenCoa(r.id)}
-                    className="h-8 px-3 bg-[#18181B] hover:bg-[#059669] text-white text-xs font-bold uppercase tracking-wider inline-flex items-center gap-1.5 transition-colors cursor-pointer"
+                    className="h-10 sm:h-8 px-4 sm:px-3 bg-[#18181B] hover:bg-[#059669] text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition-colors cursor-pointer w-full sm:w-auto shadow-xs"
                   >
                     <Eye className="w-3.5 h-3.5" />
                     <span>View COA</span>

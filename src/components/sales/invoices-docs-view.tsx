@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { MobileFilterSheet } from "@/components/shared/mobile-filter-sheet";
 import {
   FileText,
   Search,
@@ -46,55 +47,48 @@ export function InvoicesDocsView() {
 
   return (
     <div className="space-y-6 select-none">
-      {/* Command Header */}
-      <div className="border-b border-neutral-300 pb-4 sm:pb-5">
-        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-neutral-900">
-          Invoices &amp; Challans
-        </h1>
+      {/* 1. COMPACT COMMAND HEADER (with Count & Desktop View Toggle) */}
+      <div className="border-b border-neutral-300 pb-4 sm:pb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-neutral-900">
+            Invoices &amp; Documentation
+          </h1>
+          <span className="text-[11px] font-bold font-mono px-2 py-0.5 bg-neutral-200 border border-neutral-300 text-neutral-800">
+            {filteredInvoices.length}
+          </span>
+        </div>
+
+        {/* Desktop Dual View */}
+        <div className="hidden sm:inline-flex border border-neutral-300 divide-x divide-neutral-300 text-xs shrink-0 h-10">
+          <button
+            type="button"
+            onClick={() => setViewMode("cards")}
+            className={`px-3 py-1.5 transition-colors cursor-pointer flex items-center gap-1.5 ${
+              viewMode === "cards"
+                ? "bg-[#18181B] text-white font-semibold"
+                : "bg-neutral-200/50 text-neutral-700 hover:bg-neutral-200"
+            }`}
+          >
+            <LayoutGrid className="w-3.5 h-3.5" />
+            <span>Cards</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setViewMode("table")}
+            className={`px-3 py-1.5 transition-colors cursor-pointer flex items-center gap-1.5 ${
+              viewMode === "table"
+                ? "bg-[#18181B] text-white font-semibold"
+                : "bg-neutral-200/50 text-neutral-700 hover:bg-neutral-200"
+            }`}
+          >
+            <TableIcon className="w-3.5 h-3.5" />
+            <span>Table</span>
+          </button>
+        </div>
       </div>
 
       {/* Invoices Section */}
       <section className="space-y-4">
-        <div className="flex items-center justify-between border-b border-neutral-300 pb-2.5">
-          <div className="flex items-center gap-2">
-            <FileText className="w-4 h-4 text-neutral-800 shrink-0" />
-            <h2 className="text-xs font-bold uppercase tracking-wider text-neutral-900">
-              Invoices &amp; Challans Ledger
-            </h2>
-            <span className="text-[10px] font-bold font-mono px-1.5 py-0.5 bg-neutral-200 border border-neutral-300 text-neutral-800">
-              {filteredInvoices.length}
-            </span>
-          </div>
-
-          {/* Desktop Dual View */}
-          <div className="hidden sm:inline-flex border border-neutral-300 divide-x divide-neutral-300 text-xs shrink-0 h-10">
-            <button
-              type="button"
-              onClick={() => setViewMode("cards")}
-              className={`px-3 py-1.5 transition-colors cursor-pointer flex items-center gap-1.5 ${
-                viewMode === "cards"
-                  ? "bg-[#18181B] text-white font-semibold"
-                  : "bg-neutral-200/50 text-neutral-700 hover:bg-neutral-200"
-              }`}
-            >
-              <LayoutGrid className="w-3.5 h-3.5" />
-              <span>Cards</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setViewMode("table")}
-              className={`px-3 py-1.5 transition-colors cursor-pointer flex items-center gap-1.5 ${
-                viewMode === "table"
-                  ? "bg-[#18181B] text-white font-semibold"
-                  : "bg-neutral-200/50 text-neutral-700 hover:bg-neutral-200"
-              }`}
-            >
-              <TableIcon className="w-3.5 h-3.5" />
-              <span>Table</span>
-            </button>
-          </div>
-        </div>
-
         {/* Content container - borderless on mobile, bordered on PC */}
         <div className="border-0 p-0 bg-transparent sm:border sm:border-neutral-300 sm:p-6 sm:bg-white/30 space-y-4 sm:space-y-5">
           {/* Subheader & Search / Filter Controls */}
@@ -116,10 +110,17 @@ export function InvoicesDocsView() {
               <button
                 type="button"
                 onClick={() => setIsMobileFilterOpen(true)}
-                className="sm:hidden w-10 h-10 flex items-center justify-center border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-700 shrink-0 cursor-pointer"
+                className={`sm:hidden w-10 h-10 flex items-center justify-center border shrink-0 cursor-pointer relative transition-colors ${
+                  statusFilter !== "ALL"
+                    ? "bg-[#18181B] text-white border-[#18181B]"
+                    : "bg-white text-neutral-700 border-neutral-300 hover:bg-neutral-100"
+                }`}
                 title="Filter Options"
               >
                 <SlidersHorizontal className="w-4 h-4" />
+                {statusFilter !== "ALL" && (
+                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-[#059669] rounded-full ring-2 ring-white" />
+                )}
               </button>
             </div>
 
@@ -188,179 +189,63 @@ export function InvoicesDocsView() {
             </div>
           </div>
 
-          {/* Mobile Filter Modal Popup */}
-          {isMobileFilterOpen && (
-            <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-end sm:hidden">
-              <div className="w-full bg-white border-t border-neutral-300 p-4 space-y-4 max-h-[80vh] overflow-y-auto">
-                <div className="flex items-center justify-between border-b border-neutral-200 pb-3">
-                  <div className="flex items-center gap-2">
-                    <SlidersHorizontal className="w-4 h-4 text-[#059669]" />
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-neutral-900">
-                      Filter Invoices
-                    </h3>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setIsMobileFilterOpen(false)}
-                    className="p-1 hover:bg-neutral-100 text-neutral-500 hover:text-neutral-900"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-1 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setStatusFilter("ALL");
-                      setIsMobileFilterOpen(false);
-                    }}
-                    className={`h-11 px-4 text-xs font-semibold flex items-center justify-between border ${
-                      statusFilter === "ALL"
-                        ? "bg-[#18181B] text-white border-[#18181B]"
-                        : "bg-white text-neutral-800 border-neutral-200"
-                    }`}
-                  >
-                    <span>All Invoices</span>
-                    <span className="font-mono text-[11px] font-bold px-1.5 py-0.5 bg-neutral-200/40">{invoices.length}</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setStatusFilter("PAID");
-                      setIsMobileFilterOpen(false);
-                    }}
-                    className={`h-11 px-4 text-xs font-semibold flex items-center justify-between border ${
-                      statusFilter === "PAID"
-                        ? "bg-[#18181B] text-white border-[#18181B]"
-                        : "bg-white text-neutral-800 border-neutral-200"
-                    }`}
-                  >
-                    <span>Fully Paid</span>
-                    <span className="font-mono text-[11px] font-bold px-1.5 py-0.5 bg-neutral-200/40">
-                      {invoices.filter((i) => i.paymentStatus === "FULLY_PAID").length}
-                    </span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setStatusFilter("PENDING");
-                      setIsMobileFilterOpen(false);
-                    }}
-                    className={`h-11 px-4 text-xs font-semibold flex items-center justify-between border ${
-                      statusFilter === "PENDING"
-                        ? "bg-[#18181B] text-white border-[#18181B]"
-                        : "bg-white text-neutral-800 border-neutral-200"
-                    }`}
-                  >
-                    <span>Outstanding</span>
-                    <span className="font-mono text-[11px] font-bold px-1.5 py-0.5 bg-neutral-200/40">
-                      {invoices.filter((i) => i.paymentStatus !== "FULLY_PAID").length}
-                    </span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
+          {/* Mobile Filter Sheet */}
+          <MobileFilterSheet
+            isOpen={isMobileFilterOpen}
+            onClose={() => setIsMobileFilterOpen(false)}
+            title="Filter Invoices"
+            selectedId={statusFilter}
+            onSelect={(id) => setStatusFilter(id as typeof statusFilter)}
+            options={[
+              {
+                id: "ALL",
+                label: "All Invoices",
+                count: invoices.length,
+                dotColor: "bg-neutral-400",
+                selectedDotColor: "bg-white ring-2 ring-white/30",
+              },
+              {
+                id: "PAID",
+                label: "Fully Paid",
+                count: invoices.filter((i) => i.paymentStatus === "FULLY_PAID").length,
+                dotColor: "bg-[#059669]",
+                selectedDotColor: "bg-[#10B981] ring-2 ring-[#10B981]/40",
+              },
+              {
+                id: "PENDING",
+                label: "Outstanding",
+                count: invoices.filter((i) => i.paymentStatus !== "FULLY_PAID").length,
+                dotColor: "bg-amber-500",
+                selectedDotColor: "bg-amber-400 ring-2 ring-amber-400/40",
+              },
+            ]}
+          />
 
           {filteredInvoices.length === 0 ? (
             <div className="py-8 text-center text-xs text-neutral-500 font-mono">
               No commercial invoices match your search criteria.
             </div>
-          ) : viewMode === "cards" ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredInvoices.map((inv) => (
-                <div
-                  key={inv.invoiceNumber}
-                  className="border border-neutral-300 hover:border-neutral-900 bg-white/40 p-4 flex flex-col justify-between space-y-4 transition-all"
-                >
-                  <div>
-                    <div className="flex items-start justify-between pb-2 border-b border-neutral-200">
-                      <div>
-                        <span className="text-[10px] font-mono text-neutral-500">{inv.invoiceDate}</span>
-                        <h3 className="font-mono font-bold text-neutral-900 text-base">{inv.invoiceNumber}</h3>
-                      </div>
-                      <span className={`text-[10px] font-bold uppercase px-2 py-0.5 ${
-                        inv.paymentStatus === "FULLY_PAID"
-                          ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
-                          : "bg-amber-100 text-amber-800 border border-amber-300"
-                      }`}>
-                        {inv.paymentStatus.replace("_", " ")}
-                      </span>
-                    </div>
-
-                    <div className="mt-3 space-y-1.5 text-xs text-neutral-700">
-                      <div className="flex justify-between">
-                        <span className="text-neutral-500">Customer:</span>
-                        <span className="font-bold text-neutral-900 truncate max-w-[170px]">{inv.customerName}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-neutral-500">Dispatch:</span>
-                        <span className="font-mono text-neutral-900">{inv.dispatchNumber}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-neutral-500">E-Way Bill:</span>
-                        <span className="font-mono text-neutral-700">{inv.eWayBillNumber}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-neutral-500">Net Quantity:</span>
-                        <span className="font-mono font-bold text-neutral-900">{inv.quantityMT} MT</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-neutral-500">Invoice Amount:</span>
-                        <span className="font-mono font-black text-neutral-900">₹{inv.totalInvoiceAmount.toLocaleString("en-IN")}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-neutral-500">Outstanding:</span>
-                        <span className="font-mono font-bold text-amber-700">₹{inv.outstandingAmount.toLocaleString("en-IN")}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="pt-3 border-t border-neutral-200 flex items-center justify-between">
-                    <span className="text-[10px] text-neutral-500 font-mono">
-                      Due: {inv.paymentDueDate}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setSelectedInvoice(inv)}
-                      className="h-8 px-3 bg-[#18181B] hover:bg-[#059669] text-white text-xs font-bold uppercase tracking-wider inline-flex items-center gap-1.5 transition-colors cursor-pointer"
-                    >
-                      <Eye className="w-3.5 h-3.5" />
-                      <span>View Slip</span>
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
           ) : (
-            /* Transparent Industrial Table */
-            <div className="border border-neutral-300 overflow-x-auto bg-transparent">
-              <table className="w-full text-left text-xs border-collapse">
-                <thead>
-                  <tr className="border-b border-neutral-300 bg-neutral-200/50 text-neutral-600 font-bold uppercase tracking-wider text-[10px]">
-                    <th className="py-2.5 px-3">Invoice Number</th>
-                    <th className="py-2.5 px-3">Customer</th>
-                    <th className="py-2.5 px-3">Dispatch Ref</th>
-                    <th className="py-2.5 px-3 font-mono">E-Way Bill</th>
-                    <th className="py-2.5 px-3 font-mono">Total Net MT</th>
-                    <th className="py-2.5 px-3 font-mono">Invoice Value (₹)</th>
-                    <th className="py-2.5 px-3 font-mono">Outstanding</th>
-                    <th className="py-2.5 px-3">Payment Status</th>
-                    <th className="py-2.5 px-3 text-right">Document</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-neutral-300">
-                  {filteredInvoices.map((inv) => (
-                    <tr key={inv.invoiceNumber} className="hover:bg-neutral-200/40 transition-colors">
-                      <td className="py-2.5 px-3 font-mono font-bold text-neutral-900">{inv.invoiceNumber}</td>
-                      <td className="py-2.5 px-3 font-semibold text-neutral-900">{inv.customerName}</td>
-                      <td className="py-2.5 px-3 font-mono text-neutral-700">{inv.dispatchNumber}</td>
-                      <td className="py-2.5 px-3 font-mono text-neutral-700">{inv.eWayBillNumber}</td>
-                      <td className="py-2.5 px-3 font-mono font-bold text-neutral-900">{inv.quantityMT} MT</td>
-                      <td className="py-2.5 px-3 font-mono font-bold text-neutral-900">₹{inv.totalInvoiceAmount.toLocaleString("en-IN")}</td>
-                      <td className="py-2.5 px-3 font-mono text-amber-700 font-semibold">₹{inv.outstandingAmount.toLocaleString("en-IN")}</td>
-                      <td className="py-2.5 px-3">
+            <>
+              {/* Cards View: Always on Mobile, respects viewMode on Desktop */}
+              <div
+                className={
+                  viewMode === "cards"
+                    ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+                    : "grid grid-cols-1 sm:hidden gap-4"
+                }
+              >
+                {filteredInvoices.map((inv) => (
+                  <div
+                    key={inv.invoiceNumber}
+                    className="border border-neutral-300 hover:border-neutral-900 bg-white/40 p-4 flex flex-col justify-between space-y-4 transition-all"
+                  >
+                    <div>
+                      <div className="flex items-start justify-between pb-2 border-b border-neutral-200">
+                        <div>
+                          <span className="text-[10px] font-mono text-neutral-500">{inv.invoiceDate}</span>
+                          <h3 className="font-mono font-bold text-neutral-900 text-base">{inv.invoiceNumber}</h3>
+                        </div>
                         <span className={`text-[10px] font-bold uppercase px-2 py-0.5 ${
                           inv.paymentStatus === "FULLY_PAID"
                             ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
@@ -368,22 +253,106 @@ export function InvoicesDocsView() {
                         }`}>
                           {inv.paymentStatus.replace("_", " ")}
                         </span>
-                      </td>
-                      <td className="py-2.5 px-3 text-right">
-                        <button
-                          type="button"
-                          onClick={() => setSelectedInvoice(inv)}
-                          className="h-8 px-3 bg-[#18181B] hover:bg-[#059669] text-white text-xs font-bold uppercase tracking-wider inline-flex items-center gap-1.5 transition-colors cursor-pointer"
-                        >
-                          <Eye className="w-3.5 h-3.5" />
-                          <span>View Invoice</span>
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                      </div>
+
+                      <div className="mt-3 space-y-1.5 text-xs text-neutral-700">
+                        <div className="flex justify-between">
+                          <span className="text-neutral-500">Customer:</span>
+                          <span className="font-bold text-neutral-900 truncate max-w-[170px]">{inv.customerName}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-neutral-500">Dispatch:</span>
+                          <span className="font-mono text-neutral-900">{inv.dispatchNumber}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-neutral-500">E-Way Bill:</span>
+                          <span className="font-mono text-neutral-700">{inv.eWayBillNumber}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-neutral-500">Net Quantity:</span>
+                          <span className="font-mono font-bold text-neutral-900">{inv.quantityMT} MT</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-neutral-500">Invoice Amount:</span>
+                          <span className="font-mono font-black text-neutral-900">₹{inv.totalInvoiceAmount.toLocaleString("en-IN")}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-neutral-500">Outstanding:</span>
+                          <span className="font-mono font-bold text-amber-700">₹{inv.outstandingAmount.toLocaleString("en-IN")}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="pt-3 border-t border-neutral-200 flex items-center justify-between">
+                      <span className="text-[10px] text-neutral-500 font-mono">
+                        Due: {inv.paymentDueDate}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedInvoice(inv)}
+                        className="h-8 px-3 bg-[#18181B] hover:bg-[#059669] text-white text-xs font-bold uppercase tracking-wider inline-flex items-center gap-1.5 transition-colors cursor-pointer"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                        <span>View Slip</span>
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Table View: PC Only when viewMode === "table" */}
+              {viewMode === "table" && (
+                <div className="hidden sm:block border border-neutral-300 overflow-x-auto bg-transparent">
+                  <table className="w-full text-left text-xs border-collapse">
+                    <thead>
+                      <tr className="border-b border-neutral-300 bg-neutral-200/50 text-neutral-600 font-bold uppercase tracking-wider text-[10px]">
+                        <th className="py-2.5 px-3">Invoice Number</th>
+                        <th className="py-2.5 px-3">Customer</th>
+                        <th className="py-2.5 px-3">Dispatch Ref</th>
+                        <th className="py-2.5 px-3 font-mono">E-Way Bill</th>
+                        <th className="py-2.5 px-3 font-mono">Total Net MT</th>
+                        <th className="py-2.5 px-3 font-mono">Invoice Value (₹)</th>
+                        <th className="py-2.5 px-3 font-mono">Outstanding</th>
+                        <th className="py-2.5 px-3">Payment Status</th>
+                        <th className="py-2.5 px-3 text-right">Document</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-neutral-300">
+                      {filteredInvoices.map((inv) => (
+                        <tr key={inv.invoiceNumber} className="hover:bg-neutral-200/40 transition-colors">
+                          <td className="py-2.5 px-3 font-mono font-bold text-neutral-900">{inv.invoiceNumber}</td>
+                          <td className="py-2.5 px-3 font-semibold text-neutral-900">{inv.customerName}</td>
+                          <td className="py-2.5 px-3 font-mono text-neutral-700">{inv.dispatchNumber}</td>
+                          <td className="py-2.5 px-3 font-mono text-neutral-700">{inv.eWayBillNumber}</td>
+                          <td className="py-2.5 px-3 font-mono font-bold text-neutral-900">{inv.quantityMT} MT</td>
+                          <td className="py-2.5 px-3 font-mono font-bold text-neutral-900">₹{inv.totalInvoiceAmount.toLocaleString("en-IN")}</td>
+                          <td className="py-2.5 px-3 font-mono text-amber-700 font-semibold">₹{inv.outstandingAmount.toLocaleString("en-IN")}</td>
+                          <td className="py-2.5 px-3">
+                            <span className={`text-[10px] font-bold uppercase px-2 py-0.5 ${
+                              inv.paymentStatus === "FULLY_PAID"
+                                ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
+                                : "bg-amber-100 text-amber-800 border border-amber-300"
+                            }`}>
+                              {inv.paymentStatus.replace("_", " ")}
+                            </span>
+                          </td>
+                          <td className="py-2.5 px-3 text-right">
+                            <button
+                              type="button"
+                              onClick={() => setSelectedInvoice(inv)}
+                              className="h-8 px-3 bg-[#18181B] hover:bg-[#059669] text-white text-xs font-bold uppercase tracking-wider inline-flex items-center gap-1.5 transition-colors cursor-pointer"
+                            >
+                              <Eye className="w-3.5 h-3.5" />
+                              <span>View Invoice</span>
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </>
           )}
         </div>
       </section>

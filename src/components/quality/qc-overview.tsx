@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { MobileFilterSheet } from "@/components/shared/mobile-filter-sheet";
 import {
   FlaskConical,
   CheckCircle2,
@@ -224,10 +225,17 @@ export function QcOverview() {
               <button
                 type="button"
                 onClick={() => setIsMobileFilterOpen(true)}
-                className="sm:hidden w-10 h-10 flex items-center justify-center border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-700 shrink-0 cursor-pointer"
+                className={`sm:hidden w-10 h-10 flex items-center justify-center border shrink-0 cursor-pointer relative transition-colors ${
+                  filterStatus !== "ALL"
+                    ? "bg-[#18181B] text-white border-[#18181B]"
+                    : "bg-white text-neutral-700 border-neutral-300 hover:bg-neutral-100"
+                }`}
                 title="Filter Options"
               >
                 <SlidersHorizontal className="w-4 h-4" />
+                {filterStatus !== "ALL" && (
+                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-[#059669] rounded-full ring-2 ring-white" />
+                )}
               </button>
             </div>
 
@@ -296,52 +304,37 @@ export function QcOverview() {
             </div>
           </div>
 
-          {/* Mobile Filter Sheet Modal */}
-          {isMobileFilterOpen && (
-            <div className="fixed inset-0 z-50 bg-black/40 flex items-end sm:hidden">
-              <div className="bg-white w-full border-t border-neutral-300 p-4 space-y-3">
-                <div className="flex items-center justify-between border-b border-neutral-200 pb-2">
-                  <span className="text-xs font-bold uppercase tracking-wider text-neutral-800">Filter Options</span>
-                  <button
-                    type="button"
-                    onClick={() => setIsMobileFilterOpen(false)}
-                    className="text-xs font-bold text-neutral-500 hover:text-neutral-800"
-                  >
-                    Close ✕
-                  </button>
-                </div>
-                <div className="grid grid-cols-3 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => { setFilterStatus("ALL"); setIsMobileFilterOpen(false); }}
-                    className={`p-2.5 text-xs font-medium border text-center ${
-                      filterStatus === "ALL" ? "border-neutral-900 bg-[#18181B] text-white font-bold" : "border-neutral-300 bg-neutral-50 text-neutral-700"
-                    }`}
-                  >
-                    All ({pendingRm.length})
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { setFilterStatus("PENDING"); setIsMobileFilterOpen(false); }}
-                    className={`p-2.5 text-xs font-medium border text-center ${
-                      filterStatus === "PENDING" ? "border-neutral-900 bg-[#18181B] text-white font-bold" : "border-neutral-300 bg-neutral-50 text-neutral-700"
-                    }`}
-                  >
-                    Pending ({pendingRm.filter((s) => s.status === "PENDING").length})
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { setFilterStatus("TESTING"); setIsMobileFilterOpen(false); }}
-                    className={`p-2.5 text-xs font-medium border text-center ${
-                      filterStatus === "TESTING" ? "border-neutral-900 bg-[#18181B] text-white font-bold" : "border-neutral-300 bg-neutral-50 text-neutral-700"
-                    }`}
-                  >
-                    In Testing ({pendingRm.filter((s) => s.status === "TESTING").length})
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
+          {/* Mobile Filter Sheet */}
+          <MobileFilterSheet
+            isOpen={isMobileFilterOpen}
+            onClose={() => setIsMobileFilterOpen(false)}
+            title="Filter Samples"
+            selectedId={filterStatus}
+            onSelect={(id) => setFilterStatus(id as typeof filterStatus)}
+            options={[
+              {
+                id: "ALL",
+                label: "All Samples",
+                count: pendingRm.length,
+                dotColor: "bg-neutral-400",
+                selectedDotColor: "bg-white ring-2 ring-white/30",
+              },
+              {
+                id: "PENDING",
+                label: "Pending Sampling",
+                count: pendingRm.filter((s) => s.status === "PENDING").length,
+                dotColor: "bg-amber-500",
+                selectedDotColor: "bg-amber-400 ring-2 ring-amber-400/40",
+              },
+              {
+                id: "TESTING",
+                label: "In Laboratory Testing",
+                count: pendingRm.filter((s) => s.status === "TESTING").length,
+                dotColor: "bg-[#059669]",
+                selectedDotColor: "bg-[#10B981] ring-2 ring-[#10B981]/40",
+              },
+            ]}
+          />
 
           {/* Cards or Table */}
           {filteredSamples.length === 0 ? (
@@ -390,7 +383,7 @@ export function QcOverview() {
                   </div>
                 </div>
 
-                <div className="pt-3 border-t border-neutral-200 flex items-center justify-between">
+                <div className="pt-2 border-t border-neutral-200 flex items-center justify-between gap-2">
                   <span className={`text-[10px] font-bold uppercase px-2 py-0.5 ${
                     sample.status === "TESTING"
                       ? "bg-amber-100 text-amber-800 border border-amber-300"
@@ -401,9 +394,9 @@ export function QcOverview() {
                   <button
                     type="button"
                     onClick={() => handleStartRmTest(sample.id)}
-                    className="h-8 px-3 bg-[#18181B] hover:bg-[#059669] text-white text-xs font-bold uppercase tracking-wider inline-flex items-center gap-1.5 transition-colors"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer shadow-xs"
                   >
-                    <span>{sample.status === "TESTING" ? "Continue Test" : "Test Sample"}</span>
+                    <span>{sample.status === "TESTING" ? "Continue" : "Test Sample"}</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -481,15 +474,15 @@ export function QcOverview() {
       </section>
 
       {/* Main Section 2: Finished Goods Batches Awaiting Final QC (PDF Sec 22) */}
-      <section className="space-y-3 pt-6 border-t border-neutral-300">
-        <div className="flex items-center justify-between">
+      <section className="space-y-4 pt-6 border-t border-neutral-300">
+        <div className="flex items-center justify-between border-b border-neutral-300 pb-2.5">
           <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-[#059669]" />
-            <h2 className="text-xs font-bold uppercase tracking-wider text-neutral-800">
-              Finished Goods Batches Awaiting Release Test (8mm Pellets)
+            <ShieldCheck className="w-4 h-4 text-neutral-800 shrink-0" />
+            <h2 className="text-xs font-bold uppercase tracking-wider text-neutral-900">
+              FG Release Testing Queue
             </h2>
-            <span className="px-2 py-0.5 text-[10px] font-bold bg-neutral-200 text-neutral-800">
-              {pendingFg.length} Pending
+            <span className="text-[10px] font-bold font-mono px-1.5 py-0.5 bg-neutral-200 border border-neutral-300 text-neutral-800">
+              {pendingFg.length}
             </span>
           </div>
         </div>
@@ -498,53 +491,54 @@ export function QcOverview() {
           {pendingFg.map((batch) => (
             <div
               key={batch.id}
-              className="border border-neutral-300 bg-white/40 p-4 flex flex-col justify-between space-y-3"
+              className="border border-neutral-300 bg-white/40 hover:border-neutral-900 p-3 sm:p-4 flex flex-col justify-between space-y-2.5 transition-all group"
             >
               <div>
-                <div className="flex items-start justify-between pb-2 border-b border-neutral-200">
+                {/* Top Row: Batch Number + Status Badge */}
+                <div className="flex items-start justify-between gap-1 pb-1.5 border-b border-neutral-200">
                   <div>
-                    <div className="font-mono font-bold text-neutral-900 text-sm">
+                    <div className="font-mono font-bold text-neutral-900 text-sm group-hover:text-[#059669] transition-colors">
                       {batch.batchNumber}
                     </div>
                     <div className="text-[10px] text-neutral-500 font-mono mt-0.5">
-                      Production Batch: {batch.productionBatchNumber} · Line: {batch.productionLine}
+                      PB: {batch.productionBatchNumber} · {batch.productionLine}
                     </div>
                   </div>
-                  <span className="border border-neutral-300 bg-[#18181B] text-white text-[10px] font-bold uppercase px-2 py-0.5">
-                    Finished Goods
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 border border-blue-300 text-blue-700 text-[10px] font-bold uppercase bg-blue-50 shrink-0">
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse" />
+                    <span>Awaiting Test</span>
                   </span>
                 </div>
 
-                <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-neutral-700">
-                  <div>
-                    <span className="text-neutral-500 block text-[11px]">Product:</span>
-                    <span className="font-semibold text-neutral-900">{batch.productName}</span>
+                {/* Details: Product + Qty & Specs */}
+                <div className="mt-2.5 space-y-1 text-xs">
+                  <div className="flex items-baseline justify-between gap-2">
+                    <span className="font-semibold text-neutral-900 truncate">
+                      {batch.productName}
+                    </span>
+                    <span className="font-mono font-bold text-neutral-900 tabular-nums text-xs shrink-0">
+                      {batch.quantityMT} MT
+                    </span>
                   </div>
-                  <div>
-                    <span className="text-neutral-500 block text-[11px]">Batch Quantity:</span>
-                    <span className="font-mono font-bold text-neutral-900">{batch.quantityMT} MT</span>
-                  </div>
-                  <div>
-                    <span className="text-neutral-500 block text-[11px]">Production Date:</span>
-                    <span className="font-mono text-neutral-700">{batch.productionDate}</span>
-                  </div>
-                  <div>
-                    <span className="text-neutral-500 block text-[11px]">QC Target:</span>
-                    <span className="font-medium text-emerald-800">8mm Standard / GCV &gt; 4200</span>
+
+                  <div className="flex items-center justify-between text-[11px] text-neutral-600">
+                    <span>Produced: {batch.productionDate}</span>
+                    <span className="font-medium text-[#047857]">8mm · GCV &gt; 4200</span>
                   </div>
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-neutral-200 flex items-center justify-between">
-                <span className="text-[10px] font-bold uppercase px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-200">
-                  Awaiting Final Lab Release
+              {/* Bottom: Action (Matching Gate Layout Standard) */}
+              <div className="pt-2 border-t border-neutral-200 flex items-center justify-between gap-2">
+                <span className="text-[10px] text-neutral-400">
+                  Lab Release Test
                 </span>
                 <button
                   type="button"
                   onClick={() => handleStartFgTest(batch.id)}
-                  className="h-8 px-3 bg-[#18181B] hover:bg-[#059669] text-white text-xs font-bold uppercase tracking-wider inline-flex items-center gap-1.5 transition-colors"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer shadow-xs"
                 >
-                  <span>Enter Lab Results</span>
+                  <span>Enter Results</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </div>

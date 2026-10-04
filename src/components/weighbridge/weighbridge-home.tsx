@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { MobileFilterSheet } from "@/components/shared/mobile-filter-sheet";
 import {
   Scale,
   Search,
@@ -106,25 +107,54 @@ export function WeighbridgeHome() {
   return (
     <div className="w-full space-y-8 sm:space-y-10 select-none">
       {/* ========================================================================= */}
-      {/* 1. COMPACT COMMAND HEADER (EXACT GATE DASHBOARD STYLE)                    */}
+      {/* 1. COMPACT COMMAND HEADER (with Desktop Actions)                          */}
       {/* ========================================================================= */}
-      <div className="border-b border-neutral-300 pb-4 sm:pb-5">
+      <div className="border-b border-neutral-300 pb-4 sm:pb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-neutral-900">
-          Weighbridge Operations
+          Scale Terminal
         </h1>
+
+        {/* Action Buttons: Visible on Tablet/Desktop (sm and up) */}
+        <div className="hidden sm:flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => {
+              if (records.length > 0) openSlipModal(records[0]);
+            }}
+            className="h-10 px-4 border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-800 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors cursor-pointer"
+          >
+            <Printer className="w-4 h-4 text-neutral-600" />
+            <span>Reprint Last Slip</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() =>
+              openCaptureModal({
+                weighmentType:
+                  activePlatformId === "WB-01" ? "INBOUND_GROSS" : "OUTBOUND_GROSS",
+                platformId: activePlatformId,
+              })
+            }
+            className="h-10 px-5 bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs"
+          >
+            <Plus className="w-4 h-4" strokeWidth={2.5} />
+            <span>Manual Weight Entry</span>
+          </button>
+        </div>
       </div>
 
       {/* ========================================================================= */}
       {/* 2. REAL-TIME OPERATIONAL METRICS (4 CLICKABLE CARDS - GATE STYLE)         */}
       {/* ========================================================================= */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-5">
-        {/* Metric 1: At Weighbridge */}
+        {/* Metric 1: Waiting Weighment */}
         <div
           onClick={() => setFilterType("ALL")}
           className="border border-neutral-300 p-4 sm:p-5 hover:border-neutral-900 transition-colors cursor-pointer group bg-white flex flex-col justify-between"
         >
           <span className="text-[11px] sm:text-xs font-bold text-neutral-500 uppercase tracking-wider group-hover:text-neutral-900 transition-colors truncate">
-            At Weighbridge
+            Waiting Weighment
           </span>
           <div className="mt-3 flex items-baseline gap-1.5 sm:gap-2">
             <span className="text-2xl sm:text-3xl font-black tracking-tight text-neutral-900 tabular-nums">
@@ -134,13 +164,13 @@ export function WeighbridgeHome() {
           </div>
         </div>
 
-        {/* Metric 2: 1st Gross Weight */}
+        {/* Metric 2: 1st Gross */}
         <div
           onClick={() => setFilterType("FIRST")}
           className="border border-neutral-300 p-4 sm:p-5 hover:border-neutral-900 transition-colors cursor-pointer group bg-white flex flex-col justify-between"
         >
           <span className="text-[11px] sm:text-xs font-bold text-neutral-500 uppercase tracking-wider group-hover:text-neutral-900 transition-colors truncate">
-            1st Gross Weight
+            1st Gross
           </span>
           <div className="mt-3 flex items-baseline gap-1.5 sm:gap-2">
             <span className="text-2xl sm:text-3xl font-black tracking-tight text-neutral-900 tabular-nums">
@@ -150,13 +180,13 @@ export function WeighbridgeHome() {
           </div>
         </div>
 
-        {/* Metric 3: 2nd Tare & Net */}
+        {/* Metric 3: 2nd Tare */}
         <div
           onClick={() => setFilterType("SECOND")}
           className="border border-neutral-300 p-4 sm:p-5 hover:border-neutral-900 transition-colors cursor-pointer group bg-white flex flex-col justify-between"
         >
           <span className="text-[11px] sm:text-xs font-bold text-neutral-500 uppercase tracking-wider group-hover:text-neutral-900 transition-colors truncate">
-            2nd Tare & Net
+            2nd Tare
           </span>
           <div className="mt-3 flex items-baseline gap-1.5 sm:gap-2">
             <span className="text-2xl sm:text-3xl font-black tracking-tight text-neutral-900 tabular-nums">
@@ -166,7 +196,7 @@ export function WeighbridgeHome() {
           </div>
         </div>
 
-        {/* Metric 4: Completed Today */}
+        {/* Metric 4: Slips Today */}
         <div
           onClick={() => {
             if (records.length > 0) openSlipModal(records[0]);
@@ -174,7 +204,7 @@ export function WeighbridgeHome() {
           className="border border-neutral-300 p-4 sm:p-5 hover:border-neutral-900 transition-colors cursor-pointer group bg-white flex flex-col justify-between"
         >
           <span className="text-[11px] sm:text-xs font-bold text-neutral-500 uppercase tracking-wider group-hover:text-neutral-900 transition-colors truncate">
-            Completed Today
+            Slips Today
           </span>
           <div className="mt-3 flex items-baseline gap-1.5 sm:gap-2">
             <span className="text-2xl sm:text-3xl font-black tracking-tight text-neutral-900 tabular-nums">
@@ -188,20 +218,9 @@ export function WeighbridgeHome() {
       </div>
 
       {/* ========================================================================= */}
-      {/* 3. QUICK ACTION BUTTONS (EXACT GATE DASHBOARD STYLE)                      */}
+      {/* 3. MOBILE ACTION STACK (Directly below KPI cards on mobile)                */}
       {/* ========================================================================= */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 w-full">
-        <button
-          type="button"
-          onClick={() => {
-            if (records.length > 0) openSlipModal(records[0]);
-          }}
-          className="h-11 sm:h-10 px-4 border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-800 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors cursor-pointer w-full sm:w-auto"
-        >
-          <Printer className="w-4 h-4 text-neutral-600" />
-          <span>Reprint Last Slip</span>
-        </button>
-
+      <div className="sm:hidden flex flex-col items-stretch gap-2.5 w-full">
         <button
           type="button"
           onClick={() =>
@@ -211,10 +230,21 @@ export function WeighbridgeHome() {
               platformId: activePlatformId,
             })
           }
-          className="h-11 sm:h-10 px-5 bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs w-full sm:w-auto"
+          className="h-11 px-5 bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs w-full"
         >
           <Plus className="w-4 h-4" strokeWidth={2.5} />
           <span>Manual Weight Entry</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            if (records.length > 0) openSlipModal(records[0]);
+          }}
+          className="h-11 px-4 border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-800 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors cursor-pointer w-full"
+        >
+          <Printer className="w-4 h-4 text-neutral-600" />
+          <span>Reprint Last Slip</span>
         </button>
       </div>
 
@@ -295,10 +325,17 @@ export function WeighbridgeHome() {
               <button
                 type="button"
                 onClick={() => setIsMobileFilterOpen(true)}
-                className="sm:hidden w-10 h-10 flex items-center justify-center border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-700 shrink-0 cursor-pointer"
+                className={`sm:hidden w-10 h-10 flex items-center justify-center border shrink-0 cursor-pointer relative transition-colors ${
+                  filterType !== "ALL"
+                    ? "bg-[#18181B] text-white border-[#18181B]"
+                    : "bg-white text-neutral-700 border-neutral-300 hover:bg-neutral-100"
+                }`}
                 title="Filter Options"
               >
                 <SlidersHorizontal className="w-4 h-4" />
+                {filterType !== "ALL" && (
+                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-[#059669] rounded-full ring-2 ring-white" />
+                )}
               </button>
             </div>
 
@@ -367,52 +404,37 @@ export function WeighbridgeHome() {
             </div>
           </div>
 
-          {/* Mobile Filter Sheet Modal */}
-          {isMobileFilterOpen && (
-            <div className="fixed inset-0 z-50 bg-black/40 flex items-end sm:hidden">
-              <div className="bg-white w-full border-t border-neutral-300 p-4 space-y-3">
-                <div className="flex items-center justify-between border-b border-neutral-200 pb-2">
-                  <span className="text-xs font-bold uppercase tracking-wider text-neutral-800">Filter Options</span>
-                  <button
-                    type="button"
-                    onClick={() => setIsMobileFilterOpen(false)}
-                    className="text-xs font-bold text-neutral-500 hover:text-neutral-800"
-                  >
-                    Close ✕
-                  </button>
-                </div>
-                <div className="grid grid-cols-3 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => { setFilterType("ALL"); setIsMobileFilterOpen(false); }}
-                    className={`p-2.5 text-xs font-medium border text-center ${
-                      filterType === "ALL" ? "border-neutral-900 bg-[#18181B] text-white font-bold" : "border-neutral-300 bg-neutral-50 text-neutral-700"
-                    }`}
-                  >
-                    All ({firstWeighmentQueue.length + secondWeighmentQueue.length})
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { setFilterType("FIRST"); setIsMobileFilterOpen(false); }}
-                    className={`p-2.5 text-xs font-medium border text-center ${
-                      filterType === "FIRST" ? "border-neutral-900 bg-[#18181B] text-white font-bold" : "border-neutral-300 bg-neutral-50 text-neutral-700"
-                    }`}
-                  >
-                    1st Gross ({firstWeighmentQueue.length})
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { setFilterType("SECOND"); setIsMobileFilterOpen(false); }}
-                    className={`p-2.5 text-xs font-medium border text-center ${
-                      filterType === "SECOND" ? "border-neutral-900 bg-[#18181B] text-white font-bold" : "border-neutral-300 bg-neutral-50 text-neutral-700"
-                    }`}
-                  >
-                    2nd Tare ({secondWeighmentQueue.length})
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
+          {/* Mobile Filter Sheet */}
+          <MobileFilterSheet
+            isOpen={isMobileFilterOpen}
+            onClose={() => setIsMobileFilterOpen(false)}
+            title="Filter Weighment Queue"
+            selectedId={filterType}
+            onSelect={(id) => setFilterType(id as typeof filterType)}
+            options={[
+              {
+                id: "ALL",
+                label: "All Waiting Vehicles",
+                count: firstWeighmentQueue.length + secondWeighmentQueue.length,
+                dotColor: "bg-neutral-400",
+                selectedDotColor: "bg-white ring-2 ring-white/30",
+              },
+              {
+                id: "FIRST",
+                label: "1st Gross Weighment",
+                count: firstWeighmentQueue.length,
+                dotColor: "bg-[#059669]",
+                selectedDotColor: "bg-[#10B981] ring-2 ring-[#10B981]/40",
+              },
+              {
+                id: "SECOND",
+                label: "2nd Tare Weighment",
+                count: secondWeighmentQueue.length,
+                dotColor: "bg-blue-500",
+                selectedDotColor: "bg-sky-400 ring-2 ring-sky-400/40",
+              },
+            ]}
+          />
 
           {/* Content: Cards Grid (Always on Mobile, or PC when Cards selected) or Table (PC only) */}
           {displayedQueue.length === 0 ? (

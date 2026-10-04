@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
+import { MobileFilterSheet } from "@/components/shared/mobile-filter-sheet";
 import {
   Truck,
   Search,
@@ -323,10 +324,17 @@ export function LiveVehicleTracker({
               <button
                 type="button"
                 onClick={() => setShowFilters(true)}
-                className="sm:hidden w-10 h-10 flex items-center justify-center border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-700 shrink-0 cursor-pointer"
+                className={`sm:hidden w-10 h-10 flex items-center justify-center border shrink-0 cursor-pointer relative transition-colors ${
+                  activeTab !== "ALL"
+                    ? "bg-[#18181B] text-white border-[#18181B]"
+                    : "bg-white text-neutral-700 border-neutral-300 hover:bg-neutral-100"
+                }`}
                 title="Filter Options"
               >
                 <SlidersHorizontal className="w-4 h-4" />
+                {activeTab !== "ALL" && (
+                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-[#059669] rounded-full ring-2 ring-white" />
+                )}
               </button>
             </div>
 
@@ -364,55 +372,51 @@ export function LiveVehicleTracker({
             </div>
           </div>
 
-          {/* Mobile Filter Modal Popup */}
-          {showFilters && (
-            <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-end sm:hidden">
-              <div className="w-full bg-white border-t border-neutral-300 p-4 space-y-4 max-h-[80vh] overflow-y-auto">
-                <div className="flex items-center justify-between border-b border-neutral-200 pb-3">
-                  <div className="flex items-center gap-2">
-                    <SlidersHorizontal className="w-4 h-4 text-[#059669]" />
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-neutral-900">
-                      Filter Active Fleet
-                    </h3>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setShowFilters(false)}
-                    className="p-1 hover:bg-neutral-100 text-neutral-500 hover:text-neutral-900"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-1 gap-2">
-                  {[
-                    { key: "ALL", label: "All Vehicles", count: stats.totalInside },
-                    { key: "INBOUND_RM", label: "Inbound RM", count: stats.inboundRM },
-                    { key: "OUTBOUND_DISPATCH", label: "Outbound FG", count: stats.outboundFG },
-                    { key: "WAITING_WEIGHMENT", label: "Weighbridge Queue", count: stats.awaitingWeighbridge },
-                    { key: "UNLOADING", label: "Unload & QC", count: stats.activeUnloading },
-                  ].map((tab) => (
-                    <button
-                      key={tab.key}
-                      type="button"
-                      onClick={() => {
-                        setActiveTab(tab.key as FilterTab);
-                        setShowFilters(false);
-                      }}
-                      className={`h-11 px-4 text-xs font-semibold flex items-center justify-between border ${
-                        activeTab === tab.key
-                          ? "bg-[#18181B] text-white border-[#18181B]"
-                          : "bg-white text-neutral-800 border-neutral-200"
-                      }`}
-                    >
-                      <span>{tab.label}</span>
-                      <span className="font-mono text-[11px] font-bold px-1.5 py-0.5 bg-neutral-200/40">{tab.count}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
+          {/* Mobile Filter Sheet */}
+          <MobileFilterSheet
+            isOpen={showFilters}
+            onClose={() => setShowFilters(false)}
+            title="Filter Active Fleet"
+            selectedId={activeTab}
+            onSelect={(id) => setActiveTab(id as FilterTab)}
+            options={[
+              {
+                id: "ALL",
+                label: "All Vehicles",
+                count: stats.totalInside,
+                dotColor: "bg-neutral-400",
+                selectedDotColor: "bg-white ring-2 ring-white/30",
+              },
+              {
+                id: "INBOUND_RM",
+                label: "Inbound RM",
+                count: stats.inboundRM,
+                dotColor: "bg-[#059669]",
+                selectedDotColor: "bg-[#10B981] ring-2 ring-[#10B981]/40",
+              },
+              {
+                id: "OUTBOUND_DISPATCH",
+                label: "Outbound FG",
+                count: stats.outboundFG,
+                dotColor: "bg-neutral-700",
+                selectedDotColor: "bg-white ring-2 ring-white/30",
+              },
+              {
+                id: "WAITING_WEIGHMENT",
+                label: "Weighbridge Queue",
+                count: stats.awaitingWeighbridge,
+                dotColor: "bg-amber-500",
+                selectedDotColor: "bg-amber-400 ring-2 ring-amber-400/40",
+              },
+              {
+                id: "UNLOADING",
+                label: "Unload & QC",
+                count: stats.activeUnloading,
+                dotColor: "bg-blue-500",
+                selectedDotColor: "bg-sky-400 ring-2 ring-sky-400/40",
+              },
+            ]}
+          />
         </div>
 
         {/* Vehicles Data: Cards View or Table View */}

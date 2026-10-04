@@ -53,18 +53,38 @@ export function FormulasMasterView() {
 
   return (
     <div className="space-y-6 select-none">
-      {/* Executive Command Header */}
-      <div className="border-b border-neutral-300 pb-4 sm:pb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-neutral-900">
-          Biomass Pellet Blend Formulas
-        </h1>
+      {/* 1. COMPACT COMMAND HEADER */}
+      <div className="border-b border-neutral-300 pb-4 sm:pb-5 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div className="flex items-center gap-2.5">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-neutral-900">
+            Biomass Pellet Blend Formulas
+          </h1>
+          <span className="text-xs font-bold font-mono px-2 py-0.5 bg-neutral-200 border border-neutral-300 text-neutral-800">
+            {blendFormulas.length}
+          </span>
+        </div>
 
+        {/* Action Buttons: Visible on Tablet/Desktop (sm and up) */}
+        <div className="hidden sm:flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setIsModalOpen(true)}
+            className="h-10 px-5 bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs"
+          >
+            <Plus className="w-4 h-4" strokeWidth={2.5} />
+            <span>Create New Formula</span>
+          </button>
+        </div>
+      </div>
+
+      {/* 2. MOBILE ACTION STACK (Gate UI Pattern) */}
+      <div className="sm:hidden flex flex-col items-stretch gap-2.5 w-full">
         <button
           type="button"
           onClick={() => setIsModalOpen(true)}
-          className="h-10 px-4 bg-[#18181B] hover:bg-[#059669] text-white text-xs font-bold uppercase tracking-wider inline-flex items-center gap-2 transition-colors cursor-pointer"
+          className="h-11 px-5 bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs w-full"
         >
-          <Plus className="w-4 h-4 text-emerald-400" />
+          <Plus className="w-4 h-4" strokeWidth={2.5} />
           <span>Create New Formula</span>
         </button>
       </div>
@@ -74,7 +94,7 @@ export function FormulasMasterView() {
         {blendFormulas.map((formula) => (
           <div
             key={formula.id}
-            className="bg-white border border-neutral-300 p-5 space-y-4 hover:border-neutral-900 transition-all"
+            className="bg-white/40 border border-neutral-300 p-5 space-y-4 hover:border-neutral-900 transition-all"
           >
             <div className="flex items-start justify-between">
               <div>

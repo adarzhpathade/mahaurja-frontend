@@ -1,7 +1,7 @@
 # 📊 MAHAURJA – Project Progress Tracker
 
-> **Last Updated:** 04 Oct 2026, 13:10 IST
-> **Status:** 🟢 8 Core Roles Implemented & Type-Checked (0 Errors) · 🟡 UI Harmonization in Progress (Gate & QC Lab 100% Done; Weighbridge, Sales, Production, Inventory, Admin, Management queued) · Detailed Blueprint in `SESSION_HANDOFF.md`
+> **Last Updated:** 04 Oct 2026, 15:35 IST
+> **Status:** 🟢 8 Core Roles Implemented & Type-Checked (0 Errors) · 🟢 100% UI Harmonization Complete Across All 8 Roles · 🟢 Dev Role Switcher & Traceability Pipeline Redesigned · Detailed Blueprint in `SESSION_HANDOFF.md`
 
 ---
 
@@ -11,15 +11,15 @@
 |---|---|---|
 | Project Setup (Next.js, Tailwind v4, Motion, Lenis) | 🟢 Complete | 100% |
 | Design System & Shared Components (Registry & Standards) | 🟢 Complete | 100% |
-| Role 1 — Admin / Super Admin (`/admin`) | 🟢 Functional | 100% |
+| Role 1 — Admin / Super Admin (`/admin`) | 🟢 Complete & Harmonized | 100% |
 | Role 2 — Gate / Security Operator (`/gate`) | 🟢 Complete & Harmonized | 100% |
-| Role 3 — Weighbridge Operator (`/weighbridge`) | 🟢 Functional (Harmonization Queued) | 90% |
+| Role 3 — Weighbridge Operator (`/weighbridge`) | 🟢 Complete & Harmonized | 100% |
 | Role 4 — QC / Lab Technician (`/quality`) | 🟢 Complete & Harmonized | 100% |
-| Role 5 — Production Supervisor (`/production`) | 🟢 Functional (Harmonization Queued) | 90% |
-| Role 6 — Warehouse / Inventory Manager (`/inventory`) | 🟢 Functional (Harmonization Queued) | 90% |
-| Role 7 — Sales / Dispatch Manager (`/sales`) | 🟢 Functional (Harmonization Queued) | 90% |
-| Role 8 — Management / Plant Director (`/management`) | 🟢 Functional (Harmonization Queued) | 90% |
-| UI Harmonization (Command Headers & Mobile Cards) | 🟡 In Progress | 2/8 Roles Done (25%) |
+| Role 5 — Production Supervisor (`/production`) | 🟢 Complete & Harmonized | 100% |
+| Role 6 — Warehouse / Inventory Manager (`/inventory`) | 🟢 Complete & Harmonized | 100% |
+| Role 7 — Sales / Dispatch Manager (`/sales`) | 🟢 Complete & Harmonized | 100% |
+| Role 8 — Management / Plant Director (`/management`) | 🟢 Complete & Harmonized | 100% |
+| UI Harmonization (Command Headers & Mobile Cards) | 🟢 Complete | 8/8 Roles Done (100%) |
 | Auth (Optional Single-Sign-On) | ⚪ Optional / Ready for Backend Bindings | 50% |
 
 **Legend:** 🔴 Not Started · 🟡 In Progress / Next Up · 🟢 Complete · 🔵 Under Review
@@ -51,6 +51,7 @@
 - [x] **Standard 6:** Strict Ban on Table White Backgrounds (transparent wrappers, mist headers `bg-neutral-200/50`, hairline dividers `divide-neutral-300`)
 - [x] **Standard 7:** Translucent Queue Cards (`bg-white/40 border border-neutral-300`) & Bio-Emerald / Pitch Charcoal direction badges
 - [x] **Standard 8:** Precision Industrial Navigation System with strongly-typed role profiles and 8-station desktop/mobile switcher
+- [x] **Standard 9:** Unified Mobile Filter Sheet (`@/components/shared/mobile-filter-sheet`): Portal to `document.body` for 0 gap at bottom, square close icon, 1-tap select and dismiss, pitch-charcoal active state without tick marks, high-contrast dots, active filter indicator badge on mobile buttons. Rolled out across all screens.
 
 ### Streamlined Role-Based Navigation (`components/layout/industrial-nav.tsx`)
 - [x] Audited all 8 user roles against `Mahaurja Operational Flow.pdf` (Section 38 "Physical-to-Digital" rule)
@@ -297,12 +298,12 @@ Harmonizing all workbenches to match the Gate Operations and QC Lab design langu
 |---|---|---|
 | **Role 2: Gate / Security** | 🟢 100% Complete | `gate-home.tsx`, `live-vehicle-tracker.tsx`, `gate-entry-modal.tsx`, `gate-exit.tsx` |
 | **Role 4: QC / Lab** | 🟢 100% Complete | `qc-overview.tsx`, `qc-records-ledger.tsx`, `rm-testing-workbench.tsx`, `fg-testing-workbench.tsx` |
-| **Role 3: Weighbridge** | 🟡 Next Up | `weighbridge-home.tsx`, `weighments-ledger.tsx` |
-| **Role 7: Sales / Dispatch** | 🟡 Queued | `sales-orders-view.tsx`, `dispatch-planning-view.tsx`, `invoices-docs-view.tsx`, `delivery-pod-view.tsx`, `payments-ledger-view.tsx` |
-| **Role 5: Production** | 🟡 Queued | `production-plans-view.tsx`, `material-issue-view.tsx`, `processing-view.tsx`, `batch-history-view.tsx` |
-| **Role 6: Inventory** | 🟡 Queued | `raw-materials-view.tsx`, `finished-goods-view.tsx`, `packaging-view.tsx`, `lot-traceability-view.tsx` |
-| **Role 1: Admin Masters** | 🟡 Queued | `suppliers-master-view.tsx`, `customers-master-view.tsx`, `materials-storage-view.tsx`, `formulas-master-view.tsx`, `users-access-view.tsx` |
-| **Role 8: Management** | 🟡 Queued | `management-dashboard-view.tsx`, `traceability-explorer-view.tsx`, `cost-yield-view.tsx`, `management-reports-view.tsx` |
+| **Role 3: Weighbridge** | 🟢 100% Complete | `weighbridge-home.tsx`, `weighments-ledger.tsx` |
+| **Role 7: Sales / Dispatch** | 🟢 100% Complete | `sales-orders-view.tsx`, `dispatch-planning-view.tsx`, `invoices-docs-view.tsx`, `delivery-pod-view.tsx`, `payments-ledger-view.tsx` |
+| **Role 5: Production** | 🟢 100% Complete | `production-plans-view.tsx`, `material-issue-workbench.tsx`, `processing-stages-console.tsx`, `batch-history-view.tsx` |
+| **Role 6: Inventory** | 🟢 100% Complete | `raw-materials-view.tsx`, `finished-goods-view.tsx`, `packaging-workbench.tsx`, `lots-traceability-view.tsx` |
+| **Role 1: Admin Masters** | 🟢 100% Complete | `suppliers-master-view.tsx`, `customers-master-view.tsx`, `materials-storage-view.tsx`, `formulas-master-view.tsx`, `users-access-view.tsx` |
+| **Role 8: Management** | 🟢 100% Complete | `management-dashboard-view.tsx`, `traceability-explorer-view.tsx`, `cost-yield-view.tsx`, `plant-reports-view.tsx` |
 
 ---
 
@@ -322,7 +323,7 @@ Harmonizing all workbenches to match the Gate Operations and QC Lab design langu
 | Gate Operations UI Harmonization & Mobile Zero-Scroll | 04 Oct 2026 | 🟢 Complete |
 | QC Lab UI Harmonization & Mobile Responsive Cards | 04 Oct 2026 | 🟢 Complete |
 | Comprehensive Session Handoff Blueprint (`SESSION_HANDOFF.md`) | 04 Oct 2026 | 🟢 Complete |
-| Remaining 6 Modules UI Harmonization | 04 Oct 2026 | 🟡 Next Up |
+| System-Wide UI Harmonization Across All 8 Roles | 04 Oct 2026 | 🟢 Complete |
 
 ---
 

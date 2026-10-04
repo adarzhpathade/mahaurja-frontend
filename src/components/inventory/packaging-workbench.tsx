@@ -80,10 +80,43 @@ export function PackagingWorkbench() {
   return (
     <div className="space-y-6 select-none">
       {/* Page Header */}
-      <div className="border-b border-neutral-300 pb-4 sm:pb-5">
-        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-neutral-900">
-          Finished Goods Bagging &amp; Packaging Workbench
-        </h1>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-neutral-300 pb-4 sm:pb-5">
+        <div className="flex items-center gap-2.5">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-neutral-900">
+            Packaging &amp; Bagging
+          </h1>
+          <span className="text-xs sm:text-sm font-bold font-mono px-2 py-0.5 bg-neutral-200 border border-neutral-300 text-neutral-800">
+            {filteredRecords.length}
+          </span>
+        </div>
+
+        {/* Desktop Dual View */}
+        <div className="hidden sm:inline-flex border border-neutral-300 divide-x divide-neutral-300 text-xs shrink-0 h-10">
+          <button
+            type="button"
+            onClick={() => setViewMode("cards")}
+            className={`px-3 py-1.5 transition-colors cursor-pointer flex items-center gap-1.5 ${
+              viewMode === "cards"
+                ? "bg-[#18181B] text-white font-semibold"
+                : "bg-neutral-200/50 text-neutral-700 hover:bg-neutral-200"
+            }`}
+          >
+            <LayoutGrid className="w-3.5 h-3.5" />
+            <span>Cards</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setViewMode("table")}
+            className={`px-3 py-1.5 transition-colors cursor-pointer flex items-center gap-1.5 ${
+              viewMode === "table"
+                ? "bg-[#18181B] text-white font-semibold"
+                : "bg-neutral-200/50 text-neutral-700 hover:bg-neutral-200"
+            }`}
+          >
+            <TableIcon className="w-3.5 h-3.5" />
+            <span>Table</span>
+          </button>
+        </div>
       </div>
 
       {successMsg && (
@@ -240,44 +273,11 @@ export function PackagingWorkbench() {
 
       {/* Packaging Records History Ledger */}
       <section className="space-y-4 pt-6 border-t border-neutral-300">
-        <div className="flex items-center justify-between border-b border-neutral-300 pb-2.5">
-          <div className="flex items-center gap-2">
-            <ShoppingBag className="w-4 h-4 text-neutral-800 shrink-0" />
-            <h2 className="text-xs font-bold uppercase tracking-wider text-neutral-900">
-              Bagging &amp; Packaging Runs
-            </h2>
-            <span className="text-[10px] font-bold font-mono px-1.5 py-0.5 bg-neutral-200 border border-neutral-300 text-neutral-800">
-              {filteredRecords.length}
-            </span>
-          </div>
-
-          {/* Desktop Dual View */}
-          <div className="hidden sm:inline-flex border border-neutral-300 divide-x divide-neutral-300 text-xs shrink-0 h-10">
-            <button
-              type="button"
-              onClick={() => setViewMode("cards")}
-              className={`px-3 py-1.5 transition-colors cursor-pointer flex items-center gap-1.5 ${
-                viewMode === "cards"
-                  ? "bg-[#18181B] text-white font-semibold"
-                  : "bg-neutral-200/50 text-neutral-700 hover:bg-neutral-200"
-              }`}
-            >
-              <LayoutGrid className="w-3.5 h-3.5" />
-              <span>Cards</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setViewMode("table")}
-              className={`px-3 py-1.5 transition-colors cursor-pointer flex items-center gap-1.5 ${
-                viewMode === "table"
-                  ? "bg-[#18181B] text-white font-semibold"
-                  : "bg-neutral-200/50 text-neutral-700 hover:bg-neutral-200"
-              }`}
-            >
-              <TableIcon className="w-3.5 h-3.5" />
-              <span>Table</span>
-            </button>
-          </div>
+        <div className="flex items-center gap-2 border-b border-neutral-300 pb-2.5">
+          <ShoppingBag className="w-4 h-4 text-[#059669] shrink-0" />
+          <h2 className="text-xs font-bold uppercase tracking-wider text-neutral-900">
+            Bagging &amp; Packaging Runs History
+          </h2>
         </div>
 
         {/* Content container - borderless on mobile, bordered on PC */}
@@ -317,82 +317,133 @@ export function PackagingWorkbench() {
           ) : viewMode === "cards" ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredRecords.map((pkg) => (
-              <div
-                key={pkg.id}
-                className="border border-neutral-300 bg-white/40 p-4 flex flex-col justify-between space-y-3"
-              >
-                <div>
-                  <div className="flex items-start justify-between pb-2 border-b border-neutral-200">
-                    <div>
-                      <span className="text-[10px] font-mono text-neutral-500">{pkg.id}</span>
-                      <h3 className="font-mono font-bold text-neutral-900 text-sm">{pkg.batchNumber}</h3>
-                    </div>
-                    <span className="border border-neutral-300 bg-[#18181B] text-white text-[10px] font-bold uppercase px-2 py-0.5">
-                      {pkg.packagingType.replace("_", " ")}
-                    </span>
-                  </div>
-
-                  <div className="mt-3 space-y-1 text-xs text-neutral-700">
-                    <div className="flex justify-between">
-                      <span className="text-neutral-500">Packaged Qty:</span>
-                      <span className="font-mono font-bold text-neutral-900">{pkg.totalQuantityMT} MT</span>
-                    </div>
-                    {pkg.numberOfBags && (
-                      <div className="flex justify-between">
-                        <span className="text-neutral-500">Bag Count:</span>
-                        <span className="font-mono text-neutral-900 font-semibold">{pkg.numberOfBags} Bags</span>
+                <div
+                  key={pkg.id}
+                  className="border border-neutral-300 bg-white/40 p-4 flex flex-col justify-between space-y-3"
+                >
+                  <div>
+                    <div className="flex items-start justify-between pb-2 border-b border-neutral-200">
+                      <div>
+                        <span className="text-[10px] font-mono text-neutral-500">{pkg.id}</span>
+                        <h3 className="font-mono font-bold text-neutral-900 text-sm">{pkg.batchNumber}</h3>
                       </div>
-                    )}
-                    <div className="flex justify-between">
-                      <span className="text-neutral-500">Storage Zone:</span>
-                      <span className="font-medium text-neutral-800">{pkg.storageBay}</span>
+                      <span className="border border-neutral-300 bg-[#18181B] text-white text-[10px] font-bold uppercase px-2 py-0.5">
+                        {pkg.packagingType.replace("_", " ")}
+                      </span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-neutral-500">Operator:</span>
-                      <span className="font-medium text-neutral-800">{pkg.operatorName}</span>
+
+                    <div className="mt-3 space-y-1 text-xs text-neutral-700">
+                      <div className="flex justify-between">
+                        <span className="text-neutral-500">Packaged Qty:</span>
+                        <span className="font-mono font-bold text-neutral-900">{pkg.totalQuantityMT} MT</span>
+                      </div>
+                      {pkg.numberOfBags && (
+                        <div className="flex justify-between">
+                          <span className="text-neutral-500">Bag Count:</span>
+                          <span className="font-mono text-neutral-900 font-semibold">{pkg.numberOfBags} Bags</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between">
+                        <span className="text-neutral-500">Storage Zone:</span>
+                        <span className="font-medium text-neutral-800">{pkg.storageBay}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-neutral-500">Operator:</span>
+                        <span className="font-medium text-neutral-800">{pkg.operatorName}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="pt-2 border-t border-neutral-200 text-[10px] text-neutral-500 font-mono flex justify-between">
-                  <span>{pkg.packagingDate}</span>
-                  <span className="text-emerald-700 font-bold">Stored</span>
+                  <div className="pt-2 border-t border-neutral-200 text-[10px] text-neutral-500 font-mono flex justify-between">
+                    <span>{pkg.packagingDate}</span>
+                    <span className="text-emerald-700 font-bold">Stored</span>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="border border-neutral-300 overflow-x-auto bg-transparent">
-            <table className="w-full text-left text-xs border-collapse">
-              <thead>
-                <tr className="border-b border-neutral-300 bg-neutral-200/50 text-neutral-600 font-bold uppercase tracking-wider text-[10px]">
-                  <th className="py-2.5 px-3">Run ID</th>
-                  <th className="py-2.5 px-3">FG Batch</th>
-                  <th className="py-2.5 px-3">Packaging Type</th>
-                  <th className="py-2.5 px-3 font-mono">Total MT</th>
-                  <th className="py-2.5 px-3 font-mono">Bags</th>
-                  <th className="py-2.5 px-3">Storage Bay</th>
-                  <th className="py-2.5 px-3">Operator</th>
-                  <th className="py-2.5 px-3 text-right">Date / Time</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-neutral-300">
+              ))}
+            </div>
+          ) : (
+            <>
+              {/* Mobile Cards Fallback */}
+              <div className="grid grid-cols-1 sm:hidden gap-4">
                 {filteredRecords.map((pkg) => (
-                  <tr key={pkg.id} className="hover:bg-neutral-200/40 transition-colors">
-                    <td className="py-2.5 px-3 font-mono font-bold text-neutral-900">{pkg.id}</td>
-                    <td className="py-2.5 px-3 font-mono font-semibold text-neutral-800">{pkg.batchNumber}</td>
-                    <td className="py-2.5 px-3 text-neutral-800">{pkg.packagingType.replace("_", " ")}</td>
-                    <td className="py-2.5 px-3 font-mono font-bold text-neutral-900">{pkg.totalQuantityMT} MT</td>
-                    <td className="py-2.5 px-3 font-mono text-neutral-700">{pkg.numberOfBags || "—"}</td>
-                    <td className="py-2.5 px-3 text-neutral-700">{pkg.storageBay}</td>
-                    <td className="py-2.5 px-3 text-neutral-700">{pkg.operatorName}</td>
-                    <td className="py-2.5 px-3 text-right font-mono text-neutral-600">{pkg.packagingDate}</td>
-                  </tr>
+                  <div
+                    key={pkg.id}
+                    className="border border-neutral-300 bg-white/40 p-4 flex flex-col justify-between space-y-3"
+                  >
+                    <div>
+                      <div className="flex items-start justify-between pb-2 border-b border-neutral-200">
+                        <div>
+                          <span className="text-[10px] font-mono text-neutral-500">{pkg.id}</span>
+                          <h3 className="font-mono font-bold text-neutral-900 text-sm">{pkg.batchNumber}</h3>
+                        </div>
+                        <span className="border border-neutral-300 bg-[#18181B] text-white text-[10px] font-bold uppercase px-2 py-0.5">
+                          {pkg.packagingType.replace("_", " ")}
+                        </span>
+                      </div>
+
+                      <div className="mt-3 space-y-1 text-xs text-neutral-700">
+                        <div className="flex justify-between">
+                          <span className="text-neutral-500">Packaged Qty:</span>
+                          <span className="font-mono font-bold text-neutral-900">{pkg.totalQuantityMT} MT</span>
+                        </div>
+                        {pkg.numberOfBags && (
+                          <div className="flex justify-between">
+                            <span className="text-neutral-500">Bag Count:</span>
+                            <span className="font-mono text-neutral-900 font-semibold">{pkg.numberOfBags} Bags</span>
+                          </div>
+                        )}
+                        <div className="flex justify-between">
+                          <span className="text-neutral-500">Storage Zone:</span>
+                          <span className="font-medium text-neutral-800">{pkg.storageBay}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-neutral-500">Operator:</span>
+                          <span className="font-medium text-neutral-800">{pkg.operatorName}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="pt-2 border-t border-neutral-200 text-[10px] text-neutral-500 font-mono flex justify-between">
+                      <span>{pkg.packagingDate}</span>
+                      <span className="text-emerald-700 font-bold">Stored</span>
+                    </div>
+                  </div>
                 ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+              </div>
+
+              {/* Desktop Transparent Table */}
+              <div className="hidden sm:block border border-neutral-300 overflow-x-auto bg-transparent">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead>
+                    <tr className="border-b border-neutral-300 bg-neutral-200/50 text-neutral-600 font-bold uppercase tracking-wider text-[10px]">
+                      <th className="py-2.5 px-3">Run ID</th>
+                      <th className="py-2.5 px-3">FG Batch</th>
+                      <th className="py-2.5 px-3">Packaging Type</th>
+                      <th className="py-2.5 px-3 font-mono">Total MT</th>
+                      <th className="py-2.5 px-3 font-mono">Bags</th>
+                      <th className="py-2.5 px-3">Storage Bay</th>
+                      <th className="py-2.5 px-3">Operator</th>
+                      <th className="py-2.5 px-3 text-right">Date / Time</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-neutral-300">
+                    {filteredRecords.map((pkg) => (
+                      <tr key={pkg.id} className="hover:bg-neutral-200/40 transition-colors">
+                        <td className="py-2.5 px-3 font-mono font-bold text-neutral-900">{pkg.id}</td>
+                        <td className="py-2.5 px-3 font-mono font-semibold text-neutral-800">{pkg.batchNumber}</td>
+                        <td className="py-2.5 px-3 text-neutral-800">{pkg.packagingType.replace("_", " ")}</td>
+                        <td className="py-2.5 px-3 font-mono font-bold text-neutral-900">{pkg.totalQuantityMT} MT</td>
+                        <td className="py-2.5 px-3 font-mono text-neutral-700">{pkg.numberOfBags || "—"}</td>
+                        <td className="py-2.5 px-3 text-neutral-700">{pkg.storageBay}</td>
+                        <td className="py-2.5 px-3 text-neutral-700">{pkg.operatorName}</td>
+                        <td className="py-2.5 px-3 text-right font-mono text-neutral-600">{pkg.packagingDate}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
         </div>
       </section>
     </div>

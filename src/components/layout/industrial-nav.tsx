@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Home,
   Globe,
@@ -36,6 +37,9 @@ import {
   Layers,
   Menu,
   X,
+  ArrowRight,
+  Terminal,
+  ChevronDown,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
@@ -161,6 +165,17 @@ export const ROLE_WAREHOUSE = USER_ROLES.find((r) => r.id === "warehouse") || US
 export const ROLE_ADMIN = USER_ROLES.find((r) => r.id === "admin") || USER_ROLES[6];
 export const ROLE_MANAGEMENT = USER_ROLES.find((r) => r.id === "management") || USER_ROLES[7];
 
+export const ROLE_ROUTES: Record<string, string> = {
+  "gate-security": "/gate",
+  "weighbridge": "/weighbridge",
+  "sales-dispatch": "/sales",
+  "qc-lab": "/quality",
+  "production": "/production",
+  "warehouse": "/inventory",
+  "admin": "/admin",
+  "management": "/management",
+};
+
 export function getRoleById(roleId: string): UserRoleProfile {
   return USER_ROLES.find((r) => r.id === roleId) || USER_ROLES[0];
 }
@@ -178,11 +193,13 @@ export function IndustrialNav({
   activeTabId,
   onTabChange,
 }: IndustrialNavProps) {
+  const router = useRouter();
   const [internalActiveTab, setInternalActiveTab] = useState<string>(
     currentRole.navItems[0]?.id || "home"
   );
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isDevMenuOpen, setIsDevMenuOpen] = useState(false);
 
   const selectedTab = activeTabId !== undefined ? activeTabId : internalActiveTab;
 
@@ -199,13 +216,11 @@ export function IndustrialNav({
   return (
     <header className="w-full bg-[#F4F5F7] border-b border-[#E2E8F0] select-none sticky top-0 z-40">
       <div className="relative max-w-[1920px] mx-auto px-3 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between gap-4">
-        {/* Left: Brand Name */}
-        <div className="flex items-center gap-2 sm:gap-6 shrink-0 z-10 min-w-[120px]">
-          <div className="flex items-center gap-2">
-            <span className="font-bold tracking-tight text-[#0F172A] text-sm md:text-base uppercase tracking-wider">
-              MAHAURJA
-            </span>
-          </div>
+        {/* Left: Current Page / Active Nav Item Name */}
+        <div className="flex items-center gap-2 sm:gap-6 shrink-0 z-10 min-w-0">
+          <span className="font-bold tracking-tight text-[#0F172A] text-sm md:text-base uppercase tracking-wider truncate max-w-[190px] sm:max-w-[300px]">
+            {activeNavItem ? activeNavItem.label.toUpperCase() : currentRole.roleName.toUpperCase()}
+          </span>
         </div>
 
         {/* Center: Truly Center-Aligned Tab Group */}
@@ -247,13 +262,130 @@ export function IndustrialNav({
           </div>
         </nav>
 
-        {/* Right: User Profile Icon + Mobile Menu Toggle */}
-        <div className="flex items-center gap-2 sm:gap-3 shrink-0 z-10 min-w-[120px] justify-end">
+        {/* Right: Actions (Dev Role Switcher + User Profile + Mobile Menu Toggle) */}
+        <div className="flex items-center gap-2 sm:gap-2.5 shrink-0 z-10 justify-end">
+          {/* Dev Role Switcher Button */}
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => {
+                setIsDevMenuOpen(!isDevMenuOpen);
+                setIsUserMenuOpen(false);
+              }}
+              className="h-9 px-2 sm:px-2.5 border border-dashed border-amber-600/70 bg-amber-50/80 hover:bg-amber-100 text-amber-950 flex items-center gap-1.5 cursor-pointer transition-colors shadow-2xs"
+              style={{ borderRadius: 0 }}
+              title="Developer: Switch Plant Desk / Role (8 Desks)"
+              aria-label="Dev Role Switcher"
+              aria-expanded={isDevMenuOpen}
+            >
+              <Terminal className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+              <span className="text-[11px] font-mono font-bold tracking-tight uppercase hidden sm:inline">
+                Dev: Switch Desk
+              </span>
+              <span className="text-[10px] font-mono font-bold tracking-tight uppercase sm:hidden">
+                Dev
+              </span>
+              <ChevronDown
+                className={`w-3 h-3 text-amber-700 transition-transform ${
+                  isDevMenuOpen ? "rotate-180" : ""
+                }`}
+              />
+            </button>
+
+            {/* Dev Role Switcher Popover */}
+            {isDevMenuOpen && (
+              <>
+                <div
+                  className="fixed inset-0 z-40"
+                  onClick={() => setIsDevMenuOpen(false)}
+                />
+                <div
+                  className="absolute right-0 mt-2 w-72 sm:w-80 bg-white border border-neutral-300 z-50 p-0 shadow-xl select-none"
+                  style={{ borderRadius: 0 }}
+                >
+                  <div className="px-3.5 py-2.5 bg-neutral-100 border-b border-neutral-200 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Terminal className="w-3.5 h-3.5 text-amber-700" />
+                      <span className="text-xs font-mono font-bold uppercase tracking-wider text-neutral-800">
+                        Dev Desk Switcher
+                      </span>
+                    </div>
+                    <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 bg-amber-100 text-amber-800 border border-amber-300">
+                      8 Desks
+                    </span>
+                  </div>
+
+                  <div className="divide-y divide-neutral-200 max-h-[70vh] overflow-y-auto">
+                    {USER_ROLES.map((role) => {
+                      const isCurrent = role.id === currentRole.id;
+                      const route = ROLE_ROUTES[role.id] || "/gate";
+                      const RoleIcon = role.navItems[0]?.icon || Factory;
+
+                      return (
+                        <button
+                          key={role.id}
+                          type="button"
+                          onClick={() => {
+                            setIsDevMenuOpen(false);
+                            if (onRoleChange) {
+                              onRoleChange(role);
+                            }
+                            router.push(route);
+                          }}
+                          className={`w-full px-3.5 py-2.5 flex items-center justify-between text-left transition-colors cursor-pointer ${
+                            isCurrent
+                              ? "bg-neutral-900 text-white"
+                              : "bg-white hover:bg-neutral-100 text-neutral-800"
+                          }`}
+                        >
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div
+                              className={`w-7 h-7 flex items-center justify-center shrink-0 border ${
+                                isCurrent
+                                  ? "bg-neutral-800 border-neutral-700 text-[#10B981]"
+                                  : "bg-neutral-50 border-neutral-300 text-neutral-600"
+                              }`}
+                            >
+                              <RoleIcon className="w-3.5 h-3.5" />
+                            </div>
+                            <div className="min-w-0">
+                              <div className="text-xs font-bold truncate">
+                                {role.roleName}
+                              </div>
+                              <div
+                                className={`text-[11px] truncate ${
+                                  isCurrent ? "text-neutral-400" : "text-neutral-500"
+                                }`}
+                              >
+                                {role.userName} · {route}
+                              </div>
+                            </div>
+                          </div>
+
+                          {isCurrent ? (
+                            <span className="text-[10px] font-mono font-bold text-[#10B981] px-1.5 py-0.5 bg-neutral-800 border border-neutral-700 shrink-0 ml-2">
+                              Active
+                            </span>
+                          ) : (
+                            <ArrowRight className="w-3.5 h-3.5 text-neutral-400 shrink-0 ml-2" />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+
           {/* User Profile Icon Button (Clean icon without direct verbose text) */}
           <div className="relative">
             <button
               type="button"
-              onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+              onClick={() => {
+                setIsUserMenuOpen(!isUserMenuOpen);
+                setIsDevMenuOpen(false);
+              }}
               className="w-9 h-9 border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-800 hover:text-black flex items-center justify-center relative cursor-pointer transition-colors shadow-xs"
               style={{ borderRadius: 0 }}
               title={`On Duty: ${currentRole.userName} (Gate 01 Post)`}
@@ -309,40 +441,17 @@ export function IndustrialNav({
                       </span>
                     </div>
 
-                    {/* Operational Station Quick Switcher (All 8 Roles) */}
-                    <div className="pt-2.5 mt-2 border-t border-neutral-200">
-                      <div className="text-[10px] font-bold uppercase tracking-wider text-neutral-500 mb-1.5 flex items-center justify-between">
-                        <span>Switch Operational Desk</span>
-                        <span className="text-[9px] text-emerald-600 font-bold">8 DESKS ONLINE</span>
-                      </div>
-                      <div className="space-y-1 max-h-56 overflow-y-auto pr-0.5">
-                        {[
-                          { id: "gate-security", label: "Gate & Security", url: "/gate" },
-                          { id: "weighbridge", label: "Weighbridge Metrology", url: "/weighbridge" },
-                          { id: "qc-lab", label: "QC & Testing Lab", url: "/quality" },
-                          { id: "production", label: "Pelletising Production", url: "/production" },
-                          { id: "warehouse", label: "Warehouse & Yards", url: "/inventory" },
-                          { id: "sales-dispatch", label: "Sales & Dispatch", url: "/sales" },
-                          { id: "management", label: "Management Directorate", url: "/management" },
-                          { id: "admin", label: "Admin & Master Setup", url: "/admin" },
-                        ].map((role) => (
-                          <a
-                            key={role.id}
-                            href={role.url}
-                            className={`flex items-center justify-between px-2.5 py-1.5 text-xs font-semibold border transition-colors ${
-                              currentRole.id === role.id
-                                ? "bg-[#18181B] text-white border-[#18181B]"
-                                : "bg-neutral-50 text-neutral-800 border-neutral-200 hover:bg-neutral-100"
-                            }`}
-                            style={{ borderRadius: 0 }}
-                          >
-                            <span>{role.label}</span>
-                            {currentRole.id === role.id && (
-                              <span className="text-[9px] text-emerald-400 font-bold uppercase">Active</span>
-                            )}
-                          </a>
-                        ))}
-                      </div>
+                    {/* Operational Action */}
+                    <div className="pt-3 mt-2 border-t border-neutral-200">
+                      <button
+                        type="button"
+                        onClick={() => setIsUserMenuOpen(false)}
+                        className="w-full h-8 px-3 border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-700 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                        style={{ borderRadius: 0 }}
+                      >
+                        <LogOut className="w-3.5 h-3.5 text-neutral-500" />
+                        <span>Lock Station</span>
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -350,69 +459,46 @@ export function IndustrialNav({
             )}
           </div>
 
-          {/* Mobile Collapsible Navigation Toggle Button */}
+          {/* Mobile Collapsible Navigation Toggle Button (Square Box) */}
           <button
             type="button"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden flex items-center gap-1.5 px-2.5 py-1.5 border border-neutral-400 bg-white hover:bg-neutral-100 text-neutral-900 text-xs font-bold uppercase tracking-wider cursor-pointer transition-colors active:scale-95"
+            className="md:hidden w-9 h-9 border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-800 hover:text-black flex items-center justify-center relative cursor-pointer transition-colors shadow-xs"
             style={{ borderRadius: 0 }}
             aria-expanded={isMobileMenuOpen}
-            aria-label={isMobileMenuOpen ? "Collapse Navigation" : `Current page: ${activeNavItem?.label || "Navigation"}`}
+            aria-label={isMobileMenuOpen ? "Collapse Navigation" : "Open Navigation Menu"}
           >
             {isMobileMenuOpen ? (
-              <>
-                <X className="w-4 h-4 text-neutral-900 shrink-0" />
-                <span className="text-[11px]">CLOSE</span>
-              </>
+              <X className="w-4 h-4 text-neutral-900 shrink-0" strokeWidth={1.8} />
             ) : (
-              <>
-                <Menu className="w-4 h-4 text-neutral-900 shrink-0" />
-                <span className="text-[11px] truncate max-w-[120px]">
-                  {activeNavItem ? activeNavItem.label.toUpperCase() : "PAGE"}
-                </span>
-              </>
+              <Menu className="w-4 h-4 text-neutral-900 shrink-0" strokeWidth={1.8} />
             )}
           </button>
         </div>
       </div>
 
-      {/* Collapsible Mobile Drawer Panel */}
+      {/* Collapsible Mobile Drawer Panel (Clean, Production-Ready Navigation) */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-            className="md:hidden border-t border-neutral-300 bg-white divide-y divide-neutral-200 overflow-hidden shadow-xl"
+            transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            className="md:hidden border-t border-neutral-300 bg-white shadow-xl overflow-hidden select-none"
           >
-            {/* Active Guard Info Strip (Pure station identity, no role switcher) */}
-            <div className="p-3 bg-[#F8F9FA] flex items-center justify-between gap-2 border-b border-neutral-200">
-              <div className="flex items-center gap-2.5">
-                <div className="w-7 h-7 bg-[#18181B] text-white flex items-center justify-center text-xs font-bold shrink-0">
-                  {currentRole.userName.charAt(0)}
-                </div>
-                <div className="min-w-0">
-                  <div className="text-xs font-bold text-neutral-900 leading-tight truncate">
-                    {currentRole.userName}
-                  </div>
-                  <div className="text-[10px] text-neutral-500 font-medium truncate">
-                    {currentRole.roleName} · Post 01
-                  </div>
-                </div>
-              </div>
-              <span className="text-[10px] font-bold text-[#047857] px-2 py-0.5 border border-emerald-300 bg-emerald-50">
-                ON POST
+            {/* Clean Station Subheader */}
+            <div className="px-4 py-2 bg-neutral-200/50 border-b border-neutral-300 flex items-center justify-between">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-700">
+                {currentRole.roleName}
+              </span>
+              <span className="text-[10px] font-mono text-neutral-500">
+                {currentRole.navItems.length} Desks
               </span>
             </div>
 
-            {/* Role Navigation Items (Full-width Touch-Friendly Buttons) */}
-            <div className="p-3 space-y-1.5 bg-white">
-              <div className="text-[10px] font-bold uppercase tracking-wider text-neutral-500 px-1 mb-1 flex items-center justify-between">
-                <span>{currentRole.roleName} Desks</span>
-                <span className="text-[9px] text-[#059669] font-bold">● STATION ACTIVE</span>
-              </div>
-
+            {/* Desk Navigation Items */}
+            <div className="divide-y divide-neutral-200">
               {currentRole.navItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = selectedTab === item.id;
@@ -425,77 +511,57 @@ export function IndustrialNav({
                     }}
                     type="button"
                     className={`
-                      w-full flex items-center justify-between px-3.5 py-3 text-xs font-semibold border transition-all cursor-pointer active:scale-[0.99]
+                      w-full flex items-center justify-between px-4 py-3.5 text-xs transition-colors cursor-pointer text-left
                       ${
                         isActive
-                          ? "bg-[#18181B] text-white border-[#18181B]"
-                          : "bg-white text-neutral-800 border-neutral-200 hover:bg-neutral-50 hover:border-neutral-300"
+                          ? "bg-neutral-100 text-neutral-900 font-bold border-l-4 border-l-[#059669]"
+                          : "bg-white text-neutral-700 hover:bg-neutral-50 hover:text-neutral-900 font-medium border-l-4 border-l-transparent"
                       }
                     `}
-                    style={{ borderRadius: 0 }}
                   >
                     <div className="flex items-center gap-3">
                       <Icon
                         className={`w-4 h-4 shrink-0 ${
-                          isActive ? "text-[#10B981]" : "text-neutral-500"
+                          isActive ? "text-[#059669]" : "text-neutral-500"
                         }`}
-                        strokeWidth={isActive ? 2 : 1.75}
+                        strokeWidth={isActive ? 2.2 : 1.75}
                       />
-                      <span className="text-[13px]">{item.label}</span>
+                      <span className="text-[13px] tracking-tight">{item.label}</span>
                     </div>
 
                     {isActive ? (
-                      <span className="text-[10px] uppercase font-bold tracking-wider text-[#10B981] px-2 py-0.5 border border-[#10B981]/50 bg-black/30">
-                        Current View
+                      <span
+                        className="text-[10px] font-bold uppercase tracking-wider text-[#047857] px-2 py-0.5 border border-emerald-300 bg-emerald-50"
+                        style={{ borderRadius: 0 }}
+                      >
+                        Active
                       </span>
                     ) : (
-                      <span className="text-neutral-400 text-xs font-normal">→</span>
+                      <ArrowRight className="w-3.5 h-3.5 text-neutral-400" />
                     )}
                   </button>
                 );
               })}
             </div>
 
-            {/* Quick Operational Station Switcher for Mobile */}
-            <div className="p-3 bg-[#F8F9FA] space-y-2 border-t border-neutral-200">
-              <div className="text-[10px] font-bold uppercase tracking-wider text-neutral-500 px-1 flex items-center justify-between">
-                <span>Switch Station</span>
-                <span className="text-[9px] text-emerald-600 font-bold">ONLINE</span>
-              </div>
-              <div className="grid grid-cols-2 gap-1.5">
-                {[
-                  { id: "gate-security", label: "Gate & Security", url: "/gate" },
-                  { id: "weighbridge", label: "Weighbridge", url: "/weighbridge" },
-                  { id: "qc-lab", label: "QC & Lab", url: "/quality" },
-                  { id: "production", label: "Production", url: "/production" },
-                  { id: "warehouse", label: "Warehouse", url: "/inventory" },
-                  { id: "sales-dispatch", label: "Sales & Dispatch", url: "/sales" },
-                  { id: "management", label: "Management", url: "/management" },
-                  { id: "admin", label: "Admin Masters", url: "/admin" },
-                ].map((role) => (
-                  <a
-                    key={role.id}
-                    href={role.url}
-                    className={`px-2 py-1.5 text-[11px] font-semibold border text-center transition-colors truncate ${
-                      currentRole.id === role.id
-                        ? "bg-[#18181B] text-white border-[#18181B]"
-                        : "bg-white text-neutral-800 border-neutral-300 hover:bg-neutral-50"
-                    }`}
-                    style={{ borderRadius: 0 }}
-                  >
-                    {role.label}
-                  </a>
-                ))}
-              </div>
-            </div>
-
-            {/* Quick Operational Telemetry Strip */}
-            <div className="p-3 bg-[#F4F5F7] flex items-center justify-between text-[11px] text-neutral-600">
+            {/* Dev Desk Switcher Strip (Mobile drawer helper) */}
+            <div className="p-3 bg-amber-50/70 border-t border-dashed border-amber-300 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="w-2 h-2 bg-[#059669]" />
-                <span className="font-semibold text-neutral-800">Gate 01 / Gate 02 Live</span>
+                <Terminal className="w-3.5 h-3.5 text-amber-700" />
+                <span className="text-[11px] font-mono font-bold uppercase text-amber-950">
+                  Switch Station (Dev)
+                </span>
               </div>
-              <span className="text-neutral-500">Day Duty Shift 01</span>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  setIsDevMenuOpen(true);
+                }}
+                className="px-2.5 py-1 bg-white border border-amber-300 text-[10px] font-mono font-bold text-amber-900 uppercase cursor-pointer hover:bg-amber-100 shadow-2xs"
+              >
+                All 8 Desks
+              </button>
             </div>
           </motion.div>
         )}

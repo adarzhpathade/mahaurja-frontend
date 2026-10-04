@@ -86,10 +86,43 @@ export function MaterialIssueWorkbench() {
   return (
     <div className="space-y-6 select-none">
       {/* Page Header */}
-      <div className="border-b border-neutral-300 pb-4 sm:pb-5">
-        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-neutral-900">
-          Material Issue &amp; Lot Allocation Workbench
-        </h1>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-neutral-300 pb-4 sm:pb-5">
+        <div className="flex items-center gap-2.5">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-neutral-900">
+            Raw Material Issue
+          </h1>
+          <span className="text-xs sm:text-sm font-bold font-mono px-2 py-0.5 bg-neutral-200 border border-neutral-300 text-neutral-800">
+            {filteredIssues.length}
+          </span>
+        </div>
+
+        {/* Desktop Dual View */}
+        <div className="hidden sm:inline-flex border border-neutral-300 divide-x divide-neutral-300 text-xs shrink-0 h-10">
+          <button
+            type="button"
+            onClick={() => setViewMode("cards")}
+            className={`px-3 py-1.5 transition-colors cursor-pointer flex items-center gap-1.5 ${
+              viewMode === "cards"
+                ? "bg-[#18181B] text-white font-semibold"
+                : "bg-neutral-200/50 text-neutral-700 hover:bg-neutral-200"
+            }`}
+          >
+            <LayoutGrid className="w-3.5 h-3.5" />
+            <span>Cards</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setViewMode("table")}
+            className={`px-3 py-1.5 transition-colors cursor-pointer flex items-center gap-1.5 ${
+              viewMode === "table"
+                ? "bg-[#18181B] text-white font-semibold"
+                : "bg-neutral-200/50 text-neutral-700 hover:bg-neutral-200"
+            }`}
+          >
+            <TableIcon className="w-3.5 h-3.5" />
+            <span>Table</span>
+          </button>
+        </div>
       </div>
 
       {successMsg && (
@@ -218,44 +251,11 @@ export function MaterialIssueWorkbench() {
 
       {/* Historical Issues Ledger */}
       <section className="space-y-4 pt-6 border-t border-neutral-300">
-        <div className="flex items-center justify-between border-b border-neutral-300 pb-2.5">
-          <div className="flex items-center gap-2">
-            <Layers className="w-4 h-4 text-neutral-800 shrink-0" />
-            <h2 className="text-xs font-bold uppercase tracking-wider text-neutral-900">
-              Material Issue Slips
-            </h2>
-            <span className="text-[10px] font-bold font-mono px-1.5 py-0.5 bg-neutral-200 border border-neutral-300 text-neutral-800">
-              {filteredIssues.length}
-            </span>
-          </div>
-
-          {/* Desktop Dual View */}
-          <div className="hidden sm:inline-flex border border-neutral-300 divide-x divide-neutral-300 text-xs shrink-0 h-10">
-            <button
-              type="button"
-              onClick={() => setViewMode("cards")}
-              className={`px-3 py-1.5 transition-colors cursor-pointer flex items-center gap-1.5 ${
-                viewMode === "cards"
-                  ? "bg-[#18181B] text-white font-semibold"
-                  : "bg-neutral-200/50 text-neutral-700 hover:bg-neutral-200"
-              }`}
-            >
-              <LayoutGrid className="w-3.5 h-3.5" />
-              <span>Cards</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setViewMode("table")}
-              className={`px-3 py-1.5 transition-colors cursor-pointer flex items-center gap-1.5 ${
-                viewMode === "table"
-                  ? "bg-[#18181B] text-white font-semibold"
-                  : "bg-neutral-200/50 text-neutral-700 hover:bg-neutral-200"
-              }`}
-            >
-              <TableIcon className="w-3.5 h-3.5" />
-              <span>Table</span>
-            </button>
-          </div>
+        <div className="flex items-center gap-2 border-b border-neutral-300 pb-2.5">
+          <Layers className="w-4 h-4 text-[#059669] shrink-0" />
+          <h2 className="text-xs font-bold uppercase tracking-wider text-neutral-900">
+            Material Issue Slips History
+          </h2>
         </div>
 
         {/* Content container - borderless on mobile, bordered on PC */}
@@ -295,85 +295,135 @@ export function MaterialIssueWorkbench() {
           ) : viewMode === "cards" ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {filteredIssues.map((iss) => (
-              <div
-                key={iss.id}
-                className="border border-neutral-300 bg-white/40 p-4 flex flex-col justify-between space-y-3"
-              >
-                <div>
-                  <div className="flex items-start justify-between pb-2 border-b border-neutral-200">
-                    <div>
-                      <span className="text-[10px] font-mono text-neutral-500">Plan Ref: {iss.planId}</span>
-                      <h3 className="font-mono font-bold text-neutral-900 text-base">{iss.id}</h3>
-                    </div>
-                    <span className="border border-emerald-300 bg-emerald-50 text-[#047857] text-[10px] font-bold uppercase px-2 py-0.5">
-                      {iss.status}
-                    </span>
-                  </div>
-
-                  <div className="mt-3 space-y-2 text-xs text-neutral-700">
-                    <div className="flex justify-between">
-                      <span className="text-neutral-500">Total Issued MT:</span>
-                      <span className="font-mono font-bold text-neutral-900">{iss.totalIssuedMT} MT</span>
-                    </div>
-
-                    <div className="space-y-1">
-                      <span className="text-[11px] text-neutral-500 block font-semibold">Allocated RM Lots:</span>
-                      {iss.allocatedLots.map((lot) => (
-                        <div
-                          key={lot.lotId}
-                          className="flex justify-between p-1.5 bg-neutral-100 border border-neutral-200 text-[11px] font-mono"
-                        >
-                          <span>{lot.lotId} ({lot.materialName})</span>
-                          <span className="font-bold text-neutral-900">{lot.issuedQuantityMT} MT · {lot.yardLocation}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="pt-2 border-t border-neutral-200 text-[10px] text-neutral-500 font-mono flex justify-between">
-                  <span>Issued: {iss.issueDate}</span>
-                  <span>Supervisor: {iss.supervisorName}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="border border-neutral-300 overflow-x-auto bg-transparent">
-            <table className="w-full text-left text-xs border-collapse">
-              <thead>
-                <tr className="border-b border-neutral-300 bg-neutral-200/50 text-neutral-600 font-bold uppercase tracking-wider text-[10px]">
-                  <th className="py-2.5 px-3">Issue Slip ID</th>
-                  <th className="py-2.5 px-3">Target Plan</th>
-                  <th className="py-2.5 px-3">Shift</th>
-                  <th className="py-2.5 px-3 font-mono">Total MT</th>
-                  <th className="py-2.5 px-3">Deducted RM Lots</th>
-                  <th className="py-2.5 px-3">Supervisor</th>
-                  <th className="py-2.5 px-3 text-right">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-neutral-300">
-                {filteredIssues.map((iss) => (
-                  <tr key={iss.id} className="hover:bg-neutral-200/40 transition-colors">
-                    <td className="py-2.5 px-3 font-mono font-bold text-neutral-900">{iss.id}</td>
-                    <td className="py-2.5 px-3 font-mono text-neutral-800">{iss.planId}</td>
-                    <td className="py-2.5 px-3 text-neutral-700">{iss.shift}</td>
-                    <td className="py-2.5 px-3 font-mono font-bold text-neutral-900">{iss.totalIssuedMT} MT</td>
-                    <td className="py-2.5 px-3 font-mono text-[11px] text-neutral-700">
-                      {iss.allocatedLots.map((l) => l.lotId).join(", ")}
-                    </td>
-                    <td className="py-2.5 px-3 text-neutral-700">{iss.supervisorName}</td>
-                    <td className="py-2.5 px-3 text-right">
+                <div
+                  key={iss.id}
+                  className="border border-neutral-300 bg-white/40 p-4 flex flex-col justify-between space-y-3"
+                >
+                  <div>
+                    <div className="flex items-start justify-between pb-2 border-b border-neutral-200">
+                      <div>
+                        <span className="text-[10px] font-mono text-neutral-500">Plan Ref: {iss.planId}</span>
+                        <h3 className="font-mono font-bold text-neutral-900 text-base">{iss.id}</h3>
+                      </div>
                       <span className="border border-emerald-300 bg-emerald-50 text-[#047857] text-[10px] font-bold uppercase px-2 py-0.5">
                         {iss.status}
                       </span>
-                    </td>
-                  </tr>
+                    </div>
+
+                    <div className="mt-3 space-y-2 text-xs text-neutral-700">
+                      <div className="flex justify-between">
+                        <span className="text-neutral-500">Total Issued MT:</span>
+                        <span className="font-mono font-bold text-neutral-900">{iss.totalIssuedMT} MT</span>
+                      </div>
+
+                      <div className="space-y-1">
+                        <span className="text-[11px] text-neutral-500 block font-semibold">Allocated RM Lots:</span>
+                        {iss.allocatedLots.map((lot) => (
+                          <div
+                            key={lot.lotId}
+                            className="flex justify-between p-1.5 bg-neutral-100 border border-neutral-200 text-[11px] font-mono"
+                          >
+                            <span>{lot.lotId} ({lot.materialName})</span>
+                            <span className="font-bold text-neutral-900">{lot.issuedQuantityMT} MT · {lot.yardLocation}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="pt-2 border-t border-neutral-200 text-[10px] text-neutral-500 font-mono flex justify-between">
+                    <span>Issued: {iss.issueDate}</span>
+                    <span>Supervisor: {iss.supervisorName}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <>
+              {/* Mobile Cards Fallback */}
+              <div className="grid grid-cols-1 sm:hidden gap-4">
+                {filteredIssues.map((iss) => (
+                  <div
+                    key={iss.id}
+                    className="border border-neutral-300 bg-white/40 p-4 flex flex-col justify-between space-y-3"
+                  >
+                    <div>
+                      <div className="flex items-start justify-between pb-2 border-b border-neutral-200">
+                        <div>
+                          <span className="text-[10px] font-mono text-neutral-500">Plan Ref: {iss.planId}</span>
+                          <h3 className="font-mono font-bold text-neutral-900 text-base">{iss.id}</h3>
+                        </div>
+                        <span className="border border-emerald-300 bg-emerald-50 text-[#047857] text-[10px] font-bold uppercase px-2 py-0.5">
+                          {iss.status}
+                        </span>
+                      </div>
+
+                      <div className="mt-3 space-y-2 text-xs text-neutral-700">
+                        <div className="flex justify-between">
+                          <span className="text-neutral-500">Total Issued MT:</span>
+                          <span className="font-mono font-bold text-neutral-900">{iss.totalIssuedMT} MT</span>
+                        </div>
+
+                        <div className="space-y-1">
+                          <span className="text-[11px] text-neutral-500 block font-semibold">Allocated RM Lots:</span>
+                          {iss.allocatedLots.map((lot) => (
+                            <div
+                              key={lot.lotId}
+                              className="flex justify-between p-1.5 bg-neutral-100 border border-neutral-200 text-[11px] font-mono"
+                            >
+                              <span>{lot.lotId} ({lot.materialName})</span>
+                              <span className="font-bold text-neutral-900">{lot.issuedQuantityMT} MT · {lot.yardLocation}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="pt-2 border-t border-neutral-200 text-[10px] text-neutral-500 font-mono flex justify-between">
+                      <span>Issued: {iss.issueDate}</span>
+                      <span>Supervisor: {iss.supervisorName}</span>
+                    </div>
+                  </div>
                 ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+              </div>
+
+              {/* Desktop Transparent Table */}
+              <div className="hidden sm:block border border-neutral-300 overflow-x-auto bg-transparent">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead>
+                    <tr className="border-b border-neutral-300 bg-neutral-200/50 text-neutral-600 font-bold uppercase tracking-wider text-[10px]">
+                      <th className="py-2.5 px-3">Issue Slip ID</th>
+                      <th className="py-2.5 px-3">Target Plan</th>
+                      <th className="py-2.5 px-3">Shift</th>
+                      <th className="py-2.5 px-3 font-mono">Total MT</th>
+                      <th className="py-2.5 px-3">Deducted RM Lots</th>
+                      <th className="py-2.5 px-3">Supervisor</th>
+                      <th className="py-2.5 px-3 text-right">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-neutral-300">
+                    {filteredIssues.map((iss) => (
+                      <tr key={iss.id} className="hover:bg-neutral-200/40 transition-colors">
+                        <td className="py-2.5 px-3 font-mono font-bold text-neutral-900">{iss.id}</td>
+                        <td className="py-2.5 px-3 font-mono text-neutral-800">{iss.planId}</td>
+                        <td className="py-2.5 px-3 text-neutral-700">{iss.shift}</td>
+                        <td className="py-2.5 px-3 font-mono font-bold text-neutral-900">{iss.totalIssuedMT} MT</td>
+                        <td className="py-2.5 px-3 font-mono text-[11px] text-neutral-700">
+                          {iss.allocatedLots.map((l) => l.lotId).join(", ")}
+                        </td>
+                        <td className="py-2.5 px-3 text-neutral-700">{iss.supervisorName}</td>
+                        <td className="py-2.5 px-3 text-right">
+                          <span className="border border-emerald-300 bg-emerald-50 text-[#047857] text-[10px] font-bold uppercase px-2 py-0.5">
+                            {iss.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
         </div>
       </section>
     </div>

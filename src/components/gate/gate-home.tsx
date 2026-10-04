@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { MobileFilterSheet } from "@/components/shared/mobile-filter-sheet";
 import {
   ShieldCheck,
   Truck,
@@ -108,11 +109,16 @@ export function GateHome({ onNavigateTab, onOpenEntryModal }: GateHomeProps) {
 
   // Filter & Search Pre-Advised Arrivals
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterType, setFilterType] = useState<"ALL" | "APPROACHING" | "SCHEDULED">("ALL");
+  const [filterType, setFilterType] = useState<"ALL" | "APPROACHING" | "SCHEDULED" | "DELAYED">("ALL");
   const [viewMode, setViewMode] = useState<"CARDS" | "TABLE">("CARDS");
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
   const [selectedArrival, setSelectedArrival] = useState<ExpectedArrival | null>(null);
   const [checkedInIds, setCheckedInIds] = useState<string[]>([]);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Live Metrics computed from context
   const insideVehicles = vehicles.filter((v) => v.stage !== "EXIT_COMPLETED");
@@ -141,6 +147,9 @@ export function GateHome({ onNavigateTab, onOpenEntryModal }: GateHomeProps) {
     }
     if (filterType === "SCHEDULED") {
       return matchesSearch && item.status === "ON_SCHEDULE";
+    }
+    if (filterType === "DELAYED") {
+      return matchesSearch && item.status === "DELAYED";
     }
     return matchesSearch;
   });
@@ -347,10 +356,17 @@ export function GateHome({ onNavigateTab, onOpenEntryModal }: GateHomeProps) {
               <button
                 type="button"
                 onClick={() => setIsMobileFilterOpen(true)}
-                className="sm:hidden w-10 h-10 flex items-center justify-center border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-700 shrink-0 cursor-pointer"
+                className={`sm:hidden w-10 h-10 flex items-center justify-center border shrink-0 cursor-pointer relative transition-colors ${
+                  filterType !== "ALL"
+                    ? "bg-[#18181B] text-white border-[#18181B]"
+                    : "bg-white text-neutral-700 border-neutral-300 hover:bg-neutral-100"
+                }`}
                 title="Filter Options"
               >
                 <SlidersHorizontal className="w-4 h-4" />
+                {filterType !== "ALL" && (
+                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-[#059669] rounded-full ring-2 ring-white" />
+                )}
               </button>
             </div>
 
@@ -393,7 +409,7 @@ export function GateHome({ onNavigateTab, onOpenEntryModal }: GateHomeProps) {
                       : "bg-neutral-200 text-neutral-700"
                   }`}
                 >
-                  1
+                  {PRE_ADVISED_ARRIVALS.filter((a) => a.status === "APPROACHING").length}
                 </span>
               </button>
               <button
@@ -413,58 +429,31 @@ export function GateHome({ onNavigateTab, onOpenEntryModal }: GateHomeProps) {
                       : "bg-neutral-200 text-neutral-700"
                   }`}
                 >
-                  2
+                  {PRE_ADVISED_ARRIVALS.filter((a) => a.status === "ON_SCHEDULE").length}
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setFilterType("DELAYED")}
+                className={`h-full px-3.5 cursor-pointer transition-colors whitespace-nowrap flex items-center gap-1.5 ${
+                  filterType === "DELAYED"
+                    ? "bg-[#18181B] text-white font-semibold"
+                    : "bg-white text-neutral-700 hover:bg-neutral-100"
+                }`}
+              >
+                <span>Delayed</span>
+                <span
+                  className={`px-1.5 py-0.2 text-[10px] font-bold ${
+                    filterType === "DELAYED"
+                      ? "bg-[#059669] text-white"
+                      : "bg-neutral-200 text-neutral-700"
+                  }`}
+                >
+                  {PRE_ADVISED_ARRIVALS.filter((a) => a.status === "DELAYED").length}
                 </span>
               </button>
             </div>
           </div>
-
-          {/* Mobile Filter Sheet Modal */}
-          {isMobileFilterOpen && (
-            <div className="fixed inset-0 z-50 bg-black/40 flex items-end sm:hidden">
-              <div className="bg-white w-full border-t border-neutral-300 p-4 space-y-3">
-                <div className="flex items-center justify-between border-b border-neutral-200 pb-2">
-                  <span className="text-xs font-bold uppercase tracking-wider text-neutral-800">Filter Options</span>
-                  <button
-                    type="button"
-                    onClick={() => setIsMobileFilterOpen(false)}
-                    className="text-xs font-bold text-neutral-500 hover:text-neutral-800"
-                  >
-                    Close ✕
-                  </button>
-                </div>
-                <div className="grid grid-cols-3 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => { setFilterType("ALL"); setIsMobileFilterOpen(false); }}
-                    className={`p-2.5 text-xs font-medium border text-center ${
-                      filterType === "ALL" ? "border-neutral-900 bg-[#18181B] text-white font-bold" : "border-neutral-300 bg-neutral-50 text-neutral-700"
-                    }`}
-                  >
-                    All ({PRE_ADVISED_ARRIVALS.length})
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { setFilterType("APPROACHING"); setIsMobileFilterOpen(false); }}
-                    className={`p-2.5 text-xs font-medium border text-center ${
-                      filterType === "APPROACHING" ? "border-neutral-900 bg-[#18181B] text-white font-bold" : "border-neutral-300 bg-neutral-50 text-neutral-700"
-                    }`}
-                  >
-                    Near (1)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { setFilterType("SCHEDULED"); setIsMobileFilterOpen(false); }}
-                    className={`p-2.5 text-xs font-medium border text-center ${
-                      filterType === "SCHEDULED" ? "border-neutral-900 bg-[#18181B] text-white font-bold" : "border-neutral-300 bg-neutral-50 text-neutral-700"
-                    }`}
-                  >
-                    Scheduled (2)
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
 
         {/* Content: Cards Grid (Always on Mobile, or PC when Cards selected) or Table (PC only) */}
         {filteredExpected.length === 0 ? (
@@ -818,6 +807,47 @@ export function GateHome({ onNavigateTab, onOpenEntryModal }: GateHomeProps) {
           </div>
         </div>
       )}
+
+      {/* ========================================================================= */}
+      {/* 5. SIMPLE MOBILE FILTER BOTTOM SHEET (PORTALED FLUSH TO BOTTOM, ZERO GAP) */}
+      {/* ========================================================================= */}
+      <MobileFilterSheet
+        isOpen={isMobileFilterOpen}
+        onClose={() => setIsMobileFilterOpen(false)}
+        title="Filter by Status"
+        selectedId={filterType}
+        onSelect={(id) => setFilterType(id as typeof filterType)}
+        options={[
+          {
+            id: "ALL",
+            label: "All Scheduled Arrivals",
+            count: PRE_ADVISED_ARRIVALS.length,
+            dotColor: "bg-neutral-400",
+            selectedDotColor: "bg-white ring-2 ring-white/30",
+          },
+          {
+            id: "APPROACHING",
+            label: "Near / Approaching (< 15 mins)",
+            count: PRE_ADVISED_ARRIVALS.filter((a) => a.status === "APPROACHING").length,
+            dotColor: "bg-[#059669]",
+            selectedDotColor: "bg-[#10B981] ring-2 ring-[#10B981]/40",
+          },
+          {
+            id: "SCHEDULED",
+            label: "On Schedule Fleet (15–60 mins)",
+            count: PRE_ADVISED_ARRIVALS.filter((a) => a.status === "ON_SCHEDULE").length,
+            dotColor: "bg-blue-500",
+            selectedDotColor: "bg-sky-400 ring-2 ring-sky-400/40",
+          },
+          {
+            id: "DELAYED",
+            label: "Delayed Inbound (> 60 mins)",
+            count: PRE_ADVISED_ARRIVALS.filter((a) => a.status === "DELAYED").length,
+            dotColor: "bg-amber-500",
+            selectedDotColor: "bg-amber-400 ring-2 ring-amber-400/40",
+          },
+        ]}
+      />
     </div>
   );
 }

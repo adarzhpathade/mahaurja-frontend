@@ -72,16 +72,19 @@ export function MaterialsStorageView() {
   return (
     <div className="space-y-8 select-none">
       {/* Top Executive Header */}
-      <div className="border-b border-neutral-300 pb-4 sm:pb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-neutral-900">
-          Materials &amp; Storage Locations
-        </h1>
+      <div className="border-b border-neutral-300 pb-4 sm:pb-5 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div>
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-neutral-900">
+            Materials &amp; Storage Locations
+          </h1>
+        </div>
 
-        <div className="flex items-center gap-2">
+        {/* Action Buttons: Visible on Tablet/Desktop (sm and up) */}
+        <div className="hidden sm:flex items-center gap-3">
           <button
             type="button"
             onClick={() => setIsMatModalOpen(true)}
-            className="h-10 px-4 bg-white border border-neutral-300 hover:bg-neutral-100 text-neutral-800 text-xs font-bold uppercase tracking-wider inline-flex items-center gap-2 transition-colors cursor-pointer"
+            className="h-10 px-4 bg-white border border-neutral-300 hover:bg-neutral-100 text-neutral-800 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors cursor-pointer"
           >
             <Plus className="w-4 h-4 text-[#059669]" />
             <span>Add Material</span>
@@ -89,17 +92,38 @@ export function MaterialsStorageView() {
           <button
             type="button"
             onClick={() => setIsLocModalOpen(true)}
-            className="h-10 px-4 bg-[#18181B] hover:bg-[#059669] text-white text-xs font-bold uppercase tracking-wider inline-flex items-center gap-2 transition-colors cursor-pointer"
+            className="h-10 px-5 bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs"
           >
-            <Plus className="w-4 h-4 text-emerald-400" />
+            <Plus className="w-4 h-4" strokeWidth={2.5} />
             <span>Add Storage Location</span>
           </button>
         </div>
       </div>
 
+      {/* 2. MOBILE ACTION STACK (Gate UI Pattern) */}
+      <div className="sm:hidden flex flex-col items-stretch gap-2.5 w-full">
+        <button
+          type="button"
+          onClick={() => setIsMatModalOpen(true)}
+          className="h-11 px-4 border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-800 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors cursor-pointer w-full"
+        >
+          <Plus className="w-4 h-4 text-[#059669]" />
+          <span>Add Material</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setIsLocModalOpen(true)}
+          className="h-11 px-5 bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs w-full"
+        >
+          <Plus className="w-4 h-4" strokeWidth={2.5} />
+          <span>Add Storage Location</span>
+        </button>
+      </div>
+
       {/* SECTION 1: MATERIALS SPECIFICATIONS & BASE RATES */}
       <section className="space-y-3">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between border-b border-neutral-200 pb-2">
           <div className="flex items-center gap-2">
             <Layers className="w-4 h-4 text-[#059669]" />
             <h2 className="text-xs font-bold uppercase tracking-wider text-neutral-800">
@@ -111,7 +135,58 @@ export function MaterialsStorageView() {
           </span>
         </div>
 
-        <div className="border border-neutral-300 overflow-x-auto bg-transparent">
+        {/* Mobile responsive cards */}
+        <div className="grid grid-cols-1 sm:hidden gap-3">
+          {materials.map((mat) => (
+            <div
+              key={mat.id}
+              className="bg-white/40 border border-neutral-300 p-4 space-y-3"
+            >
+              <div className="flex items-start justify-between">
+                <div>
+                  <span className="font-mono font-bold text-xs text-neutral-500">{mat.id}</span>
+                  <h3 className="font-bold text-sm text-neutral-900">{mat.name}</h3>
+                </div>
+                <span
+                  className={`text-[10px] font-bold uppercase px-2 py-0.5 border ${
+                    mat.category === "FINISHED_PELLET"
+                      ? "bg-[#18181B] text-white border-[#18181B]"
+                      : "bg-emerald-50 text-[#047857] border-emerald-300"
+                  }`}
+                >
+                  {mat.category === "FINISHED_PELLET" ? "Finished Goods" : "Raw Biomass"}
+                </span>
+              </div>
+              <div className="grid grid-cols-3 gap-2 text-xs border-y border-neutral-200 py-2 font-mono">
+                <div>
+                  <span className="text-[10px] text-neutral-500 block">Moisture</span>
+                  <span className="font-bold text-neutral-900">&le; {mat.targetMoistureMax.toFixed(1)}%</span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-neutral-500 block">Ash</span>
+                  <span className="font-bold text-neutral-900">&le; {mat.targetAshMax.toFixed(1)}%</span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-neutral-500 block">Min GCV</span>
+                  <span className="font-bold text-neutral-900">&ge; {mat.targetGcvMin}</span>
+                </div>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <div>
+                  <span className="text-[10px] text-neutral-500 block">Base Rate</span>
+                  <span className="font-mono font-bold text-[#059669]">₹{mat.baseRatePerMt.toLocaleString("en-IN")} / MT</span>
+                </div>
+                <div className="text-right">
+                  <span className="text-[10px] text-neutral-500 block">Stock</span>
+                  <span className="font-mono font-bold text-neutral-900">{mat.currentInventoryMt.toFixed(1)} MT</span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Desktop Transparent Industrial Table */}
+        <div className="hidden sm:block border border-neutral-300 overflow-x-auto bg-transparent">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
               <tr className="border-b border-neutral-300 bg-neutral-200/50 text-neutral-600 font-bold uppercase tracking-wider text-[10px]">
@@ -174,12 +249,12 @@ export function MaterialsStorageView() {
       </section>
 
       {/* SECTION 2: STORAGE LOCATIONS & YARDS */}
-      <section className="space-y-3">
-        <div className="flex items-center justify-between">
+      <section className="mt-6 sm:mt-5 pt-5 sm:pt-4 border-t border-neutral-200 space-y-3">
+        <div className="flex items-center justify-between border-b border-neutral-200 pb-2">
           <div className="flex items-center gap-2">
             <Warehouse className="w-4 h-4 text-[#059669]" />
             <h2 className="text-xs font-bold uppercase tracking-wider text-neutral-800">
-              Storage Locations &amp; Yard Bays (PDF Sec 11)
+              Storage Locations &amp; Yard Bays
             </h2>
           </div>
           <span className="text-xs text-neutral-500 font-mono">

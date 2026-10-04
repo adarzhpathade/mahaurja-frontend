@@ -447,26 +447,131 @@ Config: TBD
 - **Icon + Label:** `<div className="flex items-center gap-2"><Icon className="w-4 h-4 text-neutral-800 shrink-0" /><h2 className="text-xs font-bold uppercase tracking-wider text-neutral-900">{Title}</h2><span className="text-[10px] font-bold font-mono px-1.5 py-0.5 bg-neutral-200 border border-neutral-300 text-neutral-800">{count}</span></div>`
 - **Rules:** Never use giant `text-xl sm:text-2xl font-black` for section headers inside queues or ledgers.
 
-### 3. Search Bar & Mobile Filter Square Standard
+### 3. Search Bar & Mobile Filter Sheet Standard (Approved Oct 2026)
 - **Search & Mobile Button Wrapper:** `<div className="flex items-center gap-2 flex-1 sm:max-w-md">`
 - **Search Input:** `w-full h-10 pl-8.5 pr-3 text-xs bg-white border border-neutral-300 text-neutral-900 placeholder:text-[11px] placeholder:text-neutral-400 focus:outline-none focus:border-[#059669] transition-colors`
-- **Mobile Filter Square Button:** `<button type="button" onClick={() => setIsMobileFilterOpen(true)} className="sm:hidden w-10 h-10 flex items-center justify-center border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-700 shrink-0 cursor-pointer" title="Filter Options"><SlidersHorizontal className="w-4 h-4" /></button>`
+- **Mobile Filter Trigger Button:**
+  ```tsx
+  <button
+    type="button"
+    onClick={() => setIsMobileFilterOpen(true)}
+    className={`sm:hidden w-10 h-10 flex items-center justify-center border shrink-0 cursor-pointer relative transition-colors ${
+      filterValue !== "ALL"
+        ? "bg-[#18181B] text-white border-[#18181B]"
+        : "bg-white text-neutral-700 border-neutral-300 hover:bg-neutral-100"
+    }`}
+    title="Filter Options"
+  >
+    <SlidersHorizontal className="w-4 h-4" />
+    {filterValue !== "ALL" && (
+      <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-[#059669] rounded-full ring-2 ring-white" />
+    )}
+  </button>
+  ```
 - **Desktop Filter Tabs:** `<div className="hidden sm:flex items-center border border-neutral-300 divide-x divide-neutral-300 text-xs overflow-x-auto no-scrollbar shrink-0 h-10 bg-white">`
-- **Mobile Filter Modal Popup:** Rendered when `isMobileFilterOpen === true` inside a fixed backdrop overlay with close button and touch-friendly full-width selection buttons.
+- **MobileFilterSheet Component (`@/components/shared/mobile-filter-sheet`):**
+  - Rendered via `createPortal(..., document.body)` so it mounts directly to `<body>`, anchoring flush to `bottom: 0px` with **0 gap**.
+  - Starts directly with the uppercase header (no top grab handle line).
+  - Square close button: `w-7 h-7 border border-neutral-300 bg-white hover:bg-neutral-100`.
+  - 1-tap interaction: tapping an option immediately selects it and dismisses the sheet (no bulky "Apply & View" button).
+  - Single-line compact height (~220px), no extra descriptions, no badges.
+  - Active selection is indicated purely by pitch-charcoal background (`bg-[#18181B] text-white font-bold`). No tick mark.
+  - Dot colors: white ring for selected "ALL", high-contrast status colors for specific options.
 
-### 4. Command Overview Layout (Gate & QC Standard Architecture)
+### 4. Command & Master Views Mobile Layout Standard (Gate Layout Pattern)
 - **Desktop Actions in Header:** `<div className="hidden sm:flex items-center gap-3">` placed on the right side of the command header.
-- **Mobile Header:** Shows only the clean `<h1>` title and hairline bottom border (`border-b border-neutral-300 pb-4 sm:pb-5`). No cluttered button wrapping inside header.
-- **4 Operational Metric Cards:** `grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-5` sitting immediately below header divider.
+- **Mobile Header:** Shows only the clean `<h1>` title (and count chip if present) with hairline bottom border (`border-b border-neutral-300 pb-4 sm:pb-5`). No cluttered button wrapping or multi-line text wrapping inside the mobile header.
+- **4 Operational Metric Cards (if present):** `grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-5` sitting immediately below header divider.
   - Card style: `border border-neutral-300 p-4 sm:p-5 hover:border-neutral-900 transition-colors cursor-pointer group bg-white flex flex-col justify-between`
   - Values: Bold tabular numbers + inline muted unit label (`9 Vehicles`, `3 Batches`, `67% Optimal`). Eliminates busy colored badge tags on data cards.
   - **Plain English Punchy Labels:** Labels must be 1–2 short words (e.g. `PENDING RM`, `PENDING FG`, `TESTED TODAY`, `PASS RATE`, `INSIDE PLANT`, `READY FOR EXIT`) to prevent ugly ellipsis truncation (`...`) on mobile devices.
-- **Mobile Action Stack (Below KPI Cards):** Placed directly below the 4 metric cards (`sm:hidden flex flex-col items-stretch gap-2.5 w-full`):
-  - Secondary actions: `h-11 px-4 border border-neutral-300 bg-white text-neutral-800 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 w-full`
-  - Primary action: `h-11 px-5 bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-xs w-full`
-- **Section Spacing Below:** `space-y-4 pt-3 sm:pt-6` leading to queues or rosters.
+- **Dedicated Mobile Action Stack (`sm:hidden flex flex-col items-stretch gap-2.5 w-full`):**
+  - **Placement Rule:**
+    - On screens with KPI cards (Gate, Sales Orders, Dispatch Planning, Production Plans, Finished Goods): placed directly below the 4 metric cards.
+    - On master directories & ledgers without KPI cards (Materials & Storage, Formulas, Users & Access, Suppliers, Customers, Weighbridge Records, Management Dashboard): placed directly below the header divider.
+  - **Primary Action (Bio-Emerald):** `h-11 px-5 bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs w-full`
+  - **Secondary Action (White Surface):** `h-11 px-4 border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-800 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors cursor-pointer w-full`
+- **Section Spacing Below:** `space-y-4 pt-3 sm:pt-6` leading to queues, tables, or rosters.
+
+### 5. QC Testing Workbench Standard (Parameter Matrix & Mobile Console)
+- **Files:** `src/components/quality/fg-testing-workbench.tsx`, `src/components/quality/rm-testing-workbench.tsx`
+- **Header Standard:**
+  - Desktop: Title on left, `Select Batch/Sample:` dropdown cleanly aligned on right in header (`hidden sm:flex`).
+  - Mobile: Clean `<h1>` title only with hairline border; dedicated full-width `h-11` selector bar below header (`sm:hidden`).
+- **Telemetry Context Strip:**
+  - Container: `p-3 bg-neutral-200/50 border border-neutral-300 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3`
+  - Wide Labels (`Product Spec` / `Supplier`): `col-span-2 sm:col-span-1` preventing multi-line text breaking on mobile.
+  - Status Badges: True workflow status colors (Amber for PENDING/TESTING, Bio-Emerald for APPROVED, Red for REJECTED, Orange for HOLD).
+- **Section Heading:**
+  - Header: `flex items-center justify-between border-b border-neutral-300 pb-2.5`
+  - Icon + Title: `FlaskConical` in `#059669` + bold uppercase tracking-wider text.
+- **Integrated Unit Parameter Cards:**
+  - Card: `bg-white border border-neutral-300 p-3 sm:p-3.5 space-y-2 hover:border-neutral-400 focus-within:border-[#059669] transition-all`
+  - Header: Label + high-contrast bordered status badge (`bg-emerald-50 text-[#047857] border-emerald-300` vs `bg-red-50 text-red-700 border-red-300`).
+  - Input: Full-width monospace bold input with absolute inside unit suffix (`absolute right-3 text-xs font-mono font-bold text-neutral-400 pointer-events-none`).
+  - Footer: Benchmark tolerance note + live dynamic indicator (`Optimal` vs `Variance`).
+- **Quick Preset Action Chips:**
+  - Standardized inspection pills (`+ Export grade (ENplus A1)`, `+ Clean golden shell`, etc.) for 1-tap remarks addition.
+- **Mobile-First Action Footer:**
+  - Desktop: `[ Reject ] [ Quarantine / HOLD ] [ Approve / Authorize -> ]` in a clean horizontal flex row.
+  - Mobile: Full-width Bio-Emerald primary action on top (`h-11 bg-[#059669]`), followed by a balanced 2-column grid (`grid grid-cols-2 gap-2.5`) for cautionary actions (`Reject` and `Quarantine / HOLD`).
+
+### 6. Industrial Top Navigation Standard (Page Name & Square Action Buttons)
+- **File:** `src/components/layout/industrial-nav.tsx`
+- **Left Brand Area:**
+  - Displays the active page / desk name (`{activeNavItem ? activeNavItem.label.toUpperCase() : currentRole.roleName.toUpperCase()}`) in bold uppercase tracking-wider slate (`text-sm md:text-base font-bold tracking-tight text-[#0F172A] uppercase tracking-wider`).
+  - Eliminates static company name (`MAHAURJA`) clutter across all viewports to provide immediate situational orientation.
+- **Right Action Buttons:**
+  - **Dev Role Switcher Button (`Dev: Switch Desk`):** Amber dashed border button (`h-9 px-2 sm:px-2.5 border border-dashed border-amber-600/70 bg-amber-50/80 hover:bg-amber-100 text-amber-950 font-mono text-[11px] font-bold uppercase`) with `Terminal` icon and dropdown arrow. Opens an 8-desk fast navigation popover listing all plant operational desks with their operator name, direct route, and active station indicator. Also accessible via a helper strip at the bottom of the mobile drawer.
+  - **User Profile Button:** `w-9 h-9 border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-800 flex items-center justify-center relative shadow-xs` with green active-duty dot. Opens clean operator identity card and lock station action.
+  - **Mobile Menu Toggle Button:** Matching square box `w-9 h-9 border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-800 flex items-center justify-center relative shadow-xs` with `Menu` (hamburger) or `X` (close) icon.
+- **Mobile Menu Drawer Standard:**
+  - Displays only the operational desk navigation items for the current station in a clean `divide-y divide-neutral-200` list.
+  - Active item: highlighted with mist background (`bg-neutral-100`), bold slate text, Bio-Emerald border (`border-l-4 border-l-[#059669]`), and crisp `Active` pill.
+  - Inactive items: crisp white rows with smooth hover states and `ArrowRight` indicators.
+  - Footer: Includes a dedicated `Switch Station (Dev)` helper strip allowing 1-tap desk switching directly from within the mobile drawer.
+
+### 7. Mobile KPI Telemetry Card & Section Header Standard
+- **File:** `src/components/management/management-dashboard-view.tsx`
+- **Zero Line-Wrapping Metric Layout (2-Column Mobile Grid):**
+  - **Card Container:** `border border-neutral-300 p-3.5 sm:p-4 hover:border-neutral-900 transition-colors bg-white flex flex-col justify-between space-y-2`
+  - **Label:** `text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-neutral-500 truncate`
+  - **Value & Unit:** Number and unit wrapped in `<div className="flex items-baseline gap-1">`:
+    - Number: `font-mono font-black text-2xl sm:text-3xl tracking-tight tabular-nums`
+    - Unit: `text-xs sm:text-sm font-mono text-neutral-400 font-semibold`
+    - Units never wrapped in the same string as the number (`385 MT` -> `385` + `MT`), preventing awkward mid-unit word breaking.
+  - **Badge Placement (Mobile Vertical Stack vs Desktop Row):**
+    - Outer container: `flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-1.5`
+    - Badge: `text-[9px] sm:text-[10px] font-bold uppercase px-1.5 py-0.5 border self-start sm:self-auto shrink-0`
+    - On mobile (≤ 640px): Badge sits cleanly below the metric without encroaching on horizontal number width.
+    - On desktop (> 640px): Badge shifts smoothly into a baseline row on the right.
+- **Section Header Standard (Zero Subtitle Squishing on Mobile):**
+  - **Container:** `flex items-center justify-between border-b border-neutral-300 pb-2.5`
+  - **Icon:** Given `shrink-0` to prevent horizontal distortion (`<Activity className="w-4 h-4 text-[#059669] shrink-0" />`).
+  - **Title:** `text-xs font-bold uppercase tracking-wider text-neutral-900`
+  - **Subtitle / Descriptor:** Must have `hidden sm:inline` (`<span className="text-[11px] text-neutral-500 font-mono hidden sm:inline">...</span>`), preventing 2-column header collapse and ugly multi-line text crowding on mobile viewports.
+
+### 8. Bi-Directional Digital Traceability Pipeline Standard
+- **File:** `src/components/management/traceability-explorer-view.tsx`
+- **Connected Timeline Rail Layout:**
+  - **Timeline Container:** `relative pl-7 sm:pl-9 border-l-2 border-neutral-300 ml-3.5 sm:ml-5 space-y-6 sm:space-y-7`
+  - **Numbered Stage Node:** Square high-contrast node badge positioned directly on the rail line (`absolute -left-[41px] sm:-left-[49px] top-4 w-7 h-7 sm:w-8 sm:h-8 bg-[#18181B] (or #059669) text-white border-2 border-white flex items-center justify-center font-mono font-black text-xs shadow-xs`).
+  - **Replaced Disjointed Elements:** Replaced separate standalone cards and loose floating down arrows with a continuous, unified vertical pipeline.
+- **Card Surface & Header:**
+  - **Surface:** `bg-white border border-neutral-300 hover:border-neutral-900 transition-colors p-4 sm:p-5 space-y-3 shadow-2xs`
+  - **Stage Header:** Step indicator (`Step 1 of 6 · ...`) with icon and uppercase tracking-wider text, paired with high-contrast status badge (`15.0 MT Delivered`, `COA-261003-001 Approved`, `100% Trace Verified`).
+- **Structured Micro-Panels (Zero Inline Wrapping):**
+  - Replaced inline text strings (which broke awkwardly across lines on mobile) with dedicated metric chips: `grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1`
+  - Parameter Chip: `bg-neutral-50 border border-neutral-200 p-2.5`
+  - Upper Label: `text-[10px] font-bold uppercase tracking-wider text-neutral-500 block truncate`
+  - Lower Value: `font-mono font-bold text-xs sm:text-sm text-neutral-900 block mt-0.5 tabular-nums` (accented with Bio-Emerald `#059669` for critical net yields/weights).
+- **Responsive Direction Switcher & Presets:**
+  - **Direction Switcher:** Symmetrical segmented buttons with icons (`RotateCcw` for Reverse Trace, `GitFork` for Forward Trace).
+  - **Search & Presets Bar:** Combined search input and non-breaking preset chips (`DIS-261002-001`, `RMLOT-GS-261004-001`) with `shrink-0` to eliminate wrapping within identifier tags.
 
 ---
 
 > **This file is auto-updated as components are built. Do not manually edit pattern entries — use the `imprint` skill after building each component.**
+
+
 
