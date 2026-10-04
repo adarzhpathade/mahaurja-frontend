@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { SmoothScroll } from "@/components/layout/smooth-scroll";
 import { AuthProvider } from "@/lib/context/auth-context";
+import { QueryProvider } from "@/lib/providers/query-provider";
 import "@/styles/globals.css";
 
 const switzer = localFont({
@@ -40,9 +41,11 @@ export default function RootLayout({
   return (
     <html lang="en" className={switzer.variable}>
       <body className="min-h-screen bg-background text-foreground antialiased selection:bg-emerald-500/20 selection:text-emerald-900">
-        <AuthProvider>
-          <SmoothScroll>{children}</SmoothScroll>
-        </AuthProvider>
+        <QueryProvider>
+          <AuthProvider>
+            <SmoothScroll>{children}</SmoothScroll>
+          </AuthProvider>
+        </QueryProvider>
       </body>
     </html>
   );

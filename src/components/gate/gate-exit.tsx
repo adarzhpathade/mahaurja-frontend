@@ -37,6 +37,7 @@ import {
 } from "lucide-react";
 import { GateVehicle, ExitClearanceRecord, VehicleDirection, GateStage } from "@/lib/types/gate";
 import { INITIAL_DEPARTED_VEHICLES } from "@/lib/data/mock-gate-vehicles";
+import { Can } from "@/lib/context/auth-context";
 
 interface GateExitProps {
   vehicles: GateVehicle[];
@@ -1399,20 +1400,29 @@ export function GateExit({ vehicles, onUpdateStage, onNavigateTab }: GateExitPro
                       Complete all 4 checks to open barrier
                     </span>
                   )}
-                  <button
-                    type="button"
-                    disabled={!isInspectionComplete}
-                    onClick={handleAuthorizeExit}
-                    className={`w-full sm:w-auto px-5 py-2.5 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer transition-all ${
-                      isInspectionComplete
-                        ? "bg-[#059669] hover:bg-[#047857] text-white shadow-md"
-                        : "bg-neutral-300 text-neutral-500 cursor-not-allowed"
-                    }`}
-                    style={{ borderRadius: 0 }}
+                  <Can
+                    perm="gate:exit"
+                    fallback={
+                      <div className="text-xs text-neutral-500 font-semibold uppercase tracking-wider py-2">
+                        Read-Only Exit Desk (Management)
+                      </div>
+                    }
                   >
-                    <Unlock className="w-4 h-4" />
-                    <span>Approve & Open Barrier</span>
-                  </button>
+                    <button
+                      type="button"
+                      disabled={!isInspectionComplete}
+                      onClick={handleAuthorizeExit}
+                      className={`w-full sm:w-auto px-5 py-2.5 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer transition-all ${
+                        isInspectionComplete
+                          ? "bg-[#059669] hover:bg-[#047857] text-white shadow-md"
+                          : "bg-neutral-300 text-neutral-500 cursor-not-allowed"
+                      }`}
+                      style={{ borderRadius: 0 }}
+                    >
+                      <Unlock className="w-4 h-4" />
+                      <span>Approve & Open Barrier</span>
+                    </button>
+                  </Can>
                 </div>
               </div>
             </motion.div>

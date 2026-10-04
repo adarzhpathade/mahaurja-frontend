@@ -3,18 +3,11 @@
 import React, { useState } from "react";
 import { MobileFilterSheet } from "@/components/shared/mobile-filter-sheet";
 import {
-  ShieldCheck,
   Search,
   Plus,
-  UserCheck,
-  UserX,
-  Mail,
-  Clock,
-  Building,
   LayoutGrid,
   Table as TableIcon,
   X,
-  BadgeCheck,
   SlidersHorizontal,
 } from "lucide-react";
 import { useAdmin } from "@/lib/context/admin-context";
@@ -22,6 +15,7 @@ import { AdminUserItem } from "@/lib/types/admin";
 import { describeApiError } from "@/lib/api/client";
 import { accessApi } from "@/lib/api/access";
 import { AccessRequestsPanel, SetupLinkNotice } from "@/components/admin/access-requests-panel";
+import { Can, useCan } from "@/lib/context/auth-context";
 
 export function UsersAccessView() {
   const { users, usersLoading, usersError, reloadUsers, addUser, toggleUserStatus } = useAdmin();
@@ -34,6 +28,7 @@ export function UsersAccessView() {
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+  const canManage = useCan("users:manage");
 
   // Form State
   const [name, setName] = useState("");
@@ -155,22 +150,24 @@ export function UsersAccessView() {
           {user.isActive ? "ON DUTY" : "SUSPENDED"}
         </span>
 
-        <div className="flex items-center gap-1.5">
-          <button
-            type="button"
-            onClick={() => void handleResetPassword(user)}
-            className="px-2 py-0.5 text-[10px] font-semibold border border-neutral-300 hover:bg-neutral-100 text-neutral-700 cursor-pointer"
-          >
-            Reset Password
-          </button>
-        <button
-          type="button"
-          onClick={() => void handleToggle(user.id)}
-          className="px-2 py-0.5 text-[10px] font-semibold border border-neutral-300 hover:bg-neutral-100 text-neutral-700 cursor-pointer"
-        >
-          {user.isActive ? "Suspend" : "Activate"}
-        </button>
-        </div>
+        <Can perm="users:manage">
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => void handleResetPassword(user)}
+              className="px-2 py-0.5 text-[10px] font-semibold border border-neutral-300 hover:bg-neutral-100 text-neutral-700 cursor-pointer"
+            >
+              Reset Password
+            </button>
+            <button
+              type="button"
+              onClick={() => void handleToggle(user.id)}
+              className="px-2 py-0.5 text-[10px] font-semibold border border-neutral-300 hover:bg-neutral-100 text-neutral-700 cursor-pointer"
+            >
+              {user.isActive ? "Suspend" : "Activate"}
+            </button>
+          </div>
+        </Can>
       </div>
     </div>
   );
@@ -218,28 +215,32 @@ export function UsersAccessView() {
             </button>
           </div>
 
+          <Can perm="users:manage">
+            <button
+              type="button"
+              onClick={() => setIsModalOpen(true)}
+              className="h-10 px-5 bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs"
+            >
+              <Plus className="w-4 h-4" strokeWidth={2.5} />
+              <span>Register Operator</span>
+            </button>
+          </Can>
+        </div>
+      </div>
+
+      {/* 2. MOBILE ACTION STACK (Gate UI Pattern) */}
+      <Can perm="users:manage">
+        <div className="sm:hidden flex flex-col items-stretch gap-2.5 w-full">
           <button
             type="button"
             onClick={() => setIsModalOpen(true)}
-            className="h-10 px-5 bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs"
+            className="h-11 px-5 bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs w-full"
           >
             <Plus className="w-4 h-4" strokeWidth={2.5} />
             <span>Register Operator</span>
           </button>
         </div>
-      </div>
-
-      {/* 2. MOBILE ACTION STACK (Gate UI Pattern) */}
-      <div className="sm:hidden flex flex-col items-stretch gap-2.5 w-full">
-        <button
-          type="button"
-          onClick={() => setIsModalOpen(true)}
-          className="h-11 px-5 bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs w-full"
-        >
-          <Plus className="w-4 h-4" strokeWidth={2.5} />
-          <span>Register Operator</span>
-        </button>
-      </div>
+      </Can>
 
       <AccessRequestsPanel onApproved={() => void reloadUsers()} />
       {issuedLink && (
@@ -427,7 +428,7 @@ export function UsersAccessView() {
                     <th className="py-3 px-4">Shift Schedule</th>
                     <th className="py-3 px-4">Last Station Activity</th>
                     <th className="py-3 px-4 text-center">Status</th>
-                    <th className="py-3 px-4 text-right">Access</th>
+                    {canManage && <th className="py-3 px-4 text-right">Access</th>}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-neutral-300 bg-transparent">
@@ -472,15 +473,17 @@ export function UsersAccessView() {
                           {user.isActive ? "ON DUTY" : "OFFLINE"}
                         </span>
                       </td>
-                      <td className="py-3.5 px-4 text-right">
-                        <button
-                          type="button"
-                          onClick={() => void handleToggle(user.id)}
-                          className="px-2.5 py-1 text-[11px] font-semibold border border-neutral-300 hover:bg-neutral-100 text-neutral-700 cursor-pointer"
-                        >
-                          {user.isActive ? "Suspend" : "Activate"}
-                        </button>
-                      </td>
+                      {canManage && (
+                        <td className="py-3.5 px-4 text-right">
+                          <button
+                            type="button"
+                            onClick={() => void handleToggle(user.id)}
+                            className="px-2.5 py-1 text-[11px] font-semibold border border-neutral-300 hover:bg-neutral-100 text-neutral-700 cursor-pointer"
+                          >
+                            {user.isActive ? "Suspend" : "Activate"}
+                          </button>
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>
@@ -572,7 +575,7 @@ export function UsersAccessView() {
                   </label>
                   <select
                     value={roleId}
-                    onChange={(e) => setRoleId(e.target.value as any)}
+                    onChange={(e) => setRoleId(e.target.value as AdminUserItem["roleId"])}
                     className="w-full h-10 px-3 bg-white border border-neutral-300 text-xs font-medium text-neutral-900 focus:outline-none focus:border-[#059669]"
                   >
                     <option value="gate-security">Gate Security</option>
@@ -594,7 +597,7 @@ export function UsersAccessView() {
                   </label>
                   <select
                     value={shift}
-                    onChange={(e) => setShift(e.target.value as any)}
+                    onChange={(e) => setShift(e.target.value as AdminUserItem["shift"])}
                     className="w-full h-10 px-3 bg-white border border-neutral-300 text-xs font-medium text-neutral-900 focus:outline-none focus:border-[#059669]"
                   >
                     <option value="Day Shift A (06:00 - 14:00)">Day Shift A (06:00 - 14:00)</option>

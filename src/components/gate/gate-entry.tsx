@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { GateVehicle, VehicleDirection } from "@/lib/types/gate";
 import { useGate } from "@/lib/context/gate-context";
+import { Can } from "@/lib/context/auth-context";
 
 const COMMON_SUPPLIERS = [
   "Krishi Bio Agro Farmers Co-op",
@@ -61,10 +62,7 @@ export function GateEntry() {
   const [direction, setDirection] = useState<VehicleDirection>("INBOUND_RM");
 
   // Pass Serial ID
-  const [passSeq, setPassSeq] = useState(101);
-  useEffect(() => {
-    setPassSeq(Math.floor(Math.random() * 800 + 100));
-  }, []);
+  const [passSeq, setPassSeq] = useState(() => Math.floor(Math.random() * 800 + 100));
 
   const passId = `${direction === "INBOUND_RM" ? "RM-GATE" : "DIS-GATE"}-261003-${passSeq}`;
 
@@ -87,6 +85,7 @@ export function GateEntry() {
   // Consume prefill data if present
   useEffect(() => {
     if (prefillEntryData) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       if (prefillEntryData.direction) setDirection(prefillEntryData.direction);
       if (prefillEntryData.vehicleNo) setVehicleNo(prefillEntryData.vehicleNo);
       if (prefillEntryData.supplierOrCustomer) setPartyName(prefillEntryData.supplierOrCustomer);
@@ -492,19 +491,21 @@ export function GateEntry() {
             </div>
 
             {/* Preset Action Chips with Generous Spacing */}
-            <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 py-1">
-              {PRESET_REMARKS.map((preset) => (
-                <button
-                  key={preset}
-                  type="button"
-                  onClick={() => handleAddPresetRemark(preset)}
-                  className="px-3 py-1.5 text-xs font-medium border border-neutral-300 bg-white hover:bg-neutral-100 hover:border-neutral-400 text-neutral-700 transition-colors cursor-pointer shrink-0 shadow-2xs"
-                  style={{ borderRadius: 0 }}
-                >
-                  + {preset}
-                </button>
-              ))}
-            </div>
+            <Can perm="gate:create">
+              <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 py-1">
+                {PRESET_REMARKS.map((preset) => (
+                  <button
+                    key={preset}
+                    type="button"
+                    onClick={() => handleAddPresetRemark(preset)}
+                    className="px-3 py-1.5 text-xs font-medium border border-neutral-300 bg-white hover:bg-neutral-100 hover:border-neutral-400 text-neutral-700 transition-colors cursor-pointer shrink-0 shadow-2xs"
+                    style={{ borderRadius: 0 }}
+                  >
+                    + {preset}
+                  </button>
+                ))}
+              </div>
+            </Can>
 
             {/* Remarks Input with Spacious Padding */}
             <div className="pt-1.5">
@@ -526,25 +527,34 @@ export function GateEntry() {
               <span>Pass routes vehicle to <strong>Weighbridge 01 (Gross Scale)</strong>.</span>
             </div>
 
-            <div className="grid grid-cols-2 gap-2.5 w-full sm:w-auto sm:flex sm:items-center">
-              <button
-                type="button"
-                onClick={handleReset}
-                className="h-10 px-4 border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-700 text-xs font-semibold uppercase tracking-wider cursor-pointer transition-colors text-center"
-                style={{ borderRadius: 0 }}
-              >
-                Clear
-              </button>
+            <Can
+              perm="gate:create"
+              fallback={
+                <div className="text-xs font-semibold text-neutral-500 uppercase tracking-wider py-2">
+                  Read-Only Console (Management View)
+                </div>
+              }
+            >
+              <div className="grid grid-cols-2 gap-2.5 w-full sm:w-auto sm:flex sm:items-center">
+                <button
+                  type="button"
+                  onClick={handleReset}
+                  className="h-10 px-4 border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-700 text-xs font-semibold uppercase tracking-wider cursor-pointer transition-colors text-center"
+                  style={{ borderRadius: 0 }}
+                >
+                  Clear
+                </button>
 
-              <button
-                type="submit"
-                className="h-10 px-5 bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer flex items-center justify-center gap-2 shadow-xs"
-                style={{ borderRadius: 0 }}
-              >
-                <ShieldCheck className="w-4 h-4 shrink-0" />
-                <span className="truncate">Issue Pass</span>
-              </button>
-            </div>
+                <button
+                  type="submit"
+                  className="h-10 px-5 bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer flex items-center justify-center gap-2 shadow-xs"
+                  style={{ borderRadius: 0 }}
+                >
+                  <ShieldCheck className="w-4 h-4 shrink-0" />
+                  <span className="truncate">Issue Pass</span>
+                </button>
+              </div>
+            </Can>
           </div>
         </form>
       </div>

@@ -1,9 +1,8 @@
 // Typed fetch wrapper for the MAHAURJA backend (Mahaurja-Backend, Fastify /api/v1).
-// Access token lives in memory; refresh token in localStorage so a reload keeps the session.
+// Access token lives in memory only. Refresh token lives in an HttpOnly cookie (mh_rt).
+// No localStorage or sessionStorage tokens are used.
 
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
-
-const REFRESH_TOKEN_KEY = "mahaurja.refreshToken";
 
 export interface ApiErrorBody {
   error: {
@@ -35,11 +34,11 @@ export interface AuthUser {
   plantId: string;
   department: string;
   assignedPost: string;
+  permissions?: string[];
 }
 
 export interface AuthResponse {
   accessToken: string;
-  refreshToken: string;
   expiresIn: number;
   user: AuthUser;
 }
@@ -47,27 +46,10 @@ export interface AuthResponse {
 let accessToken: string | null = null;
 let refreshInFlight: Promise<AuthResponse | null> | null = null;
 const sessionListeners = new Set<(session: AuthResponse | null) => void>();
-
-function readRefreshToken(): string | null {
-  try {
-    return window.localStorage.getItem(REFRESH_TOKEN_KEY);
-  } catch {
-    return null;
-  }
-}
-
-function writeRefreshToken(token: string | null): void {
-  try {
-    if (token) window.localStorage.setItem(REFRESH_TOKEN_KEY, token);
-    else window.localStorage.removeItem(REFRESH_TOKEN_KEY);
-  } catch {
-    // Storage unavailable (private mode) — session simply won't survive reload.
-  }
-}
+const lockListeners = new Set<(reason: "idle" | "expired") => void>();
 
 export function setSession(session: AuthResponse | null): void {
   accessToken = session?.accessToken ?? null;
-  writeRefreshToken(session?.refreshToken ?? null);
   sessionListeners.forEach((listener) => listener(session));
 }
 
@@ -76,12 +58,22 @@ export function onSessionChange(listener: (session: AuthResponse | null) => void
   return () => sessionListeners.delete(listener);
 }
 
+export function onStationLocked(listener: (reason: "idle" | "expired") => void): () => void {
+  lockListeners.add(listener);
+  return () => lockListeners.delete(listener);
+}
+
+export function lockStation(reason: "idle" | "expired" = "idle"): void {
+  accessToken = null;
+  lockListeners.forEach((listener) => listener(reason));
+}
+
 export function hasActiveSession(): boolean {
   return accessToken !== null;
 }
 
-export function getRefreshToken(): string | null {
-  return readRefreshToken();
+export function getAccessToken(): string | null {
+  return accessToken;
 }
 
 // Plain-English message for display: validation errors list the backend's field reasons.
@@ -111,24 +103,48 @@ async function parseError(res: Response): Promise<ApiError> {
   }
 }
 
-// Exchanges the stored refresh token for a new session. Concurrent callers share one request
-// because the backend rotates refresh tokens and treats reuse as theft.
+// Exchanges the HttpOnly refresh token cookie (mh_rt) for a new session.
+// Concurrent callers share one request because the backend rotates refresh tokens.
 export function refreshSession(): Promise<AuthResponse | null> {
   if (refreshInFlight) return refreshInFlight;
-  const refreshToken = readRefreshToken();
-  if (!refreshToken) return Promise.resolve(null);
+
+  const callRefresh = () =>
+    fetch(`${API_BASE_URL}/api/v1/auth/refresh`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({}),
+    });
 
   refreshInFlight = (async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/api/v1/auth/refresh`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ refreshToken }),
-      });
+      let res = await callRefresh();
+      // Another tab rotated the cookie at the same moment; by now the jar holds the new one.
+      if (res.status === 409) {
+        await new Promise((resolve) => setTimeout(resolve, 150));
+        res = await callRefresh();
+      }
+
       if (!res.ok) {
+        if (res.status === 401) {
+          try {
+            const body = (await res.json()) as ApiErrorBody;
+            if (body.error.code === "SESSION_IDLE") {
+              lockStation("idle");
+              return null;
+            }
+            if (body.error.code === "SESSION_EXPIRED") {
+              lockStation("expired");
+              return null;
+            }
+          } catch {
+            // Ignore parse errors on error body
+          }
+        }
         setSession(null);
         return null;
       }
+
       const session = (await res.json()) as AuthResponse;
       setSession(session);
       return session;
@@ -138,6 +154,7 @@ export function refreshSession(): Promise<AuthResponse | null> {
       refreshInFlight = null;
     }
   })();
+
   return refreshInFlight;
 }
 
@@ -167,16 +184,35 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
       method,
       headers,
       body: body !== undefined ? JSON.stringify(body) : undefined,
+      credentials: "include",
       signal,
     });
   };
 
   let res = await send();
 
-  // Access token expired (15 min) — refresh once and retry.
-  if (res.status === 401 && auth && readRefreshToken()) {
+  // Access token expired or missing in memory — try refresh once and retry.
+  if (res.status === 401 && auth) {
+    // Check if it's already SESSION_IDLE or SESSION_EXPIRED
+    try {
+      const cloned = res.clone();
+      const errBody = (await cloned.json()) as ApiErrorBody;
+      if (errBody.error.code === "SESSION_IDLE") {
+        lockStation("idle");
+        throw await parseError(res);
+      }
+      if (errBody.error.code === "SESSION_EXPIRED") {
+        lockStation("expired");
+        throw await parseError(res);
+      }
+    } catch (e) {
+      if (e instanceof ApiError) throw e;
+    }
+
     const session = await refreshSession();
-    if (session) res = await send();
+    if (session) {
+      res = await send();
+    }
   }
 
   if (!res.ok) throw await parseError(res);
@@ -191,6 +227,15 @@ export const authApi = {
       body: { email, password },
       auth: false,
     }),
-  logout: (refreshToken: string) =>
-    apiRequest<void>("/api/v1/auth/logout", { method: "POST", body: { refreshToken } }),
+  logout: () =>
+    apiRequest<void>("/api/v1/auth/logout", {
+      method: "POST",
+      body: {},
+      auth: true,
+    }),
+  me: () =>
+    apiRequest<AuthUser>("/api/v1/auth/me", {
+      method: "GET",
+      auth: true,
+    }),
 };

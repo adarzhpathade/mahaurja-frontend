@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { useQuality } from "@/lib/context/quality-context";
 import { RmTestParameters, QcStatus } from "@/lib/types/quality";
+import { Can } from "@/lib/context/auth-context";
 
 const PRESET_RM_REMARKS = [
   "Clean golden dry biomass, low moisture",
@@ -467,7 +468,7 @@ export function RmTestingWorkbench() {
               <div className="relative">
                 <select
                   value={visualGrade}
-                  onChange={(e) => setVisualGrade(e.target.value as any)}
+                  onChange={(e) => setVisualGrade(e.target.value as RmTestParameters["visualGrade"])}
                   className="w-full h-10 px-3 bg-neutral-50/60 border border-neutral-300 text-xs font-semibold text-neutral-900 focus:bg-white focus:outline-none focus:border-[#059669] transition-all cursor-pointer truncate"
                   style={{ borderRadius: 0 }}
                 >
@@ -567,41 +568,50 @@ export function RmTestingWorkbench() {
           </div>
 
           {/* Decision Buttons (Mobile-first Ergonomic Layout) */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full sm:w-auto">
-            {/* Primary Action (Bio-Emerald) */}
-            <button
-              type="button"
-              onClick={() => handleDecision("APPROVED")}
-              className="order-1 sm:order-3 h-11 sm:h-10 px-5 bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors shadow-xs cursor-pointer w-full sm:w-auto"
-              style={{ borderRadius: 0 }}
-            >
-              <CheckCircle2 className="w-4 h-4" />
-              <span>Approve for Receiving &rarr;</span>
-            </button>
-
-            {/* Cautionary Actions */}
-            <div className="order-2 sm:order-1 grid grid-cols-2 gap-2.5 w-full sm:w-auto sm:flex sm:items-center">
+          <Can
+            perm="qc:decide"
+            fallback={
+              <div className="text-xs text-neutral-500 font-semibold uppercase tracking-wider py-2">
+                Read-Only Testing Workbench (Management)
+              </div>
+            }
+          >
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full sm:w-auto">
+              {/* Primary Action (Bio-Emerald) */}
               <button
                 type="button"
-                onClick={() => handleDecision("REJECTED")}
-                className="h-10 px-4 border border-red-300 bg-red-50 hover:bg-red-100 text-red-700 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition-colors cursor-pointer w-full sm:w-auto"
+                onClick={() => handleDecision("APPROVED")}
+                className="order-1 sm:order-3 h-11 sm:h-10 px-5 bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors shadow-xs cursor-pointer w-full sm:w-auto"
                 style={{ borderRadius: 0 }}
               >
-                <XCircle className="w-4 h-4 text-red-600 shrink-0" />
-                <span className="truncate">Reject Lot</span>
+                <CheckCircle2 className="w-4 h-4" />
+                <span>Approve for Receiving &rarr;</span>
               </button>
 
-              <button
-                type="button"
-                onClick={() => handleDecision("HOLD")}
-                className="h-10 px-4 border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-800 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition-colors cursor-pointer w-full sm:w-auto"
-                style={{ borderRadius: 0 }}
-              >
-                <ShieldAlert className="w-4 h-4 text-amber-600 shrink-0" />
-                <span className="truncate">Put on HOLD</span>
-              </button>
+              {/* Cautionary Actions */}
+              <div className="order-2 sm:order-1 grid grid-cols-2 gap-2.5 w-full sm:w-auto sm:flex sm:items-center">
+                <button
+                  type="button"
+                  onClick={() => handleDecision("REJECTED")}
+                  className="h-10 px-4 border border-red-300 bg-red-50 hover:bg-red-100 text-red-700 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition-colors cursor-pointer w-full sm:w-auto"
+                  style={{ borderRadius: 0 }}
+                >
+                  <XCircle className="w-4 h-4 text-red-600 shrink-0" />
+                  <span className="truncate">Reject Lot</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleDecision("HOLD")}
+                  className="h-10 px-4 border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-800 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition-colors cursor-pointer w-full sm:w-auto"
+                  style={{ borderRadius: 0 }}
+                >
+                  <ShieldAlert className="w-4 h-4 text-amber-600 shrink-0" />
+                  <span className="truncate">Put on HOLD</span>
+                </button>
+              </div>
             </div>
-          </div>
+          </Can>
         </div>
       </div>
     </div>

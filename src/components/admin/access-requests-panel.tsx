@@ -1,12 +1,14 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Check, Copy, Inbox, UserPlus, X } from "lucide-react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AccessRequest, accessApi, REQUESTABLE_DESKS } from "@/lib/api/access";
 import { describeApiError } from "@/lib/api/client";
 import { AdminUserItem } from "@/lib/types/admin";
 import { usePlantEvents } from "@/lib/api/realtime";
+import { Can } from "@/lib/context/auth-context";
 
 const inputClass =
   "w-full h-10 px-3 bg-white border border-neutral-300 text-xs font-medium text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-[#059669]";
@@ -58,30 +60,28 @@ export function SetupLinkNotice({ name, path, onClose }: { name: string; path: s
 }
 
 export function AccessRequestsPanel({ onApproved }: { onApproved: () => void }) {
-  const [requests, setRequests] = useState<AccessRequest[]>([]);
-  const [loadError, setLoadError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+
+  const {
+    data: requests = [],
+    error: queryError,
+  } = useQuery<AccessRequest[]>({
+    queryKey: ["access-requests"],
+    queryFn: () => accessApi.listPending(),
+  });
+
+  const loadError = queryError ? describeApiError(queryError, "Could not load access requests.") : null;
+
   const [selected, setSelected] = useState<AccessRequest | null>(null);
   const [form, setForm] = useState({ roleId: "", department: "", assignedPost: "", employeeCode: "", email: "" });
   const [formError, setFormError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [issued, setIssued] = useState<{ name: string; path: string } | null>(null);
 
-  const load = useCallback(() => {
-    accessApi
-      .listPending()
-      .then((list) => {
-        setRequests(list);
-        setLoadError(null);
-      })
-      .catch((err: unknown) => setLoadError(describeApiError(err, "Could not load access requests.")));
-  }, []);
-
-  useEffect(() => {
-    load();
-  }, [load]);
-
-  // Live: new requests from the login page and decisions by other admins.
-  usePlantEvents(["access_request.*"], () => load());
+  // Live: new requests from the login page and decisions by other admins via TanStack Query invalidation
+  usePlantEvents(["access_request.*"], () => {
+    void queryClient.invalidateQueries({ queryKey: ["access-requests"] });
+  });
 
   const openApprove = (req: AccessRequest) => {
     setSelected(req);
@@ -107,7 +107,8 @@ export function AccessRequestsPanel({ onApproved }: { onApproved: () => void }) 
       });
       setIssued({ name: selected.fullName, path: result.setupUrlPath });
       setSelected(null);
-      load();
+      await queryClient.invalidateQueries({ queryKey: ["access-requests"] });
+      await queryClient.invalidateQueries({ queryKey: ["users"] });
       onApproved();
     } catch (err) {
       setFormError(describeApiError(err, "Could not approve this request."));
@@ -121,9 +122,9 @@ export function AccessRequestsPanel({ onApproved }: { onApproved: () => void }) 
     if (!reason) return;
     try {
       await accessApi.reject(req.id, reason);
-      load();
+      await queryClient.invalidateQueries({ queryKey: ["access-requests"] });
     } catch (err) {
-      setLoadError(describeApiError(err, "Could not reject this request."));
+      setFormError(describeApiError(err, "Could not reject this request."));
     }
   };
 
@@ -163,22 +164,24 @@ export function AccessRequestsPanel({ onApproved }: { onApproved: () => void }) 
                 </span>
               </div>
               {req.note && <p className="text-[11px] text-neutral-600 leading-relaxed">{req.note}</p>}
-              <div className="flex gap-2 pt-2 border-t border-neutral-200">
-                <button
-                  type="button"
-                  onClick={() => openApprove(req)}
-                  className="flex-1 h-8 bg-[#059669] hover:bg-[#047857] text-white text-[11px] font-bold uppercase tracking-wider flex items-center justify-center gap-1.5"
-                >
-                  <UserPlus className="w-3.5 h-3.5" /> Approve
-                </button>
-                <button
-                  type="button"
-                  onClick={() => void reject(req)}
-                  className="h-8 px-3 border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-700 text-[11px] font-semibold"
-                >
-                  Reject
-                </button>
-              </div>
+              <Can perm="users:manage">
+                <div className="flex gap-2 pt-2 border-t border-neutral-200">
+                  <button
+                    type="button"
+                    onClick={() => openApprove(req)}
+                    className="flex-1 h-8 bg-[#059669] hover:bg-[#047857] text-white text-[11px] font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    <UserPlus className="w-3.5 h-3.5" /> Approve
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => void reject(req)}
+                    className="h-8 px-3 border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-700 text-[11px] font-semibold cursor-pointer"
+                  >
+                    Reject
+                  </button>
+                </div>
+              </Can>
             </motion.div>
           ))}
         </AnimatePresence>
@@ -227,10 +230,10 @@ export function AccessRequestsPanel({ onApproved }: { onApproved: () => void }) 
             </div>
             {formError && <div role="alert" className="border border-red-300 bg-red-50 px-3 py-2.5 text-[#DC2626] font-medium">{formError}</div>}
             <div className="pt-4 border-t border-neutral-200 flex justify-end gap-2">
-              <button type="button" onClick={() => setSelected(null)} className="h-9 px-4 border border-neutral-300 bg-white hover:bg-neutral-100 font-semibold">
+              <button type="button" onClick={() => setSelected(null)} className="h-9 px-4 border border-neutral-300 bg-white hover:bg-neutral-100 font-semibold cursor-pointer">
                 Cancel
               </button>
-              <button type="submit" disabled={busy} className="h-9 px-4 bg-[#18181B] hover:bg-[#059669] disabled:bg-neutral-400 text-white font-bold">
+              <button type="submit" disabled={busy} className="h-9 px-4 bg-[#18181B] hover:bg-[#059669] disabled:bg-neutral-400 text-white font-bold cursor-pointer">
                 {busy ? "Approving…" : "Approve & Create Account"}
               </button>
             </div>

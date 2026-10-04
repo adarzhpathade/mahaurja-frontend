@@ -9,6 +9,7 @@ import {
   Truck,
 } from "lucide-react";
 import { useWeighbridge } from "@/lib/context/weighbridge-context";
+import { Can } from "@/lib/context/auth-context";
 
 interface ScaleIndicatorProps {
   onCaptureClick?: () => void;
@@ -195,21 +196,30 @@ export function ScaleIndicator({ onCaptureClick, className = "" }: ScaleIndicato
           </div>
 
           <div className="my-auto py-1">
-            <button
-              type="button"
-              onClick={onCaptureClick}
-              disabled={!isStable}
-              className={`w-full h-12 sm:h-13 px-4 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-[0.99] shadow-xs ${
-                isStable
-                  ? "bg-[#059669] hover:bg-[#047857] text-white border border-[#10B981]"
-                  : "bg-neutral-200 text-neutral-400 border border-neutral-300 cursor-not-allowed"
-              }`}
-              style={{ borderRadius: 0 }}
+            <Can
+              perm="weighment:capture"
+              fallback={
+                <div className="w-full h-12 sm:h-13 px-4 text-xs font-semibold uppercase tracking-wider flex items-center justify-center bg-neutral-100 text-neutral-500 border border-neutral-300">
+                  Read-Only Metrology (Management)
+                </div>
+              }
             >
-              <Zap className="w-4 h-4 fill-white shrink-0" />
-              <span className="truncate">{isStable ? "Capture Official Weight" : "Wait for Scale"}</span>
-              <ArrowRight className="w-4 h-4 shrink-0" />
-            </button>
+              <button
+                type="button"
+                onClick={onCaptureClick}
+                disabled={!isStable}
+                className={`w-full h-12 sm:h-13 px-4 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-[0.99] shadow-xs ${
+                  isStable
+                    ? "bg-[#059669] hover:bg-[#047857] text-white border border-[#10B981]"
+                    : "bg-neutral-200 text-neutral-400 border border-neutral-300 cursor-not-allowed"
+                }`}
+                style={{ borderRadius: 0 }}
+              >
+                <Zap className="w-4 h-4 fill-white shrink-0" />
+                <span className="truncate">{isStable ? "Capture Official Weight" : "Wait for Scale"}</span>
+                <ArrowRight className="w-4 h-4 shrink-0" />
+              </button>
+            </Can>
           </div>
 
           <div className="text-[11px] font-mono text-neutral-400 text-center truncate">

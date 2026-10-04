@@ -1,8 +1,9 @@
 "use client";
 
-import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
+import React, { createContext, useCallback, useContext, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ApiError } from "@/lib/api/client";
-import { ApiUser, NewUserInput, toAdminUserItem, usersApi } from "@/lib/api/users";
+import { NewUserInput, usersApi } from "@/lib/api/users";
 import { usePlantEvents } from "@/lib/api/realtime";
 import {
   SupplierItem,
@@ -301,43 +302,33 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     },
   ]);
 
-  // Users come from the backend (/api/v1/users); no mock data.
-  const [users, setUsers] = useState<AdminUserItem[]>([]);
-  const [usersLoading, setUsersLoading] = useState(true);
-  const [usersError, setUsersError] = useState<string | null>(null);
+  // Users managed via TanStack Query (/api/v1/users)
+  const queryClient = useQueryClient();
 
-  const reloadUsers = useCallback(async () => {
-    setUsersLoading(true);
-    try {
-      setUsers(await usersApi.list());
-      setUsersError(null);
-    } catch (err) {
-      setUsersError(err instanceof ApiError ? err.message : "Could not load operators.");
-    } finally {
-      setUsersLoading(false);
-    }
-  }, []);
-
-  // Live: another admin's create / edit / suspend shows up here without a refresh.
-  usePlantEvents(["users.*"], (event) => {
-    const apiUser = (event.payload as { user?: ApiUser }).user;
-    if (!apiUser) return;
-    const item = toAdminUserItem(apiUser);
-    setUsers((prev) =>
-      prev.some((u) => u.id === item.id) ? prev.map((u) => (u.id === item.id ? item : u)) : [item, ...prev],
-    );
+  const {
+    data: users = [],
+    isLoading: usersLoading,
+    error: usersQueryError,
+    refetch: refetchUsers,
+  } = useQuery<AdminUserItem[]>({
+    queryKey: ["users"],
+    queryFn: () => usersApi.list(),
   });
 
-  // Initial load (usersLoading starts true); reloadUsers is for the retry button.
-  useEffect(() => {
-    usersApi
-      .list()
-      .then((list) => setUsers(list))
-      .catch((err: unknown) =>
-        setUsersError(err instanceof ApiError ? err.message : "Could not load operators."),
-      )
-      .finally(() => setUsersLoading(false));
-  }, []);
+  const usersError = usersQueryError
+    ? usersQueryError instanceof ApiError
+      ? usersQueryError.message
+      : "Could not load operators."
+    : null;
+
+  const reloadUsers = useCallback(async () => {
+    await refetchUsers();
+  }, [refetchUsers]);
+
+  // Live: invalidate queries instead of merging payloads (Requirement d)
+  usePlantEvents(["users.*"], () => {
+    void queryClient.invalidateQueries({ queryKey: ["users"] });
+  });
 
   const addSupplier = (
     supplier: Omit<SupplierItem, "id" | "totalSuppliedMt" | "totalPayoutInr" | "createdAt">
@@ -417,15 +408,15 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   };
 
   const addUser = async (input: NewUserInput) => {
-    const created = await usersApi.create(input);
-    setUsers((prev) => (prev.some((u) => u.id === created.id) ? prev : [created, ...prev]));
+    await usersApi.create(input);
+    await queryClient.invalidateQueries({ queryKey: ["users"] });
   };
 
   const toggleUserStatus = async (id: string) => {
     const current = users.find((u) => u.id === id);
     if (!current) return;
-    const updated = await usersApi.setActive(id, !current.isActive);
-    setUsers((prev) => prev.map((u) => (u.id === id ? updated : u)));
+    await usersApi.setActive(id, !current.isActive);
+    await queryClient.invalidateQueries({ queryKey: ["users"] });
   };
 
   return (

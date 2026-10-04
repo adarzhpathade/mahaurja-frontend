@@ -81,7 +81,11 @@ async function connect() {
     url.searchParams.set("ticket", ticket);
     if (lastEventId !== null) url.searchParams.set("lastEventId", String(lastEventId));
 
-    const res = await fetch(url, { signal: abort.signal, headers: { Accept: "text/event-stream" } });
+    const res = await fetch(url, {
+      signal: abort.signal,
+      headers: { Accept: "text/event-stream" },
+      credentials: "include",
+    });
     if (!res.ok || !res.body) throw new Error(`stream ${res.status}`);
     retryDelay = 1000;
     setStatus("live");
