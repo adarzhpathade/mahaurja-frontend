@@ -22,7 +22,7 @@ export function UsersAccessView() {
   const [formError, setFormError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
-  const [issuedLink, setIssuedLink] = useState<{ name: string; path: string } | null>(null);
+  const [issuedLink, setIssuedLink] = useState<{ name: string; path: string; userId?: string } | null>(null);
   const [viewMode, setViewMode] = useState<"cards" | "table">("cards");
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
@@ -93,7 +93,7 @@ export function UsersAccessView() {
     setActionError(null);
     try {
       const result = await accessApi.resetPassword(user.id);
-      setIssuedLink({ name: user.name, path: result.setupUrlPath });
+      setIssuedLink({ name: user.name, path: result.setupUrlPath, userId: user.id });
     } catch (err) {
       setActionError(describeApiError(err, "Could not reset the password."));
     }
@@ -244,7 +244,7 @@ export function UsersAccessView() {
 
       <AccessRequestsPanel onApproved={() => void reloadUsers()} />
       {issuedLink && (
-        <SetupLinkNotice name={issuedLink.name} path={issuedLink.path} onClose={() => setIssuedLink(null)} />
+        <SetupLinkNotice name={issuedLink.name} path={issuedLink.path} userId={issuedLink.userId} onClose={() => setIssuedLink(null)} />
       )}
 
       {/* Content container - borderless on mobile, bordered on PC */}

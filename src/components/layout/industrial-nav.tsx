@@ -4,9 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import {
   Home,
-  Globe,
   Route,
-  Map as MapIcon,
   Truck,
   Scale,
   FlaskConical,
@@ -14,21 +12,15 @@ import {
   Warehouse,
   ShieldCheck,
   BarChart3,
-  FileCheck,
   LogIn,
   LogOut,
-  ArrowDownToLine,
-  ArrowUpFromLine,
   Receipt,
   CheckCircle2,
-  ShieldAlert,
   FileText,
   CalendarRange,
   PackageMinus,
-  AlertTriangle,
   PackageCheck,
   ShoppingBag,
-  ArrowLeftRight,
   Activity,
   GitFork,
   LineChart,
@@ -44,6 +36,7 @@ import {
 import { motion, AnimatePresence } from "motion/react";
 import { useAuth } from "@/lib/context/auth-context";
 import { useLiveStatus } from "@/lib/api/realtime";
+import { NotificationCenter } from "./notification-center";
 
 export interface NavItem {
   id: string;
@@ -214,6 +207,7 @@ export function IndustrialNav({
 
   // Sync optimistic tab whenever activeTabId from parent route updates
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setOptimisticTab(null);
   }, [activeTabId]);
 
@@ -235,15 +229,19 @@ export function IndustrialNav({
 
     // Give the primary/current page full priority to finish its initial render & hydration
     if (typeof window !== "undefined" && "requestIdleCallback" in window) {
-      const idleId = (window as Window & { requestIdleCallback?: any }).requestIdleCallback(
+      const win = window as Window & {
+        requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+        cancelIdleCallback?: (id: number) => void;
+      };
+      const idleId = win.requestIdleCallback?.(
         () => {
           prefetchOtherPages();
         },
         { timeout: 1500 }
       );
       return () => {
-        if ("cancelIdleCallback" in window) {
-          (window as Window & { cancelIdleCallback?: any }).cancelIdleCallback(idleId);
+        if (idleId !== undefined && win.cancelIdleCallback) {
+          win.cancelIdleCallback(idleId);
         }
       };
     } else {
@@ -451,6 +449,9 @@ export function IndustrialNav({
             )}
           </div>
           )}
+
+          {/* Notification Center Bell and Drawer */}
+          <NotificationCenter />
 
           {/* User Profile Icon Button (Clean icon without direct verbose text) */}
           <div className="relative">

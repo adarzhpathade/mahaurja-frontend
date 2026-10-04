@@ -40,6 +40,8 @@ export interface ApproveInput {
 }
 
 export interface ApproveResult {
+  userId?: string;
+  user?: AdminUserItem;
   setupToken: string;
   setupUrlPath: string;
 }

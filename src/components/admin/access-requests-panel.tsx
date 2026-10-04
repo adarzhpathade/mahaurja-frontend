@@ -10,6 +10,8 @@ import { AdminUserItem } from "@/lib/types/admin";
 import { usePlantEvents } from "@/lib/api/realtime";
 import { Can } from "@/lib/context/auth-context";
 
+import { PrintButton } from "@/components/ui/print-button";
+
 const inputClass =
   "w-full h-10 px-3 bg-white border border-neutral-300 text-xs font-medium text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-[#059669]";
 
@@ -28,9 +30,21 @@ const DEFAULT_DEPARTMENT: Record<string, string> = {
 const deskLabel = (roleId: string) => REQUESTABLE_DESKS.find((d) => d.roleId === roleId)?.label ?? roleId;
 
 // One-time setup link shown after approve / password reset. The token is only returned once.
-export function SetupLinkNotice({ name, path, onClose }: { name: string; path: string; onClose: () => void }) {
+export function SetupLinkNotice({
+  name,
+  path,
+  userId,
+  onClose,
+}: {
+  name: string;
+  path: string;
+  userId?: string;
+  onClose: () => void;
+}) {
   const [copied, setCopied] = useState(false);
   const url = typeof window !== "undefined" ? `${window.location.origin}${path}` : path;
+  const token = path.includes("token=") ? path.split("token=")[1].split("&")[0] : undefined;
+
   return (
     <div className="border border-emerald-300 bg-emerald-50 p-4 space-y-3" role="status">
       <div className="flex items-start justify-between gap-3">
@@ -41,19 +55,28 @@ export function SetupLinkNotice({ name, path, onClose }: { name: string; path: s
           <X className="w-4 h-4" />
         </button>
       </div>
-      <div className="flex gap-2">
-        <input readOnly value={url} data-testid="setup-link" className={`${inputClass} font-mono text-[11px]`} />
+      <div className="flex flex-wrap gap-2">
+        <input readOnly value={url} data-testid="setup-link" className={`${inputClass} font-mono text-[11px] flex-1 min-w-[200px]`} />
         <button
           type="button"
           onClick={() => {
             void navigator.clipboard?.writeText(url);
             setCopied(true);
           }}
-          className="h-10 px-3 border border-neutral-300 bg-white hover:bg-neutral-100 text-xs font-medium flex items-center gap-1.5 shrink-0"
+          className="h-10 px-3 border border-neutral-300 bg-white hover:bg-neutral-100 text-xs font-medium flex items-center gap-1.5 shrink-0 cursor-pointer"
         >
           {copied ? <Check className="w-3.5 h-3.5 text-[#059669]" /> : <Copy className="w-3.5 h-3.5" />}
           {copied ? "Copied" : "Copy"}
         </button>
+        {userId && (
+          <PrintButton
+            docType="user-setup-slip"
+            id={userId}
+            paper="a4"
+            token={token}
+            label="Print Slip"
+          />
+        )}
       </div>
     </div>
   );
@@ -76,7 +99,7 @@ export function AccessRequestsPanel({ onApproved }: { onApproved: () => void }) 
   const [form, setForm] = useState({ roleId: "", department: "", assignedPost: "", employeeCode: "", email: "" });
   const [formError, setFormError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [issued, setIssued] = useState<{ name: string; path: string } | null>(null);
+  const [issued, setIssued] = useState<{ name: string; path: string; userId?: string } | null>(null);
 
   // Live: new requests from the login page and decisions by other admins via TanStack Query invalidation
   usePlantEvents(["access_request.*"], () => {
@@ -105,7 +128,7 @@ export function AccessRequestsPanel({ onApproved }: { onApproved: () => void }) 
         ...form,
         roleId: form.roleId as AdminUserItem["roleId"],
       });
-      setIssued({ name: selected.fullName, path: result.setupUrlPath });
+      setIssued({ name: selected.fullName, path: result.setupUrlPath, userId: result.user?.id ?? result.userId });
       setSelected(null);
       await queryClient.invalidateQueries({ queryKey: ["access-requests"] });
       await queryClient.invalidateQueries({ queryKey: ["users"] });
@@ -140,7 +163,7 @@ export function AccessRequestsPanel({ onApproved }: { onApproved: () => void }) 
         </span>
       </div>
 
-      {issued && <SetupLinkNotice name={issued.name} path={issued.path} onClose={() => setIssued(null)} />}
+      {issued && <SetupLinkNotice name={issued.name} path={issued.path} userId={issued.userId} onClose={() => setIssued(null)} />}
       {loadError && <div role="alert" className="text-xs text-[#DC2626]">{loadError}</div>}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
