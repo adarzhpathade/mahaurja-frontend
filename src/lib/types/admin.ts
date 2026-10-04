@@ -86,7 +86,9 @@ export interface AdminUserItem {
     | "production"
     | "warehouse"
     | "admin"
-    | "management";
+    | "management"
+    | "purchase"
+    | "accounts";
   assignedPost: string;
   shift: "Day Shift A (06:00 - 14:00)" | "General Shift (09:00 - 18:00)" | "Night Shift B (14:00 - 22:00)";
   isActive: boolean;

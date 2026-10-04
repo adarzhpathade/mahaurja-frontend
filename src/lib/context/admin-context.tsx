@@ -1,6 +1,9 @@
 "use client";
 
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { ApiError } from "@/lib/api/client";
+import { ApiUser, NewUserInput, toAdminUserItem, usersApi } from "@/lib/api/users";
+import { usePlantEvents } from "@/lib/api/realtime";
 import {
   SupplierItem,
   CustomerItem,
@@ -29,8 +32,11 @@ interface AdminContextType {
   addStorageLocation: (location: Omit<StorageLocationItem, "id" | "currentStockMt">) => void;
   addBlendFormula: (formula: Omit<BlendFormulaItem, "id">) => void;
   toggleFormulaStatus: (id: string) => void;
-  addUser: (user: Omit<AdminUserItem, "id" | "lastLogin">) => void;
-  toggleUserStatus: (id: string) => void;
+  usersLoading: boolean;
+  usersError: string | null;
+  reloadUsers: () => Promise<void>;
+  addUser: (input: NewUserInput) => Promise<void>;
+  toggleUserStatus: (id: string) => Promise<void>;
 }
 
 const AdminContext = createContext<AdminContextType | undefined>(undefined);
@@ -295,104 +301,43 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     },
   ]);
 
-  const [users, setUsers] = useState<AdminUserItem[]>([
-    {
-      id: "USR-001",
-      employeeCode: "EMP-1001",
-      name: "Ramesh Pawar",
-      email: "ramesh.pawar@mahaurja.com",
-      department: "Inbound / Outbound Gate",
-      roleId: "gate-security",
-      assignedPost: "Gate Post 01",
-      shift: "Day Shift A (06:00 - 14:00)",
-      isActive: true,
-      lastLogin: "Today, 06:15 AM",
-    },
-    {
-      id: "USR-002",
-      employeeCode: "EMP-1002",
-      name: "Sunil Shinde",
-      email: "sunil.shinde@mahaurja.com",
-      department: "Weighment Station",
-      roleId: "weighbridge",
-      assignedPost: "Weighbridge Station 01 / 02",
-      shift: "Day Shift A (06:00 - 14:00)",
-      isActive: true,
-      lastLogin: "Today, 06:30 AM",
-    },
-    {
-      id: "USR-003",
-      employeeCode: "EMP-1003",
-      name: "Dr. Ananya Deshmukh",
-      email: "ananya.deshmukh@mahaurja.com",
-      department: "Quality Assurance Lab",
-      roleId: "qc-lab",
-      assignedPost: "Central QC Testing Lab",
-      shift: "General Shift (09:00 - 18:00)",
-      isActive: true,
-      lastLogin: "Today, 09:05 AM",
-    },
-    {
-      id: "USR-004",
-      employeeCode: "EMP-1004",
-      name: "Mahesh Kadam",
-      email: "mahesh.kadam@mahaurja.com",
-      department: "Pelletising Plant Line 1 & 2",
-      roleId: "production",
-      assignedPost: "Pellet Line Control Room",
-      shift: "Day Shift A (06:00 - 14:00)",
-      isActive: true,
-      lastLogin: "Today, 06:45 AM",
-    },
-    {
-      id: "USR-005",
-      employeeCode: "EMP-1005",
-      name: "Nitin Joshi",
-      email: "nitin.joshi@mahaurja.com",
-      department: "Raw Yards & Finished Sheds",
-      roleId: "warehouse",
-      assignedPost: "Warehouse Sheds & Yard Office",
-      shift: "General Shift (09:00 - 18:00)",
-      isActive: true,
-      lastLogin: "Today, 08:50 AM",
-    },
-    {
-      id: "USR-006",
-      employeeCode: "EMP-1006",
-      name: "Vikram Malhotra",
-      email: "vikram.malhotra@mahaurja.com",
-      department: "Logistics & Outbound",
-      roleId: "sales-dispatch",
-      assignedPost: "Dispatch Planning Cabin",
-      shift: "General Shift (09:00 - 18:00)",
-      isActive: true,
-      lastLogin: "Today, 09:12 AM",
-    },
-    {
-      id: "USR-007",
-      employeeCode: "EMP-1007",
-      name: "Pravin Singhania",
-      email: "pravin.singhania@mahaurja.com",
-      department: "Executive Directorate",
-      roleId: "management",
-      assignedPost: "Plant Director Office",
-      shift: "General Shift (09:00 - 18:00)",
-      isActive: true,
-      lastLogin: "Today, 08:30 AM",
-    },
-    {
-      id: "USR-008",
-      employeeCode: "EMP-1008",
-      name: "Adarsh Sharma",
-      email: "adarsh.sharma@mahaurja.com",
-      department: "System Operations",
-      roleId: "admin",
-      assignedPost: "Admin Control Console",
-      shift: "General Shift (09:00 - 18:00)",
-      isActive: true,
-      lastLogin: "Today, 07:00 AM",
-    },
-  ]);
+  // Users come from the backend (/api/v1/users); no mock data.
+  const [users, setUsers] = useState<AdminUserItem[]>([]);
+  const [usersLoading, setUsersLoading] = useState(true);
+  const [usersError, setUsersError] = useState<string | null>(null);
+
+  const reloadUsers = useCallback(async () => {
+    setUsersLoading(true);
+    try {
+      setUsers(await usersApi.list());
+      setUsersError(null);
+    } catch (err) {
+      setUsersError(err instanceof ApiError ? err.message : "Could not load operators.");
+    } finally {
+      setUsersLoading(false);
+    }
+  }, []);
+
+  // Live: another admin's create / edit / suspend shows up here without a refresh.
+  usePlantEvents(["users.*"], (event) => {
+    const apiUser = (event.payload as { user?: ApiUser }).user;
+    if (!apiUser) return;
+    const item = toAdminUserItem(apiUser);
+    setUsers((prev) =>
+      prev.some((u) => u.id === item.id) ? prev.map((u) => (u.id === item.id ? item : u)) : [item, ...prev],
+    );
+  });
+
+  // Initial load (usersLoading starts true); reloadUsers is for the retry button.
+  useEffect(() => {
+    usersApi
+      .list()
+      .then((list) => setUsers(list))
+      .catch((err: unknown) =>
+        setUsersError(err instanceof ApiError ? err.message : "Could not load operators."),
+      )
+      .finally(() => setUsersLoading(false));
+  }, []);
 
   const addSupplier = (
     supplier: Omit<SupplierItem, "id" | "totalSuppliedMt" | "totalPayoutInr" | "createdAt">
@@ -471,20 +416,16 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     );
   };
 
-  const addUser = (user: Omit<AdminUserItem, "id" | "lastLogin">) => {
-    const seq = String(users.length + 1).padStart(3, "0");
-    const newUser: AdminUserItem = {
-      ...user,
-      id: `USR-${seq}`,
-      lastLogin: "Never",
-    };
-    setUsers((prev) => [...prev, newUser]);
+  const addUser = async (input: NewUserInput) => {
+    const created = await usersApi.create(input);
+    setUsers((prev) => (prev.some((u) => u.id === created.id) ? prev : [created, ...prev]));
   };
 
-  const toggleUserStatus = (id: string) => {
-    setUsers((prev) =>
-      prev.map((u) => (u.id === id ? { ...u, isActive: !u.isActive } : u))
-    );
+  const toggleUserStatus = async (id: string) => {
+    const current = users.find((u) => u.id === id);
+    if (!current) return;
+    const updated = await usersApi.setActive(id, !current.isActive);
+    setUsers((prev) => prev.map((u) => (u.id === id ? updated : u)));
   };
 
   return (
@@ -504,6 +445,9 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         addStorageLocation,
         addBlendFormula,
         toggleFormulaStatus,
+        usersLoading,
+        usersError,
+        reloadUsers,
         addUser,
         toggleUserStatus,
       }}

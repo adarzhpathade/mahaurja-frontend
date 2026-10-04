@@ -19,9 +19,16 @@ import {
 } from "lucide-react";
 import { useAdmin } from "@/lib/context/admin-context";
 import { AdminUserItem } from "@/lib/types/admin";
+import { describeApiError } from "@/lib/api/client";
+import { accessApi } from "@/lib/api/access";
+import { AccessRequestsPanel, SetupLinkNotice } from "@/components/admin/access-requests-panel";
 
 export function UsersAccessView() {
-  const { users, addUser, toggleUserStatus } = useAdmin();
+  const { users, usersLoading, usersError, reloadUsers, addUser, toggleUserStatus } = useAdmin();
+  const [formError, setFormError] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [issuedLink, setIssuedLink] = useState<{ name: string; path: string } | null>(null);
   const [viewMode, setViewMode] = useState<"cards" | "table">("cards");
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
@@ -32,6 +39,7 @@ export function UsersAccessView() {
   const [name, setName] = useState("");
   const [employeeCode, setEmployeeCode] = useState("");
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [department, setDepartment] = useState("Inbound / Outbound Gate");
   const [roleId, setRoleId] = useState<AdminUserItem["roleId"]>("gate-security");
   const [assignedPost, setAssignedPost] = useState("Gate Post 01");
@@ -54,24 +62,55 @@ export function UsersAccessView() {
     );
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !employeeCode) return;
+    if (!name || !employeeCode || !email || !password) {
+      setFormError("Name, EMP code, email and temporary password are required.");
+      return;
+    }
+    setFormError(null);
+    setIsSaving(true);
+    try {
+      await addUser({
+        employeeCode: employeeCode.trim(),
+        name: name.trim(),
+        email: email.trim(),
+        password,
+        department,
+        roleId,
+        assignedPost,
+        shift,
+      });
+      setIsModalOpen(false);
+      setName("");
+      setEmployeeCode("");
+      setEmail("");
+      setPassword("");
+    } catch (err) {
+      setFormError(describeApiError(err, "Could not save operator. Try again."));
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
-    addUser({
-      employeeCode,
-      name,
-      email: email || `${name.toLowerCase().replace(/\s+/g, ".")}@mahaurja.com`,
-      department,
-      roleId,
-      assignedPost,
-      shift,
-      isActive: true,
-    });
+  const handleResetPassword = async (user: AdminUserItem) => {
+    if (!window.confirm(`Reset password for ${user.name}? Their current sessions will be signed out.`)) return;
+    setActionError(null);
+    try {
+      const result = await accessApi.resetPassword(user.id);
+      setIssuedLink({ name: user.name, path: result.setupUrlPath });
+    } catch (err) {
+      setActionError(describeApiError(err, "Could not reset the password."));
+    }
+  };
 
-    setIsModalOpen(false);
-    setName("");
-    setEmployeeCode("");
+  const handleToggle = async (id: string) => {
+    setActionError(null);
+    try {
+      await toggleUserStatus(id);
+    } catch (err) {
+      setActionError(describeApiError(err, "Could not change operator status."));
+    }
   };
 
   const renderUserCard = (user: AdminUserItem) => (
@@ -116,13 +155,22 @@ export function UsersAccessView() {
           {user.isActive ? "ON DUTY" : "SUSPENDED"}
         </span>
 
+        <div className="flex items-center gap-1.5">
+          <button
+            type="button"
+            onClick={() => void handleResetPassword(user)}
+            className="px-2 py-0.5 text-[10px] font-semibold border border-neutral-300 hover:bg-neutral-100 text-neutral-700 cursor-pointer"
+          >
+            Reset Password
+          </button>
         <button
           type="button"
-          onClick={() => toggleUserStatus(user.id)}
+          onClick={() => void handleToggle(user.id)}
           className="px-2 py-0.5 text-[10px] font-semibold border border-neutral-300 hover:bg-neutral-100 text-neutral-700 cursor-pointer"
         >
           {user.isActive ? "Suspend" : "Activate"}
         </button>
+        </div>
       </div>
     </div>
   );
@@ -192,6 +240,11 @@ export function UsersAccessView() {
           <span>Register Operator</span>
         </button>
       </div>
+
+      <AccessRequestsPanel onApproved={() => void reloadUsers()} />
+      {issuedLink && (
+        <SetupLinkNotice name={issuedLink.name} path={issuedLink.path} onClose={() => setIssuedLink(null)} />
+      )}
 
       {/* Content container - borderless on mobile, bordered on PC */}
       <div className="border-0 p-0 bg-transparent sm:border sm:border-neutral-300 sm:p-6 sm:bg-white/30 space-y-4 sm:space-y-5">
@@ -325,7 +378,29 @@ export function UsersAccessView() {
             ]}
           />
 
-        {filteredUsers.length === 0 ? (
+        {actionError && (
+          <div role="alert" className="border border-red-300 bg-red-50 px-3 py-2.5 text-xs font-medium text-[#DC2626]">
+            {actionError}
+          </div>
+        )}
+        {usersLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" aria-busy="true">
+            {[0, 1, 2, 3].map((i) => (
+              <div key={i} className="h-36 border border-neutral-300 bg-neutral-200/50 animate-pulse" />
+            ))}
+          </div>
+        ) : usersError ? (
+          <div role="alert" className="py-8 flex flex-col items-center gap-3 text-xs text-[#DC2626]">
+            <span>{usersError}</span>
+            <button
+              type="button"
+              onClick={() => void reloadUsers()}
+              className="px-3 py-1.5 text-xs font-medium border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-700"
+            >
+              Try Again
+            </button>
+          </div>
+        ) : filteredUsers.length === 0 ? (
           <div className="py-8 text-center text-xs text-neutral-500 font-mono">
             No personnel match your search criteria.
           </div>
@@ -400,7 +475,7 @@ export function UsersAccessView() {
                       <td className="py-3.5 px-4 text-right">
                         <button
                           type="button"
-                          onClick={() => toggleUserStatus(user.id)}
+                          onClick={() => void handleToggle(user.id)}
                           className="px-2.5 py-1 text-[11px] font-semibold border border-neutral-300 hover:bg-neutral-100 text-neutral-700 cursor-pointer"
                         >
                           {user.isActive ? "Suspend" : "Activate"}
@@ -469,10 +544,24 @@ export function UsersAccessView() {
                 </label>
                 <input
                   type="email"
-                  placeholder="name@mahaurja.com"
+                  placeholder="name@mahaurja.local"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full h-10 px-3 bg-white border border-neutral-300 text-xs font-medium text-neutral-900 focus:outline-none focus:border-[#059669]"
+                />
+              </div>
+
+              <div>
+                <label className="text-[11px] font-semibold text-neutral-700 block mb-1">
+                  Temporary Password
+                </label>
+                <input
+                  type="password"
+                  autoComplete="new-password"
+                  placeholder="Min 10 characters, letters and numbers"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full h-10 px-3 bg-white border border-neutral-300 text-xs font-medium text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-[#059669]"
                 />
               </div>
 
@@ -493,6 +582,8 @@ export function UsersAccessView() {
                     <option value="warehouse">Warehouse</option>
                     <option value="sales-dispatch">Sales &amp; Dispatch</option>
                     <option value="management">Management</option>
+                    <option value="purchase">Purchase</option>
+                    <option value="accounts">Accounts</option>
                     <option value="admin">System Admin</option>
                   </select>
                 </div>
@@ -539,6 +630,12 @@ export function UsersAccessView() {
                 </div>
               </div>
 
+              {formError && (
+                <div role="alert" className="border border-red-300 bg-red-50 px-3 py-2.5 text-xs font-medium text-[#DC2626]">
+                  {formError}
+                </div>
+              )}
+
               <div className="pt-4 border-t border-neutral-200 flex items-center justify-end gap-2">
                 <button
                   type="button"
@@ -549,9 +646,10 @@ export function UsersAccessView() {
                 </button>
                 <button
                   type="submit"
-                  className="h-9 px-4 bg-[#18181B] hover:bg-[#059669] text-white font-bold transition-colors"
+                  disabled={isSaving}
+                  className="h-9 px-4 bg-[#18181B] hover:bg-[#059669] disabled:bg-neutral-400 disabled:cursor-not-allowed text-white font-bold transition-colors"
                 >
-                  Save Operator
+                  {isSaving ? "Saving…" : "Save Operator"}
                 </button>
               </div>
             </form>

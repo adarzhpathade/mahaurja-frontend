@@ -42,6 +42,8 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
+import { useAuth } from "@/lib/context/auth-context";
+import { useLiveStatus } from "@/lib/api/realtime";
 
 export interface NavItem {
   id: string;
@@ -196,6 +198,12 @@ export function IndustrialNav({
 }: IndustrialNavProps) {
   const router = useRouter();
   const pathname = usePathname();
+  const { user, logout } = useAuth();
+  const liveStatus = useLiveStatus();
+  // Signed-in operator from the backend; role profile values are only a fallback.
+  const operatorName = user?.name ?? currentRole.userName;
+  const operatorDepartment = user?.department ?? currentRole.department;
+  const canSwitchDesk = user?.roleId === "admin" || user?.roleId === "management";
   const [internalActiveTab, setInternalActiveTab] = useState<string>(
     currentRole.navItems[0]?.id || "home"
   );
@@ -313,7 +321,20 @@ export function IndustrialNav({
 
         {/* Right: Actions (Dev Role Switcher + User Profile + Mobile Menu Toggle) */}
         <div className="flex items-center gap-2 sm:gap-2.5 shrink-0 z-10 justify-end">
+          <span
+            data-testid="live-status"
+            title={liveStatus === "live" ? "Live: updates from other desks appear instantly" : "Reconnecting to plant server…"}
+            className={`hidden sm:inline-flex items-center gap-1.5 h-7 px-2 text-[10px] font-bold uppercase tracking-wider border ${
+              liveStatus === "live"
+                ? "border-emerald-300 bg-emerald-50 text-[#047857]"
+                : "border-amber-300 bg-amber-50 text-amber-700"
+            }`}
+          >
+            <span className={`w-1.5 h-1.5 ${liveStatus === "live" ? "bg-[#059669] animate-pulse" : "bg-amber-500"}`} />
+            {liveStatus === "live" ? "Live" : "Offline"}
+          </span>
           {/* Dev Role Switcher Button */}
+          {canSwitchDesk && (
           <div className="relative">
             <button
               type="button"
@@ -429,6 +450,7 @@ export function IndustrialNav({
               </>
             )}
           </div>
+          )}
 
           {/* User Profile Icon Button (Clean icon without direct verbose text) */}
           <div className="relative">
@@ -441,7 +463,7 @@ export function IndustrialNav({
               }}
               className="w-9 h-9 border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-800 hover:text-black flex items-center justify-center relative cursor-pointer transition-colors shadow-2xs"
               style={{ borderRadius: 0 }}
-              title={`On Duty: ${currentRole.userName}`}
+              title={`On Duty: ${operatorName}`}
               aria-label="User Profile"
               aria-expanded={isUserMenuOpen}
             >
@@ -462,11 +484,11 @@ export function IndustrialNav({
                 >
                   <div className="flex items-center gap-3 pb-3 border-b border-neutral-200">
                     <div className="w-9 h-9 bg-[#18181B] text-white flex items-center justify-center font-bold text-sm shrink-0">
-                      {currentRole.userName.charAt(0)}
+                      {operatorName.charAt(0)}
                     </div>
                     <div className="min-w-0">
                       <div className="font-bold text-xs text-neutral-900 truncate">
-                        {currentRole.userName}
+                        {operatorName}
                       </div>
                       <div className="text-[11px] text-neutral-500 font-medium truncate">
                         {currentRole.roleName}
@@ -477,11 +499,11 @@ export function IndustrialNav({
                   <div className="pt-2.5 space-y-1.5 text-xs">
                     <div className="flex items-center justify-between text-neutral-600">
                       <span>Department:</span>
-                      <strong className="text-neutral-900">{currentRole.department}</strong>
+                      <strong className="text-neutral-900">{operatorDepartment}</strong>
                     </div>
                     <div className="flex items-center justify-between text-neutral-600">
                       <span>Operator:</span>
-                      <strong className="text-neutral-900 font-mono">{currentRole.userName}</strong>
+                      <strong className="text-neutral-900 font-mono">{operatorName}</strong>
                     </div>
                     <div className="flex items-center justify-between text-neutral-600">
                       <span>Duty Shift:</span>
@@ -498,12 +520,15 @@ export function IndustrialNav({
                     <div className="pt-3 mt-2 border-t border-neutral-200">
                       <button
                         type="button"
-                        onClick={() => setIsUserMenuOpen(false)}
+                        onClick={() => {
+                          setIsUserMenuOpen(false);
+                          void logout();
+                        }}
                         className="w-full h-8 px-3 border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-700 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                         style={{ borderRadius: 0 }}
                       >
                         <LogOut className="w-3.5 h-3.5 text-neutral-500" />
-                        <span>Lock Station</span>
+                        <span>Sign Out</span>
                       </button>
                     </div>
                   </div>
@@ -635,11 +660,11 @@ export function IndustrialNav({
               <div className="flex items-center gap-2 min-w-0">
                 <User className="w-3.5 h-3.5 text-neutral-500 shrink-0" />
                 <span className="font-semibold text-neutral-900 truncate">
-                  {currentRole.userName}
+                  {operatorName}
                 </span>
                 <span className="text-neutral-400">·</span>
                 <span className="text-neutral-500 truncate text-[11px]">
-                  {currentRole.department}
+                  {operatorDepartment}
                 </span>
               </div>
               <span className="text-[10px] font-bold text-[#047857] px-2 py-0.5 bg-emerald-50 border border-emerald-300 shrink-0 uppercase tracking-wider">
