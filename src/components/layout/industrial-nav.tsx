@@ -133,6 +133,7 @@ export const USER_ROLES: UserRoleProfile[] = [
     navItems: [
       { id: "suppliers", label: "Suppliers Master", icon: Users, href: "/admin/masters/suppliers" },
       { id: "customers", label: "Customer Master", icon: User, href: "/admin/masters/customers" },
+      { id: "transport", label: "Transport Master", icon: Truck, href: "/admin/masters/transport" },
       { id: "materials", label: "Materials & Storage", icon: Warehouse, href: "/admin/masters/materials" },
       { id: "formulas", label: "Blend Formulas", icon: Layers, href: "/admin/masters/formulas" },
       { id: "users-access", label: "User Access & Roles", icon: ShieldCheck, href: "/admin/users" },

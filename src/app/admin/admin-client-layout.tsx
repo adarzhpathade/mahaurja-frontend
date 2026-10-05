@@ -13,6 +13,7 @@ function AdminNavShell({ children }: { children: React.ReactNode }) {
 
   const getActiveTab = () => {
     if (pathname.includes("/masters/customers") || pathname === "/admin/customers") return "customers";
+    if (pathname.includes("/masters/transport") || pathname === "/admin/transport") return "transport";
     if (pathname.includes("/masters/materials") || pathname === "/admin/materials") return "materials";
     if (pathname.includes("/masters/formulas") || pathname === "/admin/formulas") return "formulas";
     if (pathname.includes("/users")) return "users-access";
@@ -24,6 +25,8 @@ function AdminNavShell({ children }: { children: React.ReactNode }) {
       navigateTo(href);
     } else if (tabId === "customers") {
       navigateTo("/admin/masters/customers");
+    } else if (tabId === "transport") {
+      navigateTo("/admin/masters/transport");
     } else if (tabId === "materials") {
       navigateTo("/admin/masters/materials");
     } else if (tabId === "formulas") {
