@@ -14,7 +14,8 @@ export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const isDev = process.env.NODE_ENV !== "production";
   // Same-origin API in production (rewrite) → 'self' covers it; the live stream may go direct to the backend.
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+  const apiUrl =
+    process.env.NEXT_PUBLIC_API_URL ?? (process.env.NODE_ENV === "production" ? "" : "http://localhost:4000");
   const realtimeUrl = process.env.NEXT_PUBLIC_REALTIME_URL ?? "";
 
   // 1. Generate nonce and CSP
