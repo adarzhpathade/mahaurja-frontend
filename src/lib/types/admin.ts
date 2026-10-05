@@ -36,26 +36,34 @@ export interface CustomerItem {
 }
 
 export interface MaterialItem {
-  id: string; // MAT-seq
+  id: string; // MAT-seq or uuid
+  code?: string;
   name: string;
   category: "RAW_BIOMASS" | "FINISHED_PELLET";
-  unit: "MT";
+  unit: "MT" | string;
   targetMoistureMax: number; // %
   targetAshMax: number; // %
   targetGcvMin: number; // kcal/kg
+  foreignMatterMax?: number | null;
+  bulkDensityMin?: number | null;
   baseRatePerMt: number; // INR
   currentInventoryMt: number;
   isActive: boolean;
+  version?: number;
 }
 
 export interface StorageLocationItem {
-  id: string; // LOC-seq
+  id: string; // LOC-seq or uuid
+  code?: string;
   name: string;
-  type: "Raw Material Yard" | "Finished Goods Shed" | "Quarantine Hold";
+  type: "Raw Material Yard" | "Finished Goods Shed" | "Quarantine Hold" | string;
+  displayType?: string;
   capacityMt: number;
   currentStockMt: number;
   currentMaterial: string;
   supervisorName: string;
+  isActive?: boolean;
+  version?: number;
 }
 
 export interface BlendFormulaItem {

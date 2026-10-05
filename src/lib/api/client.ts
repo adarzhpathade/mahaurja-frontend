@@ -79,6 +79,9 @@ export function getAccessToken(): string | null {
 // Plain-English message for display: validation errors list the backend's field reasons.
 export function describeApiError(err: unknown, fallback: string): string {
   if (!(err instanceof ApiError)) return fallback;
+  if (err.code === "VERSION_CONFLICT") {
+    return "Someone else changed this — reload to see their change";
+  }
   if (err.code === "VALIDATION_ERROR" && err.details.length > 0) {
     const reasons = err.details
       .map((d) => (typeof d === "object" && d !== null && "message" in d ? String(d.message) : ""))
@@ -158,8 +161,9 @@ export function refreshSession(): Promise<AuthResponse | null> {
   return refreshInFlight;
 }
 
-interface RequestOptions {
+export interface RequestOptions {
   method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+  headers?: Record<string, string>;
   body?: unknown;
   query?: Record<string, string | number | boolean | undefined>;
   auth?: boolean;
@@ -167,7 +171,7 @@ interface RequestOptions {
 }
 
 export async function apiRequest<T>(path: string, options: RequestOptions = {}): Promise<T> {
-  const { method = "GET", body, query, auth = true, signal } = options;
+  const { method = "GET", headers: customHeaders, body, query, auth = true, signal } = options;
 
   const url = new URL(`${API_BASE_URL}${path}`);
   if (query) {
@@ -177,7 +181,7 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
   }
 
   const send = () => {
-    const headers: Record<string, string> = {};
+    const headers: Record<string, string> = { ...customHeaders };
     if (body !== undefined) headers["Content-Type"] = "application/json";
     if (auth && accessToken) headers.Authorization = `Bearer ${accessToken}`;
     return fetch(url, {

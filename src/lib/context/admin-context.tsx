@@ -4,6 +4,16 @@ import React, { createContext, useCallback, useContext, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ApiError } from "@/lib/api/client";
 import { NewUserInput, usersApi } from "@/lib/api/users";
+import {
+  CreateMaterialInput,
+  UpdateMaterialInput,
+  materialsApi,
+} from "@/lib/api/materials";
+import {
+  CreateStorageLocationInput,
+  UpdateStorageLocationInput,
+  storageLocationsApi,
+} from "@/lib/api/storage-locations";
 import { usePlantEvents } from "@/lib/api/realtime";
 import {
   SupplierItem,
@@ -29,8 +39,27 @@ interface AdminContextType {
     customer: Omit<CustomerItem, "id" | "outstandingBalanceInr" | "totalOrdersMt" | "createdAt">
   ) => void;
   toggleCustomerStatus: (id: string) => void;
-  addMaterial: (material: Omit<MaterialItem, "id" | "currentInventoryMt">) => void;
-  addStorageLocation: (location: Omit<StorageLocationItem, "id" | "currentStockMt">) => void;
+  addMaterial: (material: CreateMaterialInput) => Promise<MaterialItem>;
+  updateMaterial: (
+    id: string,
+    material: UpdateMaterialInput,
+    version?: number
+  ) => Promise<MaterialItem>;
+  deactivateMaterial: (id: string, version?: number) => Promise<MaterialItem>;
+  materialsLoading: boolean;
+  materialsError: string | null;
+  reloadMaterials: () => Promise<void>;
+  addStorageLocation: (
+    location: CreateStorageLocationInput
+  ) => Promise<StorageLocationItem>;
+  updateStorageLocation: (
+    id: string,
+    location: UpdateStorageLocationInput,
+    version?: number
+  ) => Promise<StorageLocationItem>;
+  storageLocationsLoading: boolean;
+  storageLocationsError: string | null;
+  reloadStorageLocations: () => Promise<void>;
   addBlendFormula: (formula: Omit<BlendFormulaItem, "id">) => void;
   toggleFormulaStatus: (id: string) => void;
   usersLoading: boolean;
@@ -43,6 +72,8 @@ interface AdminContextType {
 const AdminContext = createContext<AdminContextType | undefined>(undefined);
 
 export function AdminProvider({ children }: { children: React.ReactNode }) {
+  const queryClient = useQueryClient();
+
   const [suppliers, setSuppliers] = useState<SupplierItem[]>([
     {
       id: "SUP-2610-001",
@@ -170,108 +201,6 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     },
   ]);
 
-  const [materials, setMaterials] = useState<MaterialItem[]>([
-    {
-      id: "MAT-001",
-      name: "Cotton Stalk",
-      category: "RAW_BIOMASS",
-      unit: "MT",
-      targetMoistureMax: 12.0,
-      targetAshMax: 6.0,
-      targetGcvMin: 4000,
-      baseRatePerMt: 3950,
-      currentInventoryMt: 185.5,
-      isActive: true,
-    },
-    {
-      id: "MAT-002",
-      name: "Sawdust",
-      category: "RAW_BIOMASS",
-      unit: "MT",
-      targetMoistureMax: 10.0,
-      targetAshMax: 3.5,
-      targetGcvMin: 4200,
-      baseRatePerMt: 3000,
-      currentInventoryMt: 95.0,
-      isActive: true,
-    },
-    {
-      id: "MAT-003",
-      name: "Soybean Straw",
-      category: "RAW_BIOMASS",
-      unit: "MT",
-      targetMoistureMax: 13.0,
-      targetAshMax: 7.0,
-      targetGcvMin: 3800,
-      baseRatePerMt: 3400,
-      currentInventoryMt: 62.0,
-      isActive: true,
-    },
-    {
-      id: "MAT-004",
-      name: "Bagasse",
-      category: "RAW_BIOMASS",
-      unit: "MT",
-      targetMoistureMax: 14.0,
-      targetAshMax: 5.0,
-      targetGcvMin: 3600,
-      baseRatePerMt: 2500,
-      currentInventoryMt: 42.5,
-      isActive: true,
-    },
-    {
-      id: "MAT-005",
-      name: "Finished Bio-Pellets (8mm)",
-      category: "FINISHED_PELLET",
-      unit: "MT",
-      targetMoistureMax: 8.0,
-      targetAshMax: 5.5,
-      targetGcvMin: 4200,
-      baseRatePerMt: 6900,
-      currentInventoryMt: 245.0,
-      isActive: true,
-    },
-  ]);
-
-  const [storageLocations, setStorageLocations] = useState<StorageLocationItem[]>([
-    {
-      id: "LOC-001",
-      name: "Yard A (Uncovered Heavy)",
-      type: "Raw Material Yard",
-      capacityMt: 500,
-      currentStockMt: 185.5,
-      currentMaterial: "Cotton Stalk",
-      supervisorName: "Nitin Joshi",
-    },
-    {
-      id: "LOC-002",
-      name: "Yard B (Covered Shed)",
-      type: "Raw Material Yard",
-      capacityMt: 350,
-      currentStockMt: 157.0,
-      currentMaterial: "Sawdust & Soybean",
-      supervisorName: "Nitin Joshi",
-    },
-    {
-      id: "LOC-003",
-      name: "Shed 01 (Finished Goods)",
-      type: "Finished Goods Shed",
-      capacityMt: 400,
-      currentStockMt: 245.0,
-      currentMaterial: "8mm Bio-Pellets (Approved)",
-      supervisorName: "Kishore Patil",
-    },
-    {
-      id: "LOC-004",
-      name: "Shed 02 (Holding / Quarantine)",
-      type: "Quarantine Hold",
-      capacityMt: 100,
-      currentStockMt: 18.0,
-      currentMaterial: "Unreleased Production Run",
-      supervisorName: "Dr. Ananya Deshmukh",
-    },
-  ]);
-
   const [blendFormulas, setBlendFormulas] = useState<BlendFormulaItem[]>([
     {
       id: "FRM-001",
@@ -302,9 +231,49 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     },
   ]);
 
-  // Users managed via TanStack Query (/api/v1/users)
-  const queryClient = useQueryClient();
+  // 1. Materials managed via TanStack Query (/api/v1/materials) - Phase 10
+  const {
+    data: materials = [],
+    isLoading: materialsLoading,
+    error: materialsQueryError,
+    refetch: refetchMaterials,
+  } = useQuery<MaterialItem[]>({
+    queryKey: ["materials"],
+    queryFn: () => materialsApi.list(),
+  });
 
+  const materialsError = materialsQueryError
+    ? materialsQueryError instanceof ApiError
+      ? materialsQueryError.message
+      : "Could not load materials."
+    : null;
+
+  const reloadMaterials = useCallback(async () => {
+    await refetchMaterials();
+  }, [refetchMaterials]);
+
+  // 2. Storage Locations managed via TanStack Query (/api/v1/storage-locations) - Phase 15
+  const {
+    data: storageLocations = [],
+    isLoading: storageLocationsLoading,
+    error: storageLocationsQueryError,
+    refetch: refetchStorageLocations,
+  } = useQuery<StorageLocationItem[]>({
+    queryKey: ["storage-locations"],
+    queryFn: () => storageLocationsApi.list(),
+  });
+
+  const storageLocationsError = storageLocationsQueryError
+    ? storageLocationsQueryError instanceof ApiError
+      ? storageLocationsQueryError.message
+      : "Could not load storage locations."
+    : null;
+
+  const reloadStorageLocations = useCallback(async () => {
+    await refetchStorageLocations();
+  }, [refetchStorageLocations]);
+
+  // 3. Users managed via TanStack Query (/api/v1/users)
   const {
     data: users = [],
     isLoading: usersLoading,
@@ -325,11 +294,20 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     await refetchUsers();
   }, [refetchUsers]);
 
-  // Live: invalidate queries instead of merging payloads (Requirement d)
+  // Live updates via SSE invalidation (Phases 8.2, 10, 15)
   usePlantEvents(["users.*"], () => {
     void queryClient.invalidateQueries({ queryKey: ["users"] });
   });
 
+  usePlantEvents(["material.*"], () => {
+    void queryClient.invalidateQueries({ queryKey: ["materials"] });
+  });
+
+  usePlantEvents(["storage_location.*"], () => {
+    void queryClient.invalidateQueries({ queryKey: ["storage-locations"] });
+  });
+
+  // Action methods
   const addSupplier = (
     supplier: Omit<SupplierItem, "id" | "totalSuppliedMt" | "totalPayoutInr" | "createdAt">
   ) => {
@@ -370,26 +348,47 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     );
   };
 
-  const addMaterial = (material: Omit<MaterialItem, "id" | "currentInventoryMt">) => {
-    const seq = String(materials.length + 1).padStart(3, "0");
-    const newMaterial: MaterialItem = {
-      ...material,
-      id: `MAT-${seq}`,
-      currentInventoryMt: 0,
-    };
-    setMaterials((prev) => [...prev, newMaterial]);
+  const addMaterial = async (input: CreateMaterialInput): Promise<MaterialItem> => {
+    const created = await materialsApi.create(input);
+    await queryClient.invalidateQueries({ queryKey: ["materials"] });
+    return created;
   };
 
-  const addStorageLocation = (
-    location: Omit<StorageLocationItem, "id" | "currentStockMt">
-  ) => {
-    const seq = String(storageLocations.length + 1).padStart(3, "0");
-    const newLocation: StorageLocationItem = {
-      ...location,
-      id: `LOC-${seq}`,
-      currentStockMt: 0,
-    };
-    setStorageLocations((prev) => [...prev, newLocation]);
+  const updateMaterial = async (
+    id: string,
+    input: UpdateMaterialInput,
+    version?: number,
+  ): Promise<MaterialItem> => {
+    const updated = await materialsApi.update(id, input, version);
+    await queryClient.invalidateQueries({ queryKey: ["materials"] });
+    return updated;
+  };
+
+  const deactivateMaterial = async (
+    id: string,
+    version?: number,
+  ): Promise<MaterialItem> => {
+    const updated = await materialsApi.deactivate(id, version);
+    await queryClient.invalidateQueries({ queryKey: ["materials"] });
+    return updated;
+  };
+
+  const addStorageLocation = async (
+    input: CreateStorageLocationInput,
+  ): Promise<StorageLocationItem> => {
+    const created = await storageLocationsApi.create(input);
+    await queryClient.invalidateQueries({ queryKey: ["storage-locations"] });
+    return created;
+  };
+
+  const updateStorageLocation = async (
+    id: string,
+    input: UpdateStorageLocationInput,
+    version?: number,
+  ): Promise<StorageLocationItem> => {
+    const updated = await storageLocationsApi.update(id, input, version);
+    await queryClient.invalidateQueries({ queryKey: ["storage-locations"] });
+    return updated;
   };
 
   const addBlendFormula = (formula: Omit<BlendFormulaItem, "id">) => {
@@ -433,7 +432,16 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         addCustomer,
         toggleCustomerStatus,
         addMaterial,
+        updateMaterial,
+        deactivateMaterial,
+        materialsLoading,
+        materialsError,
+        reloadMaterials,
         addStorageLocation,
+        updateStorageLocation,
+        storageLocationsLoading,
+        storageLocationsError,
+        reloadStorageLocations,
         addBlendFormula,
         toggleFormulaStatus,
         usersLoading,
