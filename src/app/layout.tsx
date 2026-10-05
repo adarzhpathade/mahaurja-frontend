@@ -27,6 +27,11 @@ const switzer = localFont({
   display: "swap",
 });
 
+// The CSP (src/proxy.ts) allows only scripts carrying this request's nonce ('strict-dynamic'), and Next.js can
+// only stamp the nonce on pages rendered per request. Pre-rendered static pages would ship nonce-less scripts
+// that the browser blocks (B31), so every page renders dynamically. Fine for an internal ~50-user app.
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "MAHAURJA – Plant Operational Management System",
   description:
