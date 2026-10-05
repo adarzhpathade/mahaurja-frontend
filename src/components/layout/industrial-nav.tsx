@@ -136,6 +136,8 @@ export const USER_ROLES: UserRoleProfile[] = [
       { id: "transport", label: "Transport Master", icon: Truck, href: "/admin/masters/transport" },
       { id: "materials", label: "Materials & Storage", icon: Warehouse, href: "/admin/masters/materials" },
       { id: "formulas", label: "Blend Formulas", icon: Layers, href: "/admin/masters/formulas" },
+      { id: "finance", label: "Tax & Finance", icon: Receipt, href: "/admin/masters/finance" },
+      { id: "approvals", label: "Approvals Inbox", icon: CheckCircle2, href: "/management/approvals" },
       { id: "users-access", label: "User Access & Roles", icon: ShieldCheck, href: "/admin/users" },
     ],
   },
@@ -146,6 +148,7 @@ export const USER_ROLES: UserRoleProfile[] = [
     department: "Executive Directorate",
     navItems: [
       { id: "live-kpis", label: "Live Plant KPIs", icon: Activity, href: "/management" },
+      { id: "approvals", label: "Approvals Inbox", icon: CheckCircle2, href: "/management/approvals" },
       { id: "traceability", label: "Bi-Directional Trace", icon: GitFork, href: "/management/traceability" },
       { id: "cost-yield", label: "Cost & Yield", icon: LineChart, href: "/management/cost-yield" },
       { id: "analytics", label: "Plant Reports", icon: BarChart3, href: "/management/reports" },

@@ -62,35 +62,7 @@ const AdminContext = createContext<AdminContextType | undefined>(undefined);
 export function AdminProvider({ children }: { children: React.ReactNode }) {
   const queryClient = useQueryClient();
 
-  const [blendFormulas, setBlendFormulas] = useState<BlendFormulaItem[]>([
-    {
-      id: "FRM-001",
-      name: "Industrial Boiler Grade (8mm)",
-      targetProduct: "8mm High-Density Bio-Pellet",
-      targetGcvMin: 4100,
-      targetAshMax: 6.0,
-      ingredients: [
-        { materialName: "Cotton Stalk", percentage: 60 },
-        { materialName: "Sawdust", percentage: 40 },
-      ],
-      notes: "Primary recipe for heavy boiler thermal efficiency. Low slag formation.",
-      isActive: true,
-    },
-    {
-      id: "FRM-002",
-      name: "Eco-Agro Standard Blend",
-      targetProduct: "8mm Standard Biomass Pellet",
-      targetGcvMin: 3950,
-      targetAshMax: 7.0,
-      ingredients: [
-        { materialName: "Cotton Stalk", percentage: 50 },
-        { materialName: "Soybean Straw", percentage: 30 },
-        { materialName: "Sawdust", percentage: 20 },
-      ],
-      notes: "Standard agricultural blend for brick kilns and secondary steam generation.",
-      isActive: true,
-    },
-  ]);
+  const [blendFormulas, setBlendFormulas] = useState<BlendFormulaItem[]>([]);
 
   // 1. Materials managed via TanStack Query (/api/v1/materials) - Phase 10
   const {

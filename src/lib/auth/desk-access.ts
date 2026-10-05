@@ -53,7 +53,9 @@ export function isPublicRoute(pathname: string): boolean {
 export function canAccessRoute(roleId: string, pathname: string): boolean {
   if (roleId === "admin" || roleId === "management") return true;
   const prefixes = ROLE_ALLOWED_PREFIXES[roleId] ?? [];
-  return prefixes.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
+  return prefixes.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`) || prefix.startsWith(`${pathname}/`),
+  );
 }
 
 export function homeRouteFor(roleId: string | undefined | null): string {
