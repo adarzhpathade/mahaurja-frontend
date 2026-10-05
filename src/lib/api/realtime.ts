@@ -1,7 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useSyncExternalStore } from "react";
-import { API_BASE_URL, apiRequest, hasActiveSession, onSessionChange } from "@/lib/api/client";
+import { apiBase, apiRequest, hasActiveSession, onSessionChange } from "@/lib/api/client";
+
+// The live stream uses a single-use ticket (no cookies), so it can go straight to the backend and skip the
+// site proxy (which may cut long-lived responses). Falls back to the normal API base.
+const REALTIME_BASE = process.env.NEXT_PUBLIC_REALTIME_URL ?? "";
 
 // Live plant events from Mahaurja-Backend (Phase 8.2, Server-Sent Events).
 // One shared connection per browser tab; desks subscribe to the event types they show.
@@ -77,7 +81,7 @@ async function connect() {
   try {
     // The stream endpoint takes a single-use 60 s ticket; each reconnect needs a fresh one.
     const { ticket } = await apiRequest<{ ticket: string }>("/api/v1/events/ticket", { method: "POST" });
-    const url = new URL(`${API_BASE_URL}/api/v1/events/stream`);
+    const url = new URL(`${REALTIME_BASE || apiBase()}/api/v1/events/stream`);
     url.searchParams.set("ticket", ticket);
     if (lastEventId !== null) url.searchParams.set("lastEventId", String(lastEventId));
 

@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { ChevronDown, Download, Printer } from "lucide-react";
-import { API_BASE_URL, getAccessToken } from "@/lib/api/client";
+import { apiBase, getAccessToken } from "@/lib/api/client";
 
 export interface PrintButtonProps {
   docType: string;
@@ -30,7 +30,7 @@ export function PrintButton({
     if (token) q.set("token", token);
     const at = getAccessToken();
     if (at) q.set("auth_token", at);
-    return `${API_BASE_URL}/api/v1/print/${docType}/${id}?${q.toString()}`;
+    return `${apiBase()}/api/v1/print/${docType}/${id}?${q.toString()}`;
   };
 
   const handlePrint = (format: "html" | "pdf", paperSize: "a4" | "thermal80" = paper) => {

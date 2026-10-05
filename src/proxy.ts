@@ -13,7 +13,9 @@ interface DeskPayload {
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const isDev = process.env.NODE_ENV !== "production";
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+  // Same-origin API in production (rewrite) → 'self' covers it; the live stream may go direct to the backend.
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+  const realtimeUrl = process.env.NEXT_PUBLIC_REALTIME_URL ?? "";
 
   // 1. Generate nonce and CSP
   const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
@@ -27,7 +29,7 @@ export async function proxy(request: NextRequest) {
     `base-uri 'self'`,
     `form-action 'self'`,
     `frame-ancestors 'none'`,
-    `connect-src 'self' ${apiUrl} ${isDev ? "ws: http: https:" : ""}`.trim(),
+    `connect-src 'self' ${apiUrl} ${realtimeUrl} ${isDev ? "ws: http: https:" : ""}`.replace(/\s+/g, " ").trim(),
     !isDev ? "upgrade-insecure-requests" : "",
   ]
     .filter(Boolean)

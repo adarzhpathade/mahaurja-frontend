@@ -2,7 +2,15 @@
 // Access token lives in memory only. Refresh token lives in an HttpOnly cookie (mh_rt).
 // No localStorage or sessionStorage tokens are used.
 
+// Empty string = same origin: production routes /api/* through this site to the backend (Next.js rewrite),
+// so auth cookies stay first-party. Local dev talks to the backend directly.
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+
+/** Absolute base for building URLs (same-origin when API_BASE_URL is empty). */
+export function apiBase(): string {
+  if (API_BASE_URL) return API_BASE_URL;
+  return typeof window !== "undefined" ? window.location.origin : "";
+}
 
 export interface ApiErrorBody {
   error: {
@@ -173,7 +181,7 @@ export interface RequestOptions {
 export async function apiRequest<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const { method = "GET", headers: customHeaders, body, query, auth = true, signal } = options;
 
-  const url = new URL(`${API_BASE_URL}${path}`);
+  const url = new URL(`${apiBase()}${path}`);
   if (query) {
     for (const [key, value] of Object.entries(query)) {
       if (value !== undefined) url.searchParams.set(key, String(value));
